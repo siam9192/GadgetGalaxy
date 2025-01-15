@@ -1,0 +1,599 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+model User {
+  id String @id  @default(uuid())
+  role UserRole
+  status AccountStatus @default(Active)
+  lastLoginAt DateTime?
+  account Account?
+  customer Customer?
+  staff Staff?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
+  activities UserActivity[]
+  notifications Notification[]
+  @@map("users")
+}
+
+model Account {
+  userId String @id 
+  authProvider AuthProvider
+  email String? @unique
+  password String?
+  googleId String? @unique
+  facebookId String? @unique
+  passwordChangedAt DateTime?
+  user User @relation(fields: [userId],references: [id])
+  @@map("accounts")
+}
+
+
+model NewAccountVerification {
+  id String @id @default(uuid())
+  fullName String
+  email String
+  password String
+  userId String?
+  otp String
+  otpGenerateCount Int @default(1)
+  otpLastGeneratedAt DateTime
+  isVerified Boolean @default(false)
+  expireAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("new_account_verifications")
+}
+
+
+model Staff {
+  id String @id @unique @default(uuid())
+  userId String @unique
+  user User @relation(fields: [userId],references: [id])
+  fullName String
+  profilePhoto String?
+  gender UserGender?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  activityLogs ActivityLog[]
+  
+  @@map("staffs")
+}
+
+
+
+model Customer {
+  id String @id  @default(uuid())
+  userId String @unique
+  user User @relation(fields: [userId],references: [id])
+  fullName String @db.VarChar(30)
+  profilePhoto String?
+  phoneNumber String?
+  gender UserGender?
+  dateOfBirth DateTime?
+  addresses Address[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
+  recentViews RecentView[]
+  cartItems CartItem[]
+  orders Order[]
+  productReviews ProductReview[]
+  searches CustomerSearch[]
+  @@map("customers")
+}
+
+
+model Address {
+  id         String   @id @default(uuid())
+  customerId String 
+  customer   Customer @relation(fields: [customerId], references: [id])
+  district String
+  zone String
+  line String
+  isDefault Boolean
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  @@map("addresses")
+}
+
+
+
+model Product {
+ id String @id  @default(uuid())
+ name String
+ slug String @unique
+ brandId String?
+ brand Brand? @relation(fields: [brandId],references: [id])
+ specification ProductSpecification[]
+ description String @db.VarChar(10000)
+ regularPrice Float?
+ salePrice Float?
+ discountPercentage Int?
+ sku String @unique
+ stock Int?
+ images ProductImage[]
+ variants Variant[]
+ categoryId String
+ category Category @relation(fields: [categoryId], references: [id])
+ tags ProductTag[]
+ rating Int @default(0)
+ status ProductStatus @default(Active)
+ isFeatured Boolean @default(false)
+//  events Event
+ viewsCount Int @default(0)
+ createdAt   DateTime  @default(now())
+ updatedAt   DateTime  @updatedAt()
+ recentViews RecentView[]
+ cartItems CartItem[]
+ orders OrderItem[]
+ reviews ProductReview[]
+ @@map("products")
+}
+
+model Event {
+  name String
+  description String?
+  // banner EventBanner[]
+  startDate DateTime
+  endDate DateTime
+  status Status
+  // products Product[]
+  @@ignore
+}
+
+model EventBanner {
+  id String @id  @default(uuid())
+  eventId String
+
+}
+
+
+
+model Variant {
+  id String @id  @default(uuid())
+  productId String
+  sku String @unique
+  colorName String @db.VarChar(20)
+  colorCode String @db.VarChar(7)
+  attributes VariantAttribute[]
+  salePrice Float
+  regularPrice Float
+  discountPercentage Int
+  stock Int
+  isHighlighted Boolean @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt()
+  product Product @relation(fields: [productId],references: [id],onDelete: Cascade)
+  cartItems CartItem[]
+  orderItems OrderItem[]
+  @@map("variants")
+}
+
+
+
+model VariantAttribute {
+  id String @id  @default(uuid())
+  variantId String 
+  name String @db.VarChar(20)
+  value String @db.VarChar(20)
+  variant Variant @relation(fields: [variantId],references: [id])
+  @@map("variant_attributes")
+}
+
+
+model ProductImage {
+ id String @id  @default(uuid())
+ productId String 
+ product Product @relation(fields: [productId],references: [id],onDelete: Cascade)
+ url String
+ @@map("product_images")
+}
+
+model ProductSpecification {
+  id String @id  @default(uuid())
+  name String @db.VarChar(20)
+  value String @db.VarChar(100)
+  productId String
+  product Product @relation(fields: [productId],references: [id])
+  @@map("product_specifications")
+}
+
+model ProductTag {
+  id String @id  @default(uuid())
+  name String
+  productId String
+  product Product @relation(fields: [productId],references: [id],onDelete:Cascade)
+  @@map("product_tags")
+}
+
+
+model ProductReview {
+  id String @id  @default(uuid())
+  customerId String
+  customer Customer @relation(fields: [customerId],references: [id])
+  productId String
+  product Product @relation(fields: [productId],references: [id])
+  orderItemId String @unique
+  orderItem OrderItem @relation(fields: [orderItemId],references:[id])
+  comment String @db.VarChar(500)
+  rating Float 
+  response String? @db.VarChar(500)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt()
+  @@map("product_reviews")
+}
+
+
+model Discount {
+  id             String   @id    @default(uuid())
+  couponCode     String @unique @db.VarChar(20)   
+  description    String @unique @db.VarChar(5000)
+  discountType   DiscountType
+  discountValue  Float?
+  minOrderValue  Float?
+  maxDiscount    Float?
+  usageLimit     Int?                                 
+  usageCount     Int @default(0)    
+  validFrom      DateTime                
+  validUntil     DateTime
+  customers      DiscountCustomerId[]
+  categories     DiscountCategoryId[]
+  status         DiscountStatus                     
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt()
+  @@map("coupons")
+}
+
+model DiscountCustomerId {
+  discountId String
+  customerId String
+  discount Discount @relation(fields: [discountId],references: [id])
+  @@id([discountId,customerId])
+  @@map("discount_customer_ids")
+}
+
+model DiscountCategoryId {
+   discountId String
+   categoryId String
+    discount Discount @relation(fields: [discountId],references: [id])
+  @@id([discountId,categoryId])
+  @@map("discount_category_ids")
+}
+
+model Order {
+ id String  @id    @default(uuid())
+ customerId String
+ customer Customer @relation(fields: [customerId],references: [id])
+ items OrderItem[] 
+ totalAmount Float
+ discountAmount Float
+ grossAmount Float
+ shippingAmount Float
+ netAmount Float
+ shippingInfo ShippingInformation?
+ couponCode String?
+ status OrderStatus @default(Pending)
+ paymentId String?
+ payment Payment?
+ createdAt       DateTime  @default(now())
+ updatedAt       DateTime  @updatedAt()
+ @@map("orders")
+}
+
+
+
+
+model OrderItem {
+   id String  @id    @default(uuid())
+   orderId String 
+   productId String?
+   variantId String
+   productName String
+   imageUrl String
+   attributes Json
+   quantity Int
+   price Int
+   totalAmount Float
+   isReviewed Boolean @default(false)
+   order Order @relation(fields: [orderId],references: [id])
+   product Product? @relation(fields: [productId],references: [id])
+   variant Variant? @relation(fields: [variantId],references: [id])
+   review ProductReview?
+   @@map("order_items")
+}
+
+
+model ShippingInformation {
+  orderId String @id
+  order Order @relation(fields: [orderId],references: [id])
+  fullName String
+  phoneNumber String
+  district String
+  zone String
+  line String
+  @@map("shipping_information")
+}
+
+
+
+model Payment {
+   id String @id  @default(uuid())
+   transactionId String @unique
+   orderId String @unique
+   amount Float
+   method PaymentMethod
+   status PaymentStatus @default(Pending)
+   json Json
+   createdAt DateTime @default(now())
+   updatedAt DateTime @updatedAt
+   order Order @relation(fields: [orderId],references: [id])
+   @@map("payments")
+}
+
+
+
+model OrderItemAttribute {
+  orderItemId String @id
+  name String
+  value String
+  @@map("order_item_attributes")
+  @@ignore
+}
+
+
+
+model Category {
+   id String @id  @default(uuid())
+   name String
+   slug String @unique
+   image_url String?
+   description String? @db.VarChar(1000)
+   parentId String?
+   isFeatured Boolean @default(false)
+   parent Category? @relation("children",fields: [parentId],references: [id],onDelete:Cascade ) 
+   children Category[] @relation("children")
+   products Product[]
+   @@map("categories")
+}
+
+
+model Brand {
+  id String @id @default(uuid())
+  name String @unique
+  description String @db.VarChar(5000)
+  logoUrl String
+  origin String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
+  products Product[]
+  @@map("brands")
+}
+
+
+
+
+
+model CartItem {
+id String @id  @default(uuid())
+customerId String
+productId String?
+variantId String?
+quantity Int
+customer Customer @relation(fields: [customerId],references: [id])
+product Product? @relation(fields: [productId],references: [id])
+variant Variant? @relation(fields: [variantId],references: [id])
+@@map("cart_items")
+}
+
+model Media {
+ id String @id  @default(uuid())
+ src String
+ type MediaType
+ hoistingProvider MediaHoistingProvider
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt()
+ @@map("media")
+ @@ignore
+}
+
+model RecentView {
+ customerId String
+ productId String
+ viewedAt DateTime @default(now())
+ customer Customer @relation(fields: [customerId],references: [id])
+ product Product @relation(fields: [productId],references: [id])
+ @@id([customerId,productId])
+ @@map("recent_views")
+}
+
+model SearchKeyword {
+  id String @id  @default(uuid())
+  keyword String @unique
+  status Status
+  count Int @default(1)
+  @@map("search_keywords")
+}
+
+
+model CustomerSearch {
+  id      Int   @id @default(autoincrement())  
+  keyword String 
+  query       String    @db.VarChar(500)
+  results     Int       @default(0)
+  searchDate  DateTime  @default(now())
+  ipAddress   String?   @db.VarChar(45) 
+  device      String?   @db.VarChar(100)
+  location    String?   @db.VarChar(255)           
+  filters     Json? 
+  customerId String
+  customer Customer @relation(fields: [customerId],references: [id])
+  @@map("customer_searches")
+}
+
+model ActivityLog {
+  id         String   @id @default(uuid())
+  staffId    String   // FK to Admin table
+  staff    Staff    @relation(fields: [staffId], references: [id])
+  action     String   // Description of the action
+  createdAt  DateTime @default(now())
+  @@map("activity_logs")
+}
+
+
+
+model UserActivity {
+   id String @id @default(uuid())
+   userId String
+   loginAt DateTime
+   logoutAt DateTime?
+   ipAddress String?
+   browser Browser
+   user User @relation(fields: [userId],references: [id])
+   @@map("user_activities")
+}
+
+model Notification {
+id String @id @default(uuid())
+userId String
+type NotificationType
+title String
+message String
+imageUrl String?
+isRead Boolean @default(false)
+createdAt DateTime @default(now())
+updatedAt DateTime @updatedAt
+link      String?
+user      User     @relation(fields: [userId], references: [id])
+@@index([userId])
+@@map("notifications")
+}
+
+
+
+
+
+enum NotificationType {
+  OrderStatus
+  Promotion
+  WishlistUpdate
+  System
+  Alert
+}
+
+enum UserRole {
+    SuperAdmin
+    Admin
+    Customer
+}
+
+enum AuthProvider {
+  Google
+  Facebook
+  EmailPassword
+}
+
+enum AccountStatus {
+  Active
+  Blocked
+  Suspended
+  Deleted
+}
+
+
+
+
+
+enum PaymentMethod {
+  Stripe
+  Paypal
+  Bkash
+  Nagad
+}
+
+
+enum PaymentStatus {
+  Pending
+  Successful
+  Failed
+  Expired
+  Canceled
+}
+
+
+
+enum UserGender {
+  Male
+  Female
+  Others
+}
+
+enum DiscountType {
+  Fixed 
+  Percentage
+}
+
+enum OrderStatus {
+  Pending
+  Placed
+  Processing
+  InTransit
+  OutForDelivery
+  Delivered
+  Returned
+  Canceled
+}
+
+enum Status {
+  Active
+  InActive
+}
+
+enum DiscountStatus {
+  Active
+  InActive
+  Disabled 
+}
+
+enum ProductStatus {
+  Active
+  InActive
+  Deleted
+}
+
+enum TrackingStatus {
+  Shipped
+  OutForDelivery
+  Delivered
+  Failed
+}
+
+enum Browser {
+  Chrome
+  Firefox
+  MicrosoftEdge
+  OperaMini
+  Unknown
+}
+
+enum MediaType {
+  Image
+  Video
+  Audio
+  Pdf
+}
+
+enum MediaHoistingProvider {
+  ImgBB
+  Cloudinary
+}
+
+
+
