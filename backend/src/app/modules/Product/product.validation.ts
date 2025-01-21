@@ -75,7 +75,7 @@ const CreateProductValidation = z.object({
   images: z
     .array(z.string().url("Each image must be a valid URL"))
     .nonempty("At least one image is required"), // At least one valid URL
-  tags: z.array(UpdateTagValidationSchema), // Optional array of strings
+  tags: z.array(z.string()), // Optional array of strings
   categoryId: z.string().min(1, "Category ID is required"), // Non-empty string
 });
 

@@ -4,35 +4,17 @@ import { sendSuccessResponse } from "../../shared/response";
 import httpStatus from "../../shared/http-status";
 import PaymentServices from "./payment.service";
 
-const updateSuccessPayment = catchAsync(async (req: Request, res: Response) => {
-  const result = await PaymentServices.updateSuccessPayment(
-    res,
-    req.params.paymentId,
-  );
+const validatePayment = catchAsync(async (req: Request, res: Response) => {
+  const result = await PaymentServices.validatePayment(req.query);
   sendSuccessResponse(res, {
-    statusCode: httpStatus.CREATED,
-    message: "",
+    statusCode: httpStatus.OK,
+    message: "Payment validation successful",
     data: result,
   });
 });
 
-const updateCancelledPayment = catchAsync(
-  async (req: Request, res: Response) => {
-    const result = await PaymentServices.updateSuccessPayment(
-      res,
-      req.params.paymentId,
-    );
-    sendSuccessResponse(res, {
-      statusCode: httpStatus.CREATED,
-      message: "",
-      data: result,
-    });
-  },
-);
-
 const PaymentControllers = {
-  updateCancelledPayment,
-  updateSuccessPayment,
+  validatePayment,
 };
 
 export default PaymentControllers;

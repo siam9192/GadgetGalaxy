@@ -10,7 +10,7 @@ export interface ICreateProductPayload {
   images: string[];
   tags: string[];
   categoryId: string;
-  variants: ICreateVariantPayload[];
+  variants?: ICreateVariantPayload[];
   specification: IProductSpecification[];
 }
 

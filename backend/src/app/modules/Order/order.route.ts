@@ -2,15 +2,18 @@ import { Router } from "express";
 import auth from "../../middlewares/auth";
 import { UserRole } from "@prisma/client";
 import OrderControllers from "./order.controller";
+import validateRequest from "../../middlewares/validateRequest";
+import OrderValidations from "./order.validation";
 
 const router = Router();
 
-router.post("/", auth(UserRole.Customer), OrderControllers.createOrder);
-router.get(
-  "/",
-  auth(UserRole.Vendor, UserRole.Customer),
-  OrderControllers.getMyOrders,
+router.post(
+  "/init",
+  auth([UserRole.Customer]),
+  validateRequest(OrderValidations.InitOrderValidation),
+  OrderControllers.initOrder,
 );
+
 const OrderRouter = router;
 
 export default OrderRouter;

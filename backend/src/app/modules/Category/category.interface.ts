@@ -1,5 +1,5 @@
 export interface ICreateCategoryPayload {
-  parentId: string;
+  parentId?: string;
   name: string;
   isFeatured: boolean;
   children: {

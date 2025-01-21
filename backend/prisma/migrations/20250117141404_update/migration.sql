@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "product_specifications" ALTER COLUMN "name" SET DATA TYPE VARCHAR(100),
+ALTER COLUMN "value" SET DATA TYPE VARCHAR(200);

@@ -55,6 +55,13 @@ router.get(
   ProductControllers.getRecommendedProducts,
 );
 
+// Only staff can access
+router.get(
+  "/for-manage",
+  auth(Object.values(UserRole).filter((ite) => ite !== UserRole.Customer)),
+  ProductControllers.getProductsForManage,
+);
+
 const ProductRouter = router;
 
 export default ProductRouter;

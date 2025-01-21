@@ -2,251 +2,259 @@ import e from "express";
 import AppError from "../../Errors/AppError";
 import httpStatus from "../../shared/http-status";
 import prisma from "../../shared/prisma";
-import { ICreateOrderPayload } from "./order.interface";
-import { DiscountType, PaymentMethod, Prisma, UserRole } from "@prisma/client";
+import {
+  ICreateOrderPayload,
+  IFilterOrder,
+  IUpdateOrderStatusPayload,
+} from "./order.interface";
+import { DiscountType, OrderStatus, Prisma, UserRole } from "@prisma/client";
 import { IAuthUser } from "../Auth/auth.interface";
-import { stripePayment } from "../../PaymentMethod/stripePayment";
-import { sslcommerzPayment } from "../../PaymentMethod/sslCommez";
-import config from "../../config";
 import { IPaginationOptions } from "../../interfaces/pagination";
 import { calculatePagination } from "../../helpers/paginationHelper";
+import PaymentServices from "../Payment/payment.service";
+import { IInitPaymentPayload } from "../Payment/payment.interface";
+import { formatExceptedDeliveryDate } from "./order.function";
 
-const createOrderIntoDB = async (
+const initOrderIntoDB = async (
   authUser: IAuthUser,
   payload: ICreateOrderPayload,
 ) => {
-  const products = await prisma.product.findMany({
+  const cartItems = await prisma.cartItem.findMany({
     where: {
       id: {
-        in: payload.items.map((item) => item.productId),
+        in: payload.cartItemsId,
+      },
+      product: {
+        status: "Active",
       },
     },
-    select: {
-      id: true,
-      salePrice: true,
-      stock: true,
+    include: {
+      product: {
+        include: {
+          images: true,
+        },
+      },
+      variant: {
+        include: {
+          attributes: true,
+        },
+      },
     },
   });
 
-  if (products.length !== payload.items.length) {
-    throw new AppError(httpStatus.NOT_FOUND, "Product not found");
+  let totalAmount = 0;
+  let discountAmount = 0;
+  let grossAmount = 0;
+  let shippingAmount = 0;
+  let netAmount = 0;
+
+  if (cartItems.length !== payload.cartItemsId.length) {
+    throw new AppError(httpStatus.NOT_FOUND, "Item  not found in cart");
   }
 
-  const calculatedItems = payload.items.map((item) => {
-    const product = products.find((ele) => ele.id === item.productId);
-    if (!product) {
-      throw new AppError(httpStatus.NOT_FOUND, "Product not found");
-    }
+  const shippingCharge = await prisma.shippingCharge.findUnique({
+    where: {
+      id: payload.shippingChargeId,
+    },
+  });
+
+  if (!shippingCharge) {
+    throw new AppError(httpStatus.NOT_FOUND, "shipping charge not found");
+  } else {
+    shippingAmount = shippingCharge.cost;
+  }
+
+  const items = cartItems.map((item) => {
+    const variant = item.variant;
+    const price = variant ? variant.salePrice : item.product?.salePrice!;
+    const quantity = item.quantity;
     return {
-      ...item,
-      price: product.salePrice,
-      subTotal: product.salePrice * item.quantity,
+      productId: item.productId,
+      variantId: variant || null,
+      productName: item.product.name,
+      imageUrl: item.product.images[0],
+      colorName: variant?.colorName || null,
+      attributes: variant?.attributes || null,
+      quantity,
+      price,
+      totalAmount: price! * quantity,
     };
   });
 
-  let subTotal = calculatedItems.reduce((p, c) => {
+  // Calculate subtotal of items
+  const subTotal = items.reduce((p, c) => {
     return p + c.price;
   }, 0);
 
-  let discount = 0;
-
-  let shippingFee = 5;
-
-  if (payload.couponId) {
-    const coupon = await prisma.coupon.findFirst({
+  // Id discount id exist then apply discount after validation
+  if (payload.discountCode) {
+    const discount = await prisma.discount.findFirst({
       where: {
-        id: payload.couponId,
+        code: payload.discountCode,
       },
     });
-    // Check coupon existence
-    if (!coupon) {
-      throw new AppError(httpStatus.NOT_FOUND, "Coupon not found");
+    // Check discount existence
+    if (!discount) {
+      throw new AppError(httpStatus.NOT_FOUND, "discount not found");
     }
-    if (coupon.minOrderValue && coupon.minOrderValue > subTotal) {
+    if (discount.minOrderValue && discount.minOrderValue > subTotal) {
       throw new AppError(
         httpStatus.NOT_ACCEPTABLE,
-        `Coupon can not applicable in this order because minimum order value is  ${coupon.minOrderValue}`,
+        `discount can not applicable in this order because minimum order value is  ${discount.minOrderValue}`,
       );
     }
 
-    if (coupon.discountValue) {
-      if (coupon.discountType === DiscountType.Fixed) {
-        discount = coupon.discountValue;
+    if (discount.discountValue) {
+      if (discount.discountType === DiscountType.Fixed) {
+        discountAmount = discount.discountValue;
       } else {
-        discount = (coupon.discountValue / 100) * subTotal;
+        discountAmount = (discount.discountValue / 100) * subTotal;
       }
     }
   }
 
-  const totalAmount = subTotal;
-  const finalAmount = parseFloat(
-    (totalAmount - discount + shippingFee).toFixed(2),
-  );
+  totalAmount = subTotal;
+  grossAmount = parseFloat((totalAmount - discountAmount).toFixed(2));
+  netAmount = grossAmount + shippingAmount;
 
-  const customer = await prisma.customer.findUnique({
+  const exceptedDeliveryDate = formatExceptedDeliveryDate(shippingCharge.deliveryHours);
+
+  
+
+  const result = await prisma.$transaction(async (txClient) => {
+    const createdOrder = await txClient.order.create({
+      data: {
+        customerId: authUser.customerId!,
+        totalAmount,
+        discountAmount,
+        grossAmount,
+        shippingAmount,
+        netAmount,
+        discountCode: payload.discountCode || null,
+        shippingChargeData: {
+          title: shippingCharge.title,
+          description: shippingCharge.description,
+          cost: shippingCharge.cost,
+        },
+        notes: payload.notes,
+        exceptedDeliveryDate,
+        deletableCartItemsId: payload.removeCartItemsAfterPurchase
+          ? payload.cartItemsId.join(",")
+          : null,
+      },
+    });
+
+    const shippingInfo = payload.shippingInfo;
+
+    let { address, addressId, ...otherShippingInfo } = shippingInfo;
+
+    if (addressId) {
+      const findAddress = await txClient.address.findUnique({
+        where: {
+          id: addressId,
+        },
+        select: {
+          district: true,
+          zone: true,
+          line: true,
+        },
+      });
+      if (!findAddress) {
+        throw new AppError(httpStatus.NOT_FOUND, "Address not found");
+      }
+      address = findAddress;
+    }
+
+    await txClient.shippingInformation.create({
+      data: {
+        orderId: createdOrder.id,
+        ...otherShippingInfo,
+        ...address,
+      },
+    });
+
+    return {
+      orderId: createdOrder.id,
+    };
+  });
+
+  const shippingInfo = payload.shippingInfo;
+
+  const { paymentId, paymentUrl } = await PaymentServices.initPayment({
+    orderId: result.orderId,
+    amount: grossAmount,
+    customer: {
+      name: shippingInfo.fullName,
+      email: shippingInfo.emailAddress,
+      phone: shippingInfo.phoneNumber,
+    },
+    shippingAddress: Object.values(shippingInfo.address).join(","),
+  });
+
+  await prisma.order.update({
     where: {
-      userId: authUser.id,
+      id: result.orderId,
+    },
+    data: {
+      paymentId,
     },
   });
 
-  const result = await prisma.$transaction(async (tx) => {
-    const orderData = {
-      customerId: customer!.id,
-      totalAmount,
-      finalAmount,
-      shippingFee,
-      discountAmount: discount,
-    };
-    const createdOrder = await tx.order.create({
-      data: orderData,
-    });
-
-    await tx.orderItem.createMany({
-      data: calculatedItems.map((item) => ({
-        ...item,
-        orderId: createdOrder.id,
-      })),
-    });
-
-    await tx.shippingAddress.create({
-      data: {
-        ...payload.shippingAddress,
-        orderId: createdOrder.id,
-      },
-    });
-
-    const today = new Date();
-    const transactionId = `STRIPE-${today.getFullYear()}${today.getMonth() + 1}${today.getDate()}${today.getHours()}${today.getMinutes()}${today.getSeconds()}${today.getMilliseconds()}`;
-
-    const paymentData = {
-      transactionId,
-      orderId: createdOrder.id,
-      customerId: customer!.id,
-      amount: finalAmount,
-      method: PaymentMethod.Stripe,
-    };
-
-    const createdPayment = await tx.payment.create({
-      data: paymentData,
-    });
-
-    await tx.order.update({
-      where: {
-        id: createdOrder.id,
-      },
-      data: {
-        paymentId: createdPayment.id,
-      },
-    });
-
-    const paymentUrl = await sslcommerzPayment({
-      amount: createdPayment.amount,
-      transactionId: createdPayment.amount,
-      successUrl: `${config.backend_base_api}/payments/${createdPayment.id}/success`,
-      cancelUrl: `${config.backend_base_api}/payments/${createdPayment.id}/cancel`,
-      service_name: "",
-    });
-    return paymentUrl;
-  });
-
   return {
-    paymentUrl: result,
+    paymentUrl,
   };
+};
+
+const UpdateOrderStatus = async (payload: IUpdateOrderStatusPayload) => {
+  const order = await prisma.order.findUnique({
+    where: {
+      id: payload.orderId,
+    },
+  });
+  if (!order) {
+    throw new AppError(httpStatus.NOT_FOUND, "Order not found");
+  }
+
+  if (
+    order.status === OrderStatus.Canceled &&
+    payload.status !== OrderStatus.Placed
+  ) {
+    throw new AppError(
+      httpStatus.NOT_ACCEPTABLE,
+      "Sorry.The order can not be canceled now",
+    );
+  } else if (
+    order.status === OrderStatus.Delivered &&
+    !["Pending", "Placed"].includes(payload.status)
+  ) {
+    throw new AppError(httpStatus.NOT_ACCEPTABLE, "Order is delivered");
+  }
+
+  return await prisma.order.update({
+    where: {
+      id: payload.orderId,
+    },
+    data: {
+      status: payload.status,
+    },
+    select: {
+      id: true,
+      status: true,
+    },
+  });
 };
 
 const getMyOrdersFromDB = async (
   authUser: IAuthUser,
+  filter: IFilterOrder,
   paginationOptions: IPaginationOptions,
 ) => {
-  const { skip, limit, sortOrder, orderBy, page } =
-    calculatePagination(paginationOptions);
 
-  const whereConditions =
-    authUser.role === UserRole.Customer
-      ? {
-          customer: {
-            userId: authUser.id,
-          },
-        }
-      : {
-          shop: {
-            vendor: {
-              userId: authUser.id,
-            },
-          },
-        };
-
-  const include: Prisma.OrderInclude =
-    authUser.role === UserRole.Vendor
-      ? {
-          customer: {
-            select: {
-              firstName: true,
-              lastName: true,
-              profilePhoto: true,
-            },
-          },
-          items: {
-            include: {
-              product: {
-                select: {
-                  name: true,
-                  images: {
-                    select: {
-                      url: true,
-                    },
-                    take: 1,
-                  },
-                },
-              },
-            },
-          },
-        }
-      : {
-          items: {
-            include: {
-              product: {
-                select: {
-                  name: true,
-                  images: {
-                    select: {
-                      url: true,
-                    },
-                    take: 1,
-                  },
-                },
-              },
-            },
-            take: 2,
-          },
-        };
-
-  const orders = await prisma.order.findMany({
-    where: whereConditions,
-    skip,
-    take: limit,
-    orderBy: {
-      [orderBy]: sortOrder,
-    },
-    include,
-  });
-
-  const total = await prisma.order.count({
-    where: whereConditions,
-  });
-
-  return {
-    data: orders,
-    meta: {
-      limit,
-      total,
-      page,
-    },
-  };
+  
 };
 
 const OrderServices = {
-  createOrderIntoDB,
+  initOrderIntoDB,
   getMyOrdersFromDB,
 };
 

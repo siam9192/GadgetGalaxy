@@ -40,6 +40,7 @@ const getProducts = catchAsync(async (req: Request, res: Response) => {
   const filterData = Pick(req.query, [
     "searchTerm",
     "categories",
+    "brands",
     "minPrice",
     "maxPrice",
   ]);
@@ -142,6 +143,27 @@ const getRecommendedProducts = catchAsync(
   },
 );
 
+const getProductsForManage = catchAsync(async (req: Request, res: Response) => {
+  const filterData = Pick(req.query, [
+    "searchTerm",
+    "categories",
+    "brands",
+    "minPrice",
+    "maxPrice",
+  ]);
+  const paginationOptions = Pick(req.query, paginationOptionKeys);
+
+  const result = await ProductServices.getProductsForManageFromDB(
+    filterData,
+    paginationOptions as any,
+  );
+  sendSuccessResponse(res, {
+    statusCode: httpStatus.OK,
+    message: "Products retrieved successfully",
+    ...result,
+  });
+});
+
 const ProductControllers = {
   createProduct,
   updateProduct,
@@ -153,6 +175,7 @@ const ProductControllers = {
   getRecommendedProducts,
   getProductBySlugForCustomerView,
   getMyProducts,
+  getProductsForManage,
 };
 
 export default ProductControllers;

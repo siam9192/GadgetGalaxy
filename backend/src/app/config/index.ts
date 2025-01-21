@@ -22,15 +22,24 @@ export default {
   app_user_name: process.env.APP_USER_NAME,
   app_pass_key: process.env.APP_PASS_KEY,
   stripe_secret: process.env.STRIPE_SECRET,
-  ssl_store_id: process.env.SSL_STORE_ID,
-  ssl_store_password: process.env.SSL_STORE_PASSWORD,
+  ssl: {
+    store_id: process.env.SSL_STORE_ID,
+    store_password: process.env.SSL_STORE_PASSWORD,
+    payment_url: process.env.SSL_PAYMENT_URL,
+    validation_url: process.env.SSL_VALIDATION_API,
+    success_url: process.env.SSL_SUCCESS_URL,
+    fail_url: process.env.SSL_FAIL_URL,
+    cancel_url: process.env.SSL_CANCEL_URL,
+  },
   paypal_id: process.env.PAYPAL_ID,
   paypal_secret: process.env.PAYPAL_SECRET,
-  payment_success_url: process.env.PAYMENT_SUCCESS_URL,
-  payment_cancel_url: process.env.PAYMENT_CANCEL_URL,
-
-  order_success_url: process.env.ORDER_SUCCESS_URL,
-  order_cancel_url: process.env.ORDER_CANCEL_URL,
-
-  payment_success_redirect_url: process.env.PAYMENT_SUCCESS_REDIRECT_URL,
+  payment: {
+    success_url: process.env.PAYMENT_SUCCESS_URL,
+    cancel_url: process.env.PAYMENT_CANCEL_URL,
+    success_redirect_url: process.env.PAYMENT_SUCCESS_REDIRECT_URL,
+  },
+  order: {
+    success_url: process.env.ORDER_SUCCESS_URL,
+    cancel_url: process.env.ORDER_CANCEL_URL,
+  },
 };

@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import AppError from "../../Errors/AppError";
 import httpStatus from "../../shared/http-status";
 import prisma from "../../shared/prisma";
@@ -11,50 +12,83 @@ const createCartItemIntoDB = async (
     where: {
       id: payload.productId,
     },
+    select: {
+      id: true,
+      _count: {
+        select: {
+          variants: true,
+        },
+      },
+    },
   });
 
   if (!product) throw new AppError(httpStatus.NOT_FOUND, "Product not found");
-
-  const customer = await prisma.customer.findFirst({
-    where: {
-      userId: authUser.id,
-    },
-    select: {
-      id: true,
-    },
-  });
-
-  if (!customer)
-    throw new AppError(httpStatus.BAD_REQUEST, "Something went wrong");
-
-  const result = await prisma.cartItem.upsert({
-    where: {
-      customerId_productId: {
-        customerId: customer.id,
+  else if (!payload.variantId && product._count.variants !== 0) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Variant id is required");
+  }
+  // If variant id exist then check variant existence in db
+  if (payload.variantId) {
+    const variant = await prisma.variant.findUnique({
+      where: {
+        id: payload.variantId,
         productId: payload.productId,
       },
-    },
-    create: {
-      customerId: customer.id,
-      productId: payload.productId,
-      quantity: payload.quantity,
-    },
-    update: {
-      quantity: {
-        increment: payload.quantity,
+      select: {
+        id: true,
       },
+    });
+    if (!variant) {
+      throw new AppError(httpStatus.NOT_FOUND, "Variant not found");
+    }
+  }
+
+  const whereConditions: Prisma.CartItemWhereInput = {
+    customerId: authUser.customerId!,
+    productId: payload.productId,
+    // id:"sss"
+  };
+
+  const cartItem = await prisma.cartItem.findFirst({
+    where: {
+      customerId: authUser.customerId!,
+      productId: payload.productId,
     },
   });
+  let result;
+
+  if (cartItem) {
+    result = await prisma.cartItem.update({
+      where: {
+        id: cartItem.id,
+      },
+      data: {
+        variantId: payload.variantId,
+        quantity: payload.quantity,
+      },
+    });
+  } else {
+    const data: any = {
+      customerId: authUser.customerId!,
+      productId: payload.productId,
+      quantity: payload.quantity,
+    };
+
+    if (payload.variantId) {
+      data.variantId = payload.variantId;
+    }
+    result = await prisma.cartItem.create({
+      data: data,
+    });
+  }
+
   return result;
 };
 
-const deleteCartItemFromDB = async (authUser: IAuthUser, productId: string) => {
-  await prisma.cartItem.deleteMany({
+const deleteCartItemFromDB = async (authUser: IAuthUser, id: string) => {
+  await prisma.cartItem.delete({
     where: {
-      customer: {
-        userId: authUser.id,
-      },
-      productId: productId,
+      id,
+      customerId: authUser.customerId,
     },
   });
 
@@ -62,13 +96,12 @@ const deleteCartItemFromDB = async (authUser: IAuthUser, productId: string) => {
 };
 
 const getMyCartItemsFromDB = async (authUser: IAuthUser) => {
-  const data = await prisma.cartItem.findMany({
+  const items = await prisma.cartItem.findMany({
     where: {
       customer: {
         userId: authUser.id,
       },
     },
-
     include: {
       product: {
         select: {
@@ -79,8 +112,24 @@ const getMyCartItemsFromDB = async (authUser: IAuthUser) => {
           images: true,
         },
       },
+      variant: true,
     },
   });
-
-  const result = await data.map((item) => ({}));
+  const result = items.map((item) => ({
+    id: item.id,
+    product: {
+      ...item.product,
+      variant: item.variant,
+    },
+    quantity: item.quantity,
+  }));
+  return result;
 };
+
+const CartItemServices = {
+  createCartItemIntoDB,
+  getMyCartItemsFromDB,
+  deleteCartItemFromDB,
+};
+
+export default CartItemServices;

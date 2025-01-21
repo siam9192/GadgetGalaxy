@@ -11,3 +11,13 @@ export function generateSlug(name: string) {
     .replace(/\s+/g, "-") // Replace spaces with hyphens
     .trim(); // Remove leading/trailing spaces
 }
+
+export function generateTransactionId(length = 10) {
+  const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let transactionId = "";
+  for (let i = 0; i < length; i++) {
+    const randomIndex = Math.floor(Math.random() * characters.length);
+    transactionId += characters[randomIndex];
+  }
+  return transactionId;
+}

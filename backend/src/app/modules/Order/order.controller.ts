@@ -6,11 +6,11 @@ import OrderServices from "./order.service";
 import Pick from "../../utils/pick";
 import { paginationOptionKeys } from "../../utils/constant";
 
-const createOrder = catchAsync(async (req: Request, res: Response) => {
-  const result = await OrderServices.createOrderIntoDB(req.user, req.body);
+const initOrder = catchAsync(async (req: Request, res: Response) => {
+  const result = await OrderServices.initOrderIntoDB(req.user, req.body);
   sendSuccessResponse(res, {
     statusCode: httpStatus.CREATED,
-    message: "Order created successfully",
+    message: "Order init successfully",
     data: result,
   });
 });
@@ -29,7 +29,7 @@ const getMyOrders = catchAsync(async (req: Request, res: Response) => {
 });
 
 const OrderControllers = {
-  createOrder,
+  initOrder,
   getMyOrders,
 };
 

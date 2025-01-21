@@ -3,8 +3,6 @@ import PaymentControllers from "./payment.controller";
 
 const router = Router();
 
-router.get("/:paymentId/success", PaymentControllers.updateSuccessPayment);
-router.get("/:paymentId/cancel", PaymentControllers.updateCancelledPayment);
-
+router.get("/ispn", PaymentControllers.validatePayment);
 const PaymentRouter = router;
 export default PaymentRouter;

@@ -16,7 +16,7 @@ import { productsSelect } from "./product.constant";
 const createProductIntoDB = async (payload: ICreateProductPayload) => {
   // if variant not exist then  default Regular price and sale price is required
   if (
-    !payload.variants.length &&
+    !payload.variants?.length &&
     (!payload.salePrice || !payload.regularPrice)
   ) {
     throw new AppError(
@@ -25,7 +25,7 @@ const createProductIntoDB = async (payload: ICreateProductPayload) => {
     );
   }
 
-  const category = prisma.category.findUnique({
+  const category = await prisma.category.findUnique({
     where: {
       id: payload.categoryId,
     },
@@ -69,7 +69,7 @@ const createProductIntoDB = async (payload: ICreateProductPayload) => {
   const { regularPrice, salePrice, images, tags, variants, specification } =
     payload;
 
-  if (variants.length) {
+  if (variants && variants.length) {
     delete productData.regularPrice;
     delete productData.salePrice;
     delete productData.discountPercentage;
@@ -153,7 +153,8 @@ const createProductIntoDB = async (payload: ICreateProductPayload) => {
       await txClient.productSpecification.createMany({
         data: specification.map((item) => ({
           productId: createdProductData.id,
-          ...item,
+          name: item.name,
+          value: item.name,
         })),
       });
     }
@@ -614,24 +615,22 @@ const getProductsFromDB = async (
       ],
     });
   }
- 
-    
-  
-  const include:Prisma.ProductInclude   =  {
+
+  const include: Prisma.ProductInclude = {
     category: {
       select: {
         name: true,
       },
     },
-     // Default where
-    variants:{
-      where:{
-        isHighlighted:true
+    // Default where
+    variants: {
+      where: {
+        isHighlighted: true,
       },
-      take:1
+      take: 1,
     },
     images: true,
-  }
+  };
 
   // If minimum price and max price exist then filter by price range
   if (minPrice && maxPrice && parseInt(minPrice) && parseInt(maxPrice)) {
@@ -640,7 +639,7 @@ const getProductsFromDB = async (
         {
           salePrice: {
             gt: parseInt(minPrice),
-            lt:parseInt(maxPrice)
+            lt: parseInt(maxPrice),
           },
         },
         {
@@ -648,7 +647,7 @@ const getProductsFromDB = async (
             some: {
               salePrice: {
                 gt: parseInt(minPrice),
-                lt:parseInt(maxPrice)
+                lt: parseInt(maxPrice),
               },
             },
           },
@@ -656,50 +655,46 @@ const getProductsFromDB = async (
       ],
     });
     include.variants = {
-      where:{
+      where: {
         salePrice: {
           gt: parseInt(minPrice),
-          lt:parseInt(maxPrice)
+          lt: parseInt(maxPrice),
         },
       },
-      take:1
-    }
-  }
- else  {
-  // If only minimum price exist
-  if (minPrice && parseInt(minPrice)) {
-
-    andConditions.push({
-      OR: [
-        {
+      take: 1,
+    };
+  } else {
+    // If only minimum price exist
+    if (minPrice && parseInt(minPrice)) {
+      andConditions.push({
+        OR: [
+          {
+            salePrice: {
+              gt: parseInt(minPrice),
+            },
+          },
+          {
+            variants: {
+              some: {
+                salePrice: {
+                  gt: parseInt(minPrice),
+                },
+              },
+            },
+          },
+        ],
+      });
+      include.variants = {
+        where: {
           salePrice: {
             gt: parseInt(minPrice),
           },
         },
-        {
-          variants: {
-            some: {
-              salePrice: {
-                gt: parseInt(minPrice),
-              },
-            },
-          },
-        },
-      ],
-    });
-    include.variants = {
-      where:{
-        salePrice: {
-          gt: parseInt(minPrice),
-        },
-      },
-      take:1
+        take: 1,
+      };
     }
-   
-  }
-  // If only maximum price exist
-  else if (maxPrice && parseInt(maxPrice)){
-   
+    // If only maximum price exist
+    else if (maxPrice && parseInt(maxPrice)) {
       andConditions.push({
         OR: [
           {
@@ -720,22 +715,21 @@ const getProductsFromDB = async (
       });
 
       include.variants = {
-        where:{
+        where: {
           salePrice: {
             lt: parseInt(maxPrice),
           },
         },
-        take:1
+        take: 1,
+      };
+    }
   }
-
- }
-}
-
 
   const whereConditions: Prisma.ProductWhereInput = {
     AND: andConditions,
+    status: "Active",
   };
- 
+
   const data = await prisma.product.findMany({
     where: whereConditions,
     skip,
@@ -743,7 +737,7 @@ const getProductsFromDB = async (
     orderBy: {
       [orderBy]: sortOrder,
     },
-    include 
+    include,
   });
 
   const total = await prisma.product.count({
@@ -757,7 +751,207 @@ const getProductsFromDB = async (
       page,
     },
   };
-}
+};
+
+const getProductsForManageFromDB = async (
+  filterData: IProductFilterData,
+  paginationOptions: IPaginationOptions,
+) => {
+  const { searchTerm, categories, brands, minPrice, maxPrice } = filterData;
+
+  const { limit, skip, page, sortOrder, orderBy } =
+    calculatePagination(paginationOptions);
+
+  const andConditions: Prisma.ProductWhereInput[] = [];
+
+  if (categories) {
+    const categoriesSlug = categories.split(",");
+    if (categoriesSlug.length) {
+      andConditions.push({
+        slug: {
+          in: categoriesSlug,
+        },
+      });
+    }
+  }
+
+  if (brands) {
+    const brandsName = brands.split(",");
+    if (brandsName.length) {
+      andConditions.push({
+        brand: {
+          name: {
+            in: brandsName,
+          },
+        },
+      });
+    }
+  }
+
+  // If search term exist then search data by search term
+  if (searchTerm) {
+    const searchableFields = ["name", "description"];
+    andConditions.push({
+      OR: [
+        ...searchableFields.map((field) => ({
+          [field]: {
+            contains: searchTerm,
+            mode: "insensitive",
+          },
+        })),
+        {
+          tags: {
+            some: {
+              name: {
+                contains: searchTerm,
+                mode: "insensitive",
+              },
+            },
+          },
+        },
+      ],
+    });
+  }
+
+  const include: Prisma.ProductInclude = {
+    category: {
+      select: {
+        name: true,
+      },
+    },
+    // Default where
+    variants: {
+      where: {
+        isHighlighted: true,
+      },
+      take: 1,
+    },
+    images: true,
+    _count: true,
+  };
+
+  // If minimum price and max price exist then filter by price range
+  if (minPrice && maxPrice && parseInt(minPrice) && parseInt(maxPrice)) {
+    andConditions.push({
+      OR: [
+        {
+          salePrice: {
+            gt: parseInt(minPrice),
+            lt: parseInt(maxPrice),
+          },
+        },
+        {
+          variants: {
+            some: {
+              salePrice: {
+                gt: parseInt(minPrice),
+                lt: parseInt(maxPrice),
+              },
+            },
+          },
+        },
+      ],
+    });
+    include.variants = {
+      where: {
+        salePrice: {
+          gt: parseInt(minPrice),
+          lt: parseInt(maxPrice),
+        },
+      },
+      take: 1,
+    };
+  } else {
+    // If only minimum price exist
+    if (minPrice && parseInt(minPrice)) {
+      andConditions.push({
+        OR: [
+          {
+            salePrice: {
+              gt: parseInt(minPrice),
+            },
+          },
+          {
+            variants: {
+              some: {
+                salePrice: {
+                  gt: parseInt(minPrice),
+                },
+              },
+            },
+          },
+        ],
+      });
+      include.variants = {
+        where: {
+          salePrice: {
+            gt: parseInt(minPrice),
+          },
+        },
+        take: 1,
+      };
+    }
+    // If only maximum price exist
+    else if (maxPrice && parseInt(maxPrice)) {
+      andConditions.push({
+        OR: [
+          {
+            salePrice: {
+              lt: parseInt(maxPrice),
+            },
+          },
+          {
+            variants: {
+              some: {
+                salePrice: {
+                  lt: parseInt(maxPrice),
+                },
+              },
+            },
+          },
+        ],
+      });
+
+      include.variants = {
+        where: {
+          salePrice: {
+            lt: parseInt(maxPrice),
+          },
+        },
+        take: 1,
+      };
+    }
+  }
+
+  const whereConditions: Prisma.ProductWhereInput = {
+    AND: andConditions,
+    status: {
+      not: "Deleted",
+    },
+  };
+
+  const data = await prisma.product.findMany({
+    where: whereConditions,
+    skip,
+    take: limit,
+    orderBy: {
+      [orderBy]: sortOrder,
+    },
+    include,
+  });
+
+  const total = await prisma.product.count({
+    where: whereConditions,
+  });
+  return {
+    data,
+    meta: {
+      total,
+      limit,
+      page,
+    },
+  };
+};
 
 const getRelatedProductsByProductSlugFromDB = async (productSlug: string) => {
   const product = await prisma.product.findUnique({
@@ -1069,6 +1263,7 @@ const ProductServices = {
   getRelatedProductsByProductSlugFromDB,
   getRecentlyViewedProductsFromDB,
   getMyProductsFromDB,
+  getProductsForManageFromDB,
   getRecommendedProductsFromDB,
 };
 

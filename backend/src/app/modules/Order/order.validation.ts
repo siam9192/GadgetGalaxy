@@ -1,25 +1,29 @@
 import { z } from "zod";
 
-const OrderItem = z.object({
-  productId: z.string().nonempty(),
-  quantity: z.number().int().min(1),
+const shippingInfo = z.object({
+  fullName: z.string(),
+  emailAddress: z.string().email().optional(),
+  phoneNumber: z.string().length(11),
+  address: z
+    .object({
+      district: z.string(),
+      zone: z.string(),
+      line: z.string(),
+    })
+    .optional(),
+  addressId: z.string().optional(),
 });
 
-const shippingAddress = z.object({
-  street: z.string(),
-  city: z.string(),
-  state: z.string(),
-  country: z.string(),
-});
-
-const CreateOrderValidation = z.object({
-  couponId: z.string().nonempty(),
-  items: z.array(OrderItem),
-  shippingAddress,
+const InitOrderValidation = z.object({
+  discountCode: z.string().nonempty().optional(),
+  shippingChargeId: z.string().nonempty(),
+  cartItemsId: z.array(z.string()).min(1),
+  shippingInfo,
+  removeCartItemsAfterPurchase: z.boolean(),
 });
 
 const OrderValidations = {
-  CreateOrderValidation,
+  InitOrderValidation,
 };
 
 export default OrderValidations;

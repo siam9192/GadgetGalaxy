@@ -199,8 +199,8 @@ model ProductImage {
 
 model ProductSpecification {
   id String @id  @default(uuid())
-  name String @db.VarChar(20)
-  value String @db.VarChar(100)
+  name String @db.VarChar(100)
+  value String @db.VarChar(200)
   productId String
   product Product @relation(fields: [productId],references: [id])
   @@map("product_specifications")
@@ -234,10 +234,10 @@ model ProductReview {
 
 model Discount {
   id             String   @id    @default(uuid())
-  couponCode     String @unique @db.VarChar(20)   
+  code     String @unique @db.VarChar(20)   
   description    String @unique @db.VarChar(5000)
   discountType   DiscountType
-  discountValue  Float?
+  discountValue  Float
   minOrderValue  Float?
   maxDiscount    Float?
   usageLimit     Int?                                 
@@ -249,6 +249,7 @@ model Discount {
   status         DiscountStatus                     
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt()
+  orders Order[]
   @@map("coupons")
 }
 
@@ -279,8 +280,14 @@ model Order {
  shippingAmount Float
  netAmount Float
  shippingInfo ShippingInformation?
- couponCode String?
+ shippingChargeData Json
+ notes String?
+ exceptedDeliveryDate String @default("2025/03/19-2025/03/26")
+ discountCode String?
+ discount Discount? @relation(fields: [discountCode],references: [code])
+ deletableCartItemsId String?
  status OrderStatus @default(Pending)
+ paymentStatus OrderPaymentStatus @default(Unpaid)
  paymentId String?
  payment Payment?
  createdAt       DateTime  @default(now())
@@ -294,28 +301,34 @@ model Order {
 model OrderItem {
    id String  @id    @default(uuid())
    orderId String 
-   productId String?
-   variantId String
+   productId String
+   variantId String?
    productName String
    imageUrl String
-   attributes Json
+   colorName String?
+   colorCode String? @db.Char(7)
+   attributes Json?
    quantity Int
    price Int
    totalAmount Float
    isReviewed Boolean @default(false)
    order Order @relation(fields: [orderId],references: [id])
-   product Product? @relation(fields: [productId],references: [id])
+   product Product @relation(fields: [productId],references: [id])
    variant Variant? @relation(fields: [variantId],references: [id])
    review ProductReview?
    @@map("order_items")
 }
 
 
+
+
 model ShippingInformation {
-  orderId String @id
+  id String @id  @default(uuid())
+  orderId String @unique
   order Order @relation(fields: [orderId],references: [id])
   fullName String
   phoneNumber String
+  emailAddress String?
   district String
   zone String
   line String
@@ -323,18 +336,29 @@ model ShippingInformation {
 }
 
 
+model ShippingCharge {
+   id          String   @id @default(uuid()) 
+   title       String  
+   description String?   
+   cost        Float  
+   deliveryHours String @default("48-72")
+   createdAt   DateTime @default(now()) 
+   updatedAt   DateTime @updatedAt
+   @@map("shipping_charges")
+}
 
 model Payment {
    id String @id  @default(uuid())
-   transactionId String @unique
+   transactionId String @unique 
    orderId String @unique
    amount Float
    method PaymentMethod
    status PaymentStatus @default(Pending)
-   json Json
+   gatewayGatewayData Json?
    createdAt DateTime @default(now())
    updatedAt DateTime @updatedAt
    order Order @relation(fields: [orderId],references: [id])
+   @@index([transactionId,orderId,id])
    @@map("payments")
 }
 
@@ -384,11 +408,11 @@ model Brand {
 model CartItem {
 id String @id  @default(uuid())
 customerId String
-productId String?
+productId String
 variantId String?
 quantity Int
 customer Customer @relation(fields: [customerId],references: [id])
-product Product? @relation(fields: [productId],references: [id])
+product Product @relation(fields: [productId],references: [id])
 variant Variant? @relation(fields: [variantId],references: [id])
 @@map("cart_items")
 }
@@ -514,6 +538,7 @@ enum AccountStatus {
 enum PaymentMethod {
   Stripe
   Paypal
+  SSLCommerz
   Bkash
   Nagad
 }
@@ -595,5 +620,8 @@ enum MediaHoistingProvider {
   Cloudinary
 }
 
-
+enum OrderPaymentStatus {
+  Paid
+  Unpaid
+}
 

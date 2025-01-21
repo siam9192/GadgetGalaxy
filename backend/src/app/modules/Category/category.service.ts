@@ -59,13 +59,16 @@ const createCategoryIntoDB = async (payload: ICreateCategoryPayload) => {
       data: data,
     });
 
+    const children = payload.children;
     // Create child categories of this category
-    payload.children.forEach(async (item) => {
+    for (let i = 0; i < children.length; i++) {
+      const item = children[i];
       let slug = generateSlug(item.name);
+
       // Generate unique slug
       let counter = 1;
       do {
-        const blog = await tx.category.findUnique({
+        const category = await prisma.category.findUnique({
           where: {
             slug,
           },
@@ -73,22 +76,31 @@ const createCategoryIntoDB = async (payload: ICreateCategoryPayload) => {
             id: true,
           },
         });
-        if (!blog) {
+        if (!category) {
           break;
         }
         counter++;
         slug = generateSlug(item.name + " " + counter);
       } while (true);
 
-      const payload = {
+      const data = {
         ...item,
         parentId: createdParentCategory.id,
         slug,
       };
 
       await tx.category.create({
-        data: payload,
+        data,
       });
+    }
+
+    return await tx.category.findUnique({
+      where: {
+        id: createdParentCategory.id,
+      },
+      include: {
+        children: true,
+      },
     });
   });
 
