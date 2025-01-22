@@ -14,6 +14,8 @@ router.post(
   OrderControllers.initOrder,
 );
 
+router.get("/",OrderControllers.getOrders)
+
 const OrderRouter = router;
 
 export default OrderRouter;

@@ -1,5 +1,6 @@
 import {
   OrderPaymentStatus,
+  OrderStatus,
   PaymentMethod,
   PaymentStatus,
 } from "@prisma/client";
@@ -93,6 +94,7 @@ const validatePayment = async (payload: any) => {
         id: updatedPaymentData.orderId,
       },
       data: {
+        status:OrderStatus.Placed,
         paymentStatus: OrderPaymentStatus.Paid,
       },
     });

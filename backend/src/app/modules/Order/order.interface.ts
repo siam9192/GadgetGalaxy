@@ -33,5 +33,8 @@ export interface IUpdateOrderStatusPayload {
 }
 
 export interface IFilterOrder {
-  status: `${OrderStatus}`;
+  status?: `${OrderStatus}`;
+  customerId?:string;
+  orderId?:string
+  orderDate?:string
 }

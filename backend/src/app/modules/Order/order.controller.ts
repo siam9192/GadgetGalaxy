@@ -28,9 +28,28 @@ const getMyOrders = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+
+
+const getOrders= catchAsync(async (req: Request, res: Response) => {
+  const paginationOptions = Pick(req.query, paginationOptionKeys);
+  const filter = Pick(req.query,["customerId","orderId","status","orderDate"]);
+
+  const result = await OrderServices.getOrdersFromDB(
+    filter,
+    paginationOptions as any,
+  );
+  sendSuccessResponse(res, {
+    statusCode: httpStatus.CREATED,
+    message: "Orders retrieved successfully",
+    ...result
+  });
+});
+
+
 const OrderControllers = {
   initOrder,
   getMyOrders,
+  getOrders,
 };
 
 export default OrderControllers;

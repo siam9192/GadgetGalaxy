@@ -244,18 +244,103 @@ const UpdateOrderStatus = async (payload: IUpdateOrderStatusPayload) => {
   });
 };
 
+const getOrdersFromDB = async (filter:IFilterOrder,paginationOptions:IPaginationOptions)=>{
+
+  const {customerId,orderDate,orderId,status} = filter
+  const {skip,limit,page,sortOrder,orderBy} = calculatePagination(paginationOptions)
+
+  const andConditions: Prisma.OrderWhereInput[] = [];
+
+  // Add a condition to filter by customerId if it's provided
+  if (customerId) {
+    andConditions.push({
+      customerId: filter.customerId, // Match orders with the given customerId
+    });
+  }
+
+  // Add a condition to filter by order status if it's provided
+  if (status) {
+    andConditions.push({
+      status, // Match orders with the given status
+    });
+  }
+
+  // Add a condition to filter by order date if it's provided and valid
+  if (orderDate && !isNaN(new Date(orderDate).getTime())) {
+    const date = new Date(orderDate); // Convert orderDate to a Date object
+    const nextDate = new Date(date); // Clone the date object
+    nextDate.setDate(date.getDate() + 1); // Add one day to calculate the next day
+
+    // Filter orders created on the specific date
+    andConditions.push({
+      createdAt: {
+        gte: date, 
+        lt: nextDate, 
+      },
+    });
+  }
+
+  const whereConditions: Prisma.OrderWhereInput = {};
+
+  // If orderId is provided, filter only by orderId and ignore other conditions
+  if (!orderId) {
+    whereConditions.AND = andConditions; // Use the AND conditions if no specific orderId is provided
+  } else {
+    whereConditions.id = orderId; // Filter by the specific orderId
+  }
+
+  const data = await prisma.order.findMany({
+    where:whereConditions,
+    skip,
+    take:limit,
+    select:{
+      id:true,
+      customer:true,
+      items:true,
+      totalAmount:true,
+      discountAmount:true,
+      grossAmount:true,
+      shippingAmount:true,
+      netAmount:true,
+      notes:true,
+      exceptedDeliveryDate:true,
+      status:true,
+      paymentStatus:true,
+      createdAt:true
+    },
+    orderBy:{
+      [orderBy]:sortOrder
+    }
+  })
+
+  const total = await prisma.order.count({
+    where:whereConditions
+  })
+
+  const meta = {
+    limit,
+    page,
+    total
+  }
+  return {
+  data,
+  meta
+  }
+  
+}
+
 const getMyOrdersFromDB = async (
   authUser: IAuthUser,
   filter: IFilterOrder,
   paginationOptions: IPaginationOptions,
 ) => {
 
-  
 };
 
 const OrderServices = {
   initOrderIntoDB,
   getMyOrdersFromDB,
+  getOrdersFromDB,
 };
 
 export default OrderServices;
