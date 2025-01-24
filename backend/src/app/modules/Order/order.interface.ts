@@ -30,11 +30,20 @@ interface IOrderItem {
 export interface IUpdateOrderStatusPayload {
   orderId: string;
   status: `${OrderStatus}`;
+  isNext?: boolean;
 }
 
 export interface IFilterOrder {
   status?: `${OrderStatus}`;
-  customerId?:string;
-  orderId?:string
-  orderDate?:string
+  customerId?: string;
+  orderId?: string;
+  orderDate?: string;
+  startDate?: string;
+  endDate?: string;
+}
+
+export interface IFilterMyOrder {
+  startDate?: string;
+  endDate?: string;
+  status?: `${OrderStatus}`;
 }

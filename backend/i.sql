@@ -1,2 +1,3 @@
--- Active: 1729097050946@@127.0.0.1@5432@Blogi
-DROP DATABASE Blogi;
+-- Active: 1729097050946@@127.0.0.1@5432@gadget_galaxy
+
+SELECT email FROM accounts;

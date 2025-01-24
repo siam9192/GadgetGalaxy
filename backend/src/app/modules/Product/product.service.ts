@@ -1253,6 +1253,28 @@ const SoftDeleteProductFromDB = async (productId: string) => {
   });
 };
 
+const CheckSkuFromDB = async (sku: string) => {
+  let status = false;
+  const product = await prisma.product.findUnique({
+    where: {
+      sku,
+    },
+  });
+  // If no product with this sku then check in variant
+  if (!product) {
+    const variant = await prisma.variant.findUnique({
+      where: {
+        sku,
+      },
+    });
+
+    if (variant) status = true;
+  } else status = true;
+  return {
+    status,
+  };
+};
+
 const ProductServices = {
   createProductIntoDB,
   updateProductIntoDB,
@@ -1265,6 +1287,7 @@ const ProductServices = {
   getMyProductsFromDB,
   getProductsForManageFromDB,
   getRecommendedProductsFromDB,
+  CheckSkuFromDB,
 };
 
 export default ProductServices;

@@ -9,6 +9,8 @@ import PaymentRouter from "../modules/Payment/payment.route";
 import ProductReviewRouter from "../modules/ProductReview/product-review.route";
 import CartItemRouter from "../modules/CartItem/cart-item.route";
 import ShippingChargeRouter from "../modules/ShippingCharge/shipping-charge.route";
+import NotificationRouter from "../modules/Notification/notification.route";
+import ActivityLogRouter from "../modules/ActivityLog/activity-log.route";
 
 type TModuleRoutes = { path: string; router: IRouter }[];
 const router = Router();
@@ -64,6 +66,14 @@ const moduleRoutes: TModuleRoutes = [
   {
     path: "/payments",
     router: PaymentRouter,
+  },
+  {
+    path: "/notifications",
+    router: NotificationRouter,
+  },
+  {
+    path: "/activity-logs",
+    router: ActivityLogRouter,
   },
 ];
 

@@ -27,7 +27,7 @@ const initPayment = async (payload: IInitPaymentPayload) => {
       continue;
     } else transactionId = generatedTranId;
   }
-  console.log("Tran id",transactionId)
+  console.log("Tran id", transactionId);
   const SSLInitPayload: IInitSSLPaymentPayload = {
     transactionId,
     amount: payload.amount,
@@ -87,34 +87,28 @@ const validatePayment = async (payload: any) => {
       },
     });
 
-  
-
-  const updatedOrderData =  await tx.order.update({
+    const updatedOrderData = await tx.order.update({
       where: {
         id: updatedPaymentData.orderId,
       },
       data: {
-        status:OrderStatus.Placed,
+        status: OrderStatus.Placed,
         paymentStatus: OrderPaymentStatus.Paid,
       },
     });
 
-
-    const deletableCartItemsId = updatedOrderData.deletableCartItemsId
-    
+    const deletableCartItemsId = updatedOrderData.deletableCartItemsId;
 
     // If deletable cart items exist then delete cart items from db
-    if(deletableCartItemsId){
+    if (deletableCartItemsId) {
       await tx.cartItem.deleteMany({
-        where:{
-          id:{
-            in:deletableCartItemsId.split(",")
-          }
-        }
-      })
+        where: {
+          id: {
+            in: deletableCartItemsId.split(","),
+          },
+        },
+      });
     }
-
-    
   });
 
   return {

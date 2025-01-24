@@ -9,21 +9,21 @@ const router = Router();
 
 router.post(
   "/",
-  // auth(UserRole.Vendor),
+  auth(Object.values(UserRole).filter((ite) => ite !== UserRole.Customer)),
   validateRequest(ProductValidations.CreateProductValidation),
   ProductControllers.createProduct,
 );
 
 router.put(
   "/",
-  // auth(UserRole.Vendor),
+  auth(Object.values(UserRole).filter((ite) => ite !== UserRole.Customer)),
   validateRequest(ProductValidations.UpdateProductValidation),
   ProductControllers.updateProduct,
 );
 
 router.delete(
   "/:productId",
-  // auth(UserRole.Vendor),
+  auth(Object.values(UserRole).filter((ite) => ite !== UserRole.Customer)),
   ProductControllers.deleteProduct,
 );
 
@@ -38,11 +38,7 @@ router.get(
   "/related/:productSlug",
   ProductControllers.getRelatedProductsByProductSlug,
 );
-router.get(
-  "/my-products",
-  // auth(UserRole.Vendor),
-  ProductControllers.getMyProducts,
-);
+
 router.get(
   "/recently-viewed",
   auth([UserRole.Customer], { providerMode: true }),
@@ -60,6 +56,12 @@ router.get(
   "/for-manage",
   auth(Object.values(UserRole).filter((ite) => ite !== UserRole.Customer)),
   ProductControllers.getProductsForManage,
+);
+
+router.get(
+  "/check-sku",
+  auth(Object.values(UserRole).filter((ite) => ite !== UserRole.Customer)),
+  ProductControllers.CheckSku,
 );
 
 const ProductRouter = router;

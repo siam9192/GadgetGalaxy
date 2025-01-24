@@ -7,7 +7,7 @@ import Pick from "../../utils/pick";
 import { paginationOptionKeys } from "../../utils/constant";
 
 const changeUserStatus = catchAsync(async (req: Request, res: Response) => {
-  const result = await UserServices.ChangeUserAccountStatusIntoDB(req.body);
+  const result = await UserServices.ChangeUserStatusIntoDB(req.user, req.body);
   sendSuccessResponse(res, {
     statusCode: httpStatus.OK,
     message: "User status changed successfully",
@@ -38,10 +38,22 @@ const getStaffsFromDB = catchAsync(async (req: Request, res: Response) => {
 });
 
 const softDeleteUser = catchAsync(async (req: Request, res: Response) => {
-  const result = await UserServices.softDeleteUserIntoDB(req.params.userId);
+  const result = await UserServices.softDeleteUserByIdIntoDB(
+    req.user,
+    req.params.userId,
+  );
   sendSuccessResponse(res, {
     statusCode: httpStatus.OK,
     message: "User deleted successfully",
+    data: result,
+  });
+});
+
+const createStaff = catchAsync(async (req: Request, res: Response) => {
+  const result = await UserServices.createStaffIntoDB(req.user, req.body);
+  sendSuccessResponse(res, {
+    statusCode: httpStatus.OK,
+    message: "Staff created successfully",
     data: result,
   });
 });
@@ -51,6 +63,7 @@ const UserControllers = {
   getCustomers,
   getStaffsFromDB,
   softDeleteUser,
+  createStaff,
 };
 
 export default UserControllers;

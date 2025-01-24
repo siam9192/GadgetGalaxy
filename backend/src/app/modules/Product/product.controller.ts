@@ -164,6 +164,15 @@ const getProductsForManage = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const CheckSku = catchAsync(async (req: Request, res: Response) => {
+  const result = await ProductServices.CheckSkuFromDB(req.params.sku);
+  sendSuccessResponse(res, {
+    statusCode: httpStatus.OK,
+    message: "Checking  status retrieved successfully",
+    data: result,
+  });
+});
+
 const ProductControllers = {
   createProduct,
   updateProduct,
@@ -176,6 +185,7 @@ const ProductControllers = {
   getProductBySlugForCustomerView,
   getMyProducts,
   getProductsForManage,
+  CheckSku,
 };
 
 export default ProductControllers;

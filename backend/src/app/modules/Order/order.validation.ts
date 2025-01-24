@@ -1,3 +1,4 @@
+import { OrderStatus } from "@prisma/client";
 import { z } from "zod";
 
 const shippingInfo = z.object({
@@ -22,8 +23,14 @@ const InitOrderValidation = z.object({
   removeCartItemsAfterPurchase: z.boolean(),
 });
 
+const UpdateOrderStatusByStaffValidation = z.object({
+  orderId: z.string(),
+  status: z.enum(Object.values(OrderStatus) as any),
+});
+
 const OrderValidations = {
   InitOrderValidation,
+  UpdateOrderStatusByStaffValidation,
 };
 
 export default OrderValidations;

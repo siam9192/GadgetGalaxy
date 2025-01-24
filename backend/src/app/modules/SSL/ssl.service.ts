@@ -39,8 +39,6 @@ const initPayment = async (payload: IInitSSLPaymentPayload) => {
     ship_country: "N/A",
   };
 
- 
-
   const response = await axios({
     method: "post",
     url: config.ssl.payment_url,

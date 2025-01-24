@@ -1,4 +1,4 @@
-import { AccountStatus, AuthProvider } from "@prisma/client";
+import { AccountStatus, AuthProvider, UserGender } from "@prisma/client";
 import { IName } from "../../reuse/types";
 
 export interface ICustomerFilterRequest {
@@ -11,4 +11,12 @@ export interface IUserFilterRequest {
   id: string;
   provider: AuthProvider;
   status: AccountStatus;
+}
+
+export interface ICreateStaffPayload {
+  fullName: string;
+  email: string;
+  password: string;
+  profilePhoto: string;
+  gender?: `${UserGender}`;
 }
