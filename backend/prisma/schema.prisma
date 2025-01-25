@@ -235,7 +235,7 @@ model ProductReview {
 model Discount {
   id             String   @id    @default(uuid())
   code     String @unique @db.VarChar(20)   
-  description    String @unique @db.VarChar(5000)
+  description    String  @db.VarChar(5000)
   discountType   DiscountType
   discountValue  Float
   minOrderValue  Float?
@@ -256,7 +256,7 @@ model Discount {
 model DiscountCustomerId {
   discountId String
   customerId String
-  discount Discount @relation(fields: [discountId],references: [id])
+  discount Discount @relation(fields: [discountId],references: [id],onDelete:Cascade)
   @@id([discountId,customerId])
   @@map("discount_customer_ids")
 }
@@ -264,7 +264,7 @@ model DiscountCustomerId {
 model DiscountCategoryId {
    discountId String
    categoryId String
-    discount Discount @relation(fields: [discountId],references: [id])
+    discount Discount @relation(fields: [discountId],references: [id],onDelete:Cascade)
   @@id([discountId,categoryId])
   @@map("discount_category_ids")
 }

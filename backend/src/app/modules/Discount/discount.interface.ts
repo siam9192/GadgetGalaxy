@@ -1,4 +1,5 @@
 import { DiscountStatus, DiscountType } from "@prisma/client";
+import e from "express";
 
 export interface ICreateDiscountPayload {
   code: string;
@@ -27,21 +28,27 @@ export interface IUpdateDiscountPayload {
   usageCount?: number;
   validFrom?: Date;
   validUntil?: Date;
-  newCustomersId?: string[];
-  newCategoriesId?: string[];
-  removed?:{
-    customers?:string[];
-    categories?:string[]
-  }
+  new?: {
+    customersId?: string[];
+    categoriesId?: string[];
+  };
+  removed?: {
+    customersId?: string[];
+    categoriesId?: string[];
+  };
   status?: `${DiscountStatus}`;
 }
 
-
 export interface IFilterDiscount {
-    code?:string;
-    startDate?:string
-    endDate?:string
-    validFrom?:string
-    validUntil?:string
+  code?: string;
+  startDate?: string;
+  endDate?: string;
+  validFrom?: string;
+  validUntil?: string;
+  status?: `${DiscountStatus}`;
 }
 
+export interface IApplyDiscountPayload {
+  cartItemsId: string[];
+  code: string;
+}

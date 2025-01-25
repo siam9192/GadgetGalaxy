@@ -3,14 +3,15 @@ import AuthRouter from "../modules/Auth/auth.route";
 import UserRouter from "../modules/User/user.route";
 import CategoryRouter from "../modules/Category/category.route";
 import ProductRouter from "../modules/Product/product.route";
-import CouponRouter from "../modules/Coupon/coupon.router";
 import OrderRouter from "../modules/Order/order.route";
 import PaymentRouter from "../modules/Payment/payment.route";
-import ProductReviewRouter from "../modules/ProductReview/product-review.route";
 import CartItemRouter from "../modules/CartItem/cart-item.route";
 import ShippingChargeRouter from "../modules/ShippingCharge/shipping-charge.route";
 import NotificationRouter from "../modules/Notification/notification.route";
 import ActivityLogRouter from "../modules/ActivityLog/activity-log.route";
+import DiscountRouter from "../modules/Discount/discount.route";
+import BrandRouter from "../modules/Brand/brand.route";
+import ProfileRouter from "../modules/Profile/profile.route";
 
 type TModuleRoutes = { path: string; router: IRouter }[];
 const router = Router();
@@ -23,14 +24,14 @@ const moduleRoutes: TModuleRoutes = [
     path: "/users",
     router: UserRouter,
   },
-  // {
-  //   path: "/profile",
-  //   router: ProfileRouter,
-  // },
-  // {
-  //   path: "/shops",
-  //   router: ShopRouter,
-  // },
+  {
+    path: "/profile",
+    router: ProfileRouter,
+  },
+  {
+    path: "/brands",
+    router: BrandRouter,
+  },
   {
     path: "/products",
     router: ProductRouter,
@@ -40,17 +41,13 @@ const moduleRoutes: TModuleRoutes = [
     router: CartItemRouter,
   },
   {
-    path: "/coupons",
-    router: CouponRouter,
+    path: "/discounts",
+    router: DiscountRouter,
   },
   {
     path: "/shipping-charges",
     router: ShippingChargeRouter,
   },
-  // {
-  //   path: "/parent-categories",
-  //   router: ParentCategoryRouter,
-  // },
   {
     path: "/categories",
     router: CategoryRouter,

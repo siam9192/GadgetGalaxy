@@ -1,22 +1,29 @@
-import {
-  Author,
-  Reader,
-  SocialLink,
-  SocialPlatform,
-  Staff,
-} from "@prisma/client";
+import { Address, UserGender } from "@prisma/client";
 
-interface ISocialLinkUpdate {
-  author_id: number;
-  platform: `${SocialPlatform}`;
-  url: string;
-  is_deleted?: boolean;
+export interface IUpdateCustomerProfilePayload {
+  fullName?: string;
+  profilePhoto?: string;
+  phoneNumber?: string;
+  gender?: `${UserGender}`;
+  dateOfBirth?: string;
+  updatedAddresses?: {
+    id: string;
+    district?: string;
+    zone?: string;
+    line?: string;
+    isDefault?: boolean;
+  }[];
+  newAddedAddresses?: {
+    district: string;
+    zone: string;
+    line: string;
+    isDefault: boolean;
+  }[];
+  deletedAddressesIds?: string[];
 }
 
-export interface IUpdateAuthorProfileData extends Author {
-  social_links: ISocialLinkUpdate[];
+export interface IUpdateStaffProfilePayload {
+  fullName?: string;
+  profilePhoto?: string;
+  gender?: `${UserGender}`;
 }
-
-export interface IUpdateReaderProfileData extends Reader {}
-
-export interface IUpdateStaffProfileData extends Staff {}

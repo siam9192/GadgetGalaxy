@@ -463,13 +463,13 @@ const getMyOrdersFromDB = async (
           lte: new Date(endDate),
         },
       });
-    } else if (startDate && !isNaN(new Date(startDate).getTime())) {
+    } else if (startDate && validate(startDate)) {
       andConditions.push({
         createdAt: {
           gte: new Date(startDate),
         },
       });
-    } else if (endDate && !isNaN(new Date(endDate).getTime())) {
+    } else if (endDate && validate(endDate)) {
       andConditions.push({
         createdAt: {
           lte: new Date(endDate),

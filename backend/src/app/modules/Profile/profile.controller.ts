@@ -13,32 +13,31 @@ const getUserProfileById = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const getCurrentUserProfile = catchAsync(
-  async (req: Request, res: Response) => {
-    const result = await ProfileServices.getUserProfileByIdFromDB(
-      req.params.id,
-    );
-    sendSuccessResponse(res, {
-      statusCode: httpStatus.OK,
-      message: "User profile retrieved successfully",
-      data: result,
-    });
-  },
-);
-
-const updateMyProfile = catchAsync(async (req: Request, res: Response) => {
-  const result = await ProfileServices.updateMyProfileIntoDB(req);
+const getMyProfile = catchAsync(async (req: Request, res: Response) => {
+  const result = await ProfileServices.getUserProfileByIdFromDB(req.user.id);
   sendSuccessResponse(res, {
     statusCode: httpStatus.OK,
-    message: "Profile successfully",
+    message: "User profile retrieved successfully",
+    data: result,
+  });
+});
+
+const updateMyProfile = catchAsync(async (req: Request, res: Response) => {
+  const result = await ProfileServices.updateMyProfileIntoDB(
+    req.user,
+    req.body,
+  );
+  sendSuccessResponse(res, {
+    statusCode: httpStatus.OK,
+    message: "Profile updated successfully",
     data: result,
   });
 });
 
 const ProfileControllers = {
   getUserProfileById,
-  getCurrentUserProfile,
-  updateMyProfile,
+  getMyProfile,
+  updateMyProfile
 };
 
 export default ProfileControllers;
