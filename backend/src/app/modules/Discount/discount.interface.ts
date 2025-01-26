@@ -1,5 +1,4 @@
 import { DiscountStatus, DiscountType } from "@prisma/client";
-import e from "express";
 
 export interface ICreateDiscountPayload {
   code: string;

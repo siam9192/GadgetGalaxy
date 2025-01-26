@@ -7,7 +7,13 @@ import {
   IFilterOrder,
   IUpdateOrderStatusPayload,
 } from "./order.interface";
-import { DiscountType, OrderStatus, Prisma, UserRole } from "@prisma/client";
+import {
+  DiscountType,
+  OrderPaymentStatus,
+  OrderStatus,
+  Prisma,
+  UserRole,
+} from "@prisma/client";
 import { IAuthUser } from "../Auth/auth.interface";
 import { IPaginationOptions } from "../../interfaces/pagination";
 import { calculatePagination } from "../../helpers/paginationHelper";
@@ -254,6 +260,7 @@ const initOrderIntoDB = async (
   const shippingInfo = payload.shippingInfo;
 
   const { paymentId, paymentUrl } = await PaymentServices.initPayment({
+    method: payload.paymentMethod,
     orderId: result.orderId,
     amount: grossAmount,
     customer: {
@@ -276,6 +283,34 @@ const initOrderIntoDB = async (
   return {
     paymentUrl,
   };
+};
+
+const PlaceOrderAfterPaymentIntoDB = async (
+  orderId: string,
+  tx: Prisma.TransactionClient,
+) => {
+  const updatedOrderData = await tx.order.update({
+    where: {
+      id: orderId,
+    },
+    data: {
+      status: OrderStatus.Placed,
+      paymentStatus: OrderPaymentStatus.Paid,
+    },
+  });
+
+  const deletableCartItemsId = updatedOrderData.deletableCartItemsId;
+
+  // If deletable cart items exist then delete cart items from db
+  if (deletableCartItemsId) {
+    await tx.cartItem.deleteMany({
+      where: {
+        id: {
+          in: deletableCartItemsId.split(","),
+        },
+      },
+    });
+  }
 };
 
 const UpdateOrderStatusByStaffIntoDB = async (
@@ -598,6 +633,7 @@ const getNotReviewedOrderItemsFromDB = async (
 
 const OrderServices = {
   initOrderIntoDB,
+  PlaceOrderAfterPaymentIntoDB,
   getMyOrdersFromDB,
   getOrdersFromDB,
   getOrderByIdFromDB,

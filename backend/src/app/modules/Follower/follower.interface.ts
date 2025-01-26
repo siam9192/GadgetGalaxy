@@ -1,3 +1,0 @@
-interface ICreateFollowerPayload {
-  shopId: string;
-}

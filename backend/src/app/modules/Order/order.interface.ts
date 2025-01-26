@@ -1,4 +1,4 @@
-import { OrderStatus } from "@prisma/client";
+import { OrderStatus, PaymentMethod } from "@prisma/client";
 
 export interface ICreateOrderPayload {
   discountCode?: string;
@@ -6,6 +6,7 @@ export interface ICreateOrderPayload {
   shippingInfo: IShippingInfo;
   notes?: string;
   cartItemsId: string[];
+  paymentMethod: `${PaymentMethod}`;
   removeCartItemsAfterPurchase: boolean;
 }
 

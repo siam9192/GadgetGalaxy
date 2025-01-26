@@ -28,7 +28,7 @@ function auth(
     try {
       decoded = jwtHelpers.verifyToken(
         token,
-        config.jwt_access_secret as string,
+        config.jwt.access_secret as string,
       ) as JwtPayload;
     } catch (error) {
       throw new AppError(httpStatus.UNAUTHORIZED, "Unauthorized");

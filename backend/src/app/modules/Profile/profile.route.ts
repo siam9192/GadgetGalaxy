@@ -1,27 +1,26 @@
-import { Router } from "express";
-import ProfileControllers from "./profile.controller";
-import auth from "../../middlewares/auth";
 import { UserRole } from "@prisma/client";
+import { Router } from "express";
+import auth from "../../middlewares/auth";
+import ProfileControllers from "./profile.controller";
 
 const router = Router();
 
 router.get(
   "/my",
   auth(Object.values(UserRole)),
-  ProfileControllers.getMyProfile
+  ProfileControllers.getMyProfile,
 );
-
 
 router.get(
   "/:id",
   auth([UserRole.SuperAdmin, UserRole.Admin]),
-  ProfileControllers.getUserProfileById
+  ProfileControllers.getUserProfileById,
 );
 
 router.put(
   "/",
   auth(Object.values(UserRole)),
-  ProfileControllers.updateMyProfile
+  ProfileControllers.updateMyProfile,
 );
 
 const ProfileRouter = router;

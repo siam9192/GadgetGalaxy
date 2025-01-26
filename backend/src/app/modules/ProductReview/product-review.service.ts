@@ -19,9 +19,7 @@ const createReviewIntoDB = async (
     where: {
       id: payload.orderItemId,
       order: {
-        customer: {
-          userId: authUser.id,
-        },
+        customerId: authUser.customerId!,
       },
     },
     include: {
@@ -185,9 +183,7 @@ const getMyReviewsFromDB = async (
     calculatePagination(paginationOptions);
 
   const whereConditions: Prisma.ProductReviewWhereInput = {
-    customer: {
-      userId: authUser.id,
-    },
+    customerId: authUser.customerId!,
   };
 
   const data = await prisma.productReview.findMany({
@@ -237,10 +233,14 @@ const getMyReviewsFromDB = async (
   };
 };
 
-const updateReviewIntoDB = async (payload: IUpdateProductReviewPayload) => {
+const updateReviewIntoDB = async (
+  authUser: IAuthUser,
+  payload: IUpdateProductReviewPayload,
+) => {
   const review = await prisma.productReview.findUnique({
     where: {
       id: payload.reviewId,
+      customerId: authUser.customerId,
     },
   });
 

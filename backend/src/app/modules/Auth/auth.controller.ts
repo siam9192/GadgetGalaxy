@@ -3,6 +3,7 @@ import catchAsync from "../../shared/catchAsync";
 import AuthServices from "./auth.service";
 import { sendSuccessResponse } from "../../shared/response";
 import httpStatus from "../../shared/http-status";
+const parser = require("user-agent-parser");
 
 const register = catchAsync(async (req: Request, res: Response) => {
   const result = await AuthServices.register(req.body);
@@ -34,10 +35,20 @@ const resendOtp = catchAsync(async (req: Request, res: Response) => {
 });
 
 const login = catchAsync(async (req: Request, res: Response) => {
-  const result = await AuthServices.login(req.body);
+  const result = await AuthServices.login(res, req.body);
+
   sendSuccessResponse(res, {
     statusCode: httpStatus.OK,
     message: "Login successful",
+    data: result,
+  });
+});
+
+const logout = catchAsync(async (req: Request, res: Response) => {
+  const result = await AuthServices.logout(req.user);
+  sendSuccessResponse(res, {
+    statusCode: httpStatus.OK,
+    message: "Logout successful",
     data: result,
   });
 });
@@ -51,12 +62,48 @@ const changePassword = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const forgetPassword = catchAsync(async (req: Request, res: Response) => {
+  const result = await AuthServices.forgetPassword(req.params.email);
+  sendSuccessResponse(res, {
+    statusCode: httpStatus.OK,
+    message: "Check your mailbox",
+    data: result,
+  });
+});
+
+const getAccessTokenUsingRefreshToken = catchAsync(
+  async (req: Request, res: Response) => {
+    const result = await AuthServices.getAccessTokenUsingRefreshToken(req, res);
+    sendSuccessResponse(res, {
+      statusCode: httpStatus.OK,
+      message: "Access token retrieved successfully",
+      data: result,
+    });
+  },
+);
+
+
+const resetPassword = catchAsync(
+  async (req: Request, res: Response) => {
+    const result = await AuthServices.resetPassword(req.body);
+    sendSuccessResponse(res, {
+      statusCode: httpStatus.OK,
+      message: "Password reset successful",
+      data: result,
+    });
+  },
+);
+
 const AuthControllers = {
   register,
   verifyRegisterUsingOTP,
   resendOtp,
   login,
+  logout,
   changePassword,
+  forgetPassword,
+  resetPassword,
+  getAccessTokenUsingRefreshToken,
 };
 
 export default AuthControllers;

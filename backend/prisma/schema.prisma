@@ -502,7 +502,14 @@ user      User     @relation(fields: [userId], references: [id])
 }
 
 
-
+model PasswordResetRequest {
+  id String @id @default(cuid())
+  userId String 
+  isUsed Boolean @default(false)
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  @@map("password_reset_requests")
+}
 
 
 enum NotificationType {
@@ -537,11 +544,14 @@ enum AccountStatus {
 
 
 enum PaymentMethod {
+  COD
   Stripe
   Paypal
   SSLCommerz
+  AamarPay
   Bkash
   Nagad
+
 }
 
 

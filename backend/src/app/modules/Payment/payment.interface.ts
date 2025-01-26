@@ -1,4 +1,7 @@
+import { PaymentMethod, PaymentStatus } from "@prisma/client";
+
 export interface IInitPaymentPayload {
+  method: `${PaymentMethod}`;
   orderId: string;
   amount: number;
   customer: {
@@ -7,4 +10,13 @@ export interface IInitPaymentPayload {
     phone: string | null;
   };
   shippingAddress: string;
+}
+
+export interface IFilterPayments {
+  minAmount?: string;
+  maxAmount?: string;
+  startDate?: string;
+  endDate?: string;
+  status?: `${PaymentStatus}`;
+  customerId?: string;
 }

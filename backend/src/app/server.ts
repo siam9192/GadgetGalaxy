@@ -1,10 +1,16 @@
 import app from "./app";
+import OverviewServices from "./modules/Overview/overview.service";
+
 const port = 5000;
 async function main() {
   try {
     app.listen(port, () => {
       console.log("GadgetGalaxy Server is Running on Port:", port);
     });
+
+    // const  res = await OverviewServices.getOrdersOverviewFromDB()
+    // console.log(res)
+    
   } catch (error) {
     console.log(error);
   }

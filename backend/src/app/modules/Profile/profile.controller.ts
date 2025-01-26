@@ -37,7 +37,7 @@ const updateMyProfile = catchAsync(async (req: Request, res: Response) => {
 const ProfileControllers = {
   getUserProfileById,
   getMyProfile,
-  updateMyProfile
+  updateMyProfile,
 };
 
 export default ProfileControllers;

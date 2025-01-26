@@ -1,4 +1,4 @@
-import { Address, UserGender } from "@prisma/client";
+import { UserGender } from "@prisma/client";
 
 export interface IUpdateCustomerProfilePayload {
   fullName?: string;

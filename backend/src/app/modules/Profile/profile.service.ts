@@ -1,7 +1,5 @@
-import e, { Request } from "express";
 import prisma from "../../shared/prisma";
 import { UserRole } from "@prisma/client";
-
 import ProfileValidations from "./profile.validation";
 import { IAuthUser } from "../Auth/auth.interface";
 import AppError from "../../Errors/AppError";
@@ -88,7 +86,7 @@ const updateMyProfileIntoDB = async (authUser: IAuthUser, payload: any) => {
 
   if (user.role === UserRole.Customer) {
     const data = payload as IUpdateCustomerProfilePayload;
-    ProfileValidations.UpdateReaderProfileValidation.parse(data);
+    ProfileValidations.UpdateCustomerProfileValidation.parse(data);
 
     result = await prisma.$transaction(async (txClient) => {
       const {

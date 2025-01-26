@@ -10,15 +10,17 @@ import {
   ILoginData,
   IOtpPayload,
   IRegisterPayload,
+  IResetPasswordPayload,
   IVerifyAccountData,
 } from "./auth.interface";
 import jwtHelpers from "../../shared/jwtHelpers";
 import config from "../../config";
-import { Response } from "express";
+import { Request, Response } from "express";
 import { generateOtp } from "../../utils/function";
 import path from "path";
 import NodeMailerServices from "../NodeMailer/node-mailer.service";
 import { JwtPayload } from "jsonwebtoken";
+import sendEmail from "../../email/send-email";
 
 const register = async (payload: IRegisterPayload) => {
   const account = await prisma.account.findUnique({
@@ -49,8 +51,6 @@ const register = async (payload: IRegisterPayload) => {
     otpLastGeneratedAt: today,
     expireAt,
   };
-
-  console.log("OTP is ", otp);
 
   const created = await prisma.newAccountVerification.create({
     data: verificationData,
@@ -86,7 +86,7 @@ const register = async (payload: IRegisterPayload) => {
 
   const token = jwtHelpers.generateToken(
     tokenPayload,
-    config.jwt_account_verification_secret as string,
+    config.jwt.account_verification_secret as string,
     "1hr",
   );
 
@@ -99,7 +99,7 @@ const register = async (payload: IRegisterPayload) => {
 const verifyRegisterUsingOTP = async (data: IVerifyAccountData) => {
   const decodedToken = (await jwtHelpers.verifyToken(
     data.token,
-    config.jwt_account_verification_secret as string,
+    config.jwt.account_verification_secret as string,
   )) as JwtPayload & IOtpPayload;
 
   const verification = await prisma.newAccountVerification.findUnique({
@@ -190,7 +190,7 @@ const resendOtp = async (token: string) => {
 
   const decodedToken = (await jwtHelpers.verifyToken(
     token,
-    config.jwt_account_verification_secret as string,
+    config.jwt.account_verification_secret as string,
   )) as JwtPayload & IOtpPayload;
 
   const verificationData = await prisma.newAccountVerification.findUnique({
@@ -263,7 +263,7 @@ const resendOtp = async (token: string) => {
 
   const newToken = jwtHelpers.generateToken(
     tokenPayload,
-    config.jwt_account_verification_secret as string,
+    config.jwt.account_verification_secret as string,
     "5m",
   );
 
@@ -273,7 +273,7 @@ const resendOtp = async (token: string) => {
   };
 };
 
-const login = async (data: ILoginData) => {
+const login = async (res: Response, data: ILoginData) => {
   const user = await prisma.user.findFirst({
     where: {
       account: {
@@ -311,12 +311,12 @@ const login = async (data: ILoginData) => {
     case AccountStatus.Blocked:
       throw new AppError(
         httpStatus.NOT_ACCEPTABLE,
-        "This account is blocked.Please contact with out support team",
+        "This account is blocked.Please contact with our support team",
       );
     case AccountStatus.Suspended:
       throw new AppError(
         httpStatus.NOT_ACCEPTABLE,
-        "This account is suspended.Please contact with out support team",
+        "This account is suspended.Please contact with our support team",
       );
     default:
       break;
@@ -330,9 +330,20 @@ const login = async (data: ILoginData) => {
     throw new AppError(httpStatus.NOT_ACCEPTABLE, "Wrong email or password");
   }
 
+  // Create user activity
+  const activity = await prisma.userActivity.create({
+    data: {
+      browser: data.browser,
+      ipAddress: data.ipAddress || null,
+      loginAt: new Date(),
+      userId: user.id,
+    },
+  });
+
   const tokenPayload: IAuthUser = {
     id: user.id,
     role: user.role,
+    activityId: activity.id,
   };
 
   // Insert profile id base on user role
@@ -345,23 +356,56 @@ const login = async (data: ILoginData) => {
   // Generating access token
   const accessToken = jwtHelpers.generateToken(
     tokenPayload,
-    config.jwt_access_secret as string,
-    "30d",
+    config.jwt.access_secret as string,
+    "7d",
   );
   // Generating refresh token
   const refreshToken = jwtHelpers.generateToken(
     tokenPayload,
-    config.jwt_refresh_token_secret as string,
-    config.jwt_refresh_token_expire_time as string,
+    config.jwt.refresh_token_secret as string,
+    config.jwt.refresh_token_expire_time as string,
   );
+
+  // Set refresh token in cookie
+  res.cookie("refreshToken", refreshToken);
+
   return {
     accessToken,
     refreshToken,
   };
 };
 
-const getAccessToken = async (res: Response) => {
-  // const refreshToken = res.cookie[]
+const logout = async (authUser: IAuthUser) => {
+  await prisma.userActivity.update({
+    where: {
+      id: authUser.activityId,
+    },
+    data: {
+      logoutAt: new Date(),
+    },
+  });
+  return null;
+};
+
+const getAccessTokenUsingRefreshToken = async (req: Request, res: Response) => {
+  const refreshToken = req.cookies.refreshToken;
+  try {
+    if (!refreshToken) {
+      throw new Error();
+    }
+
+    const decode = jwtHelpers.verifyToken(
+      refreshToken,
+      config.jwt.refresh_token_secret as string,
+    ) as JwtPayload & IAuthUser;
+
+    if (!decode) throw new Error();
+    return {
+      refreshToken,
+    };
+  } catch (error) {
+    throw new AppError(httpStatus.BAD_REQUEST, "BAD😒 request!");
+  }
 };
 
 const changePassword = async (
@@ -409,12 +453,134 @@ const changePassword = async (
   return null;
 };
 
+const forgetPassword = async (email: string) => {
+  const user = await prisma.user.findFirst({
+    where: {
+      account: {
+        email,
+      },
+    },
+  });
+
+  if (!user) throw new AppError(httpStatus.NOT_FOUND, "No user found");
+
+  const expiresAt = new Date();
+  expiresAt.setMinutes(expiresAt.getMinutes() + 6);
+
+  const session = await prisma.passwordResetRequest.create({
+    data: {
+      userId: user.id,
+      expiresAt,
+    },
+  });
+
+  const tokenPayload = {
+    sessionId: session.id,
+    userId: user.id,
+    email,
+  };
+
+  const token = jwtHelpers.generateToken(
+    tokenPayload,
+    config.jwt.reset_password_token_secret as string,
+    config.jwt.reset_password_token_expire_time as string,
+  );
+
+  const resetLink = `${config.origin}/reset-password/${token}`;
+
+  let emailSendStatus;
+
+  await ejs.renderFile(
+    path.join(process.cwd(), "/src/app/templates/reset-password-email.ejs"),
+    { link: resetLink },
+    async function (err, template) {
+      if (err) {
+        throw new AppError(400, "Something went wrong");
+      } else {
+        emailSendStatus = await NodeMailerServices.sendEmail({
+          emailAddress: email,
+          subject: "Password reset link",
+          template,
+        });
+      }
+    },
+  );
+
+  return null;
+};
+
+const resetPassword = async (payload:IResetPasswordPayload) => {
+  let decode;
+  try {
+    
+    decode = await jwtHelpers.verifyToken(
+      payload.token,
+      config.jwt.reset_password_token_secret as string,
+    ) as JwtPayload & {
+      sessionId:string,
+      userId:string,
+      email:string,
+    };
+  
+    if (!decode) throw new Error();
+    
+    const session = await prisma.passwordResetRequest.findUnique({
+      where:{
+        id:decode.sessionId,
+        expiresAt:{
+          gt:new Date()
+        },
+        isUsed:false
+      }
+    })
+
+    if(!session) throw new Error()
+
+    
+  } catch (error) {
+   
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "Sorry maybe reset link expired,used or something wrong",
+    );
+  }
+
+  const hashedNewPassword = await bcryptHash(payload.newPassword)
+
+  await prisma.$transaction(async(tx)=>{
+    await tx.account.update({
+      where:{
+        userId:decode.userId
+      },
+      data:{
+        password:hashedNewPassword,
+        passwordChangedAt:new Date()
+      }
+    })
+    await tx.passwordResetRequest.update({
+     where:{
+      id:decode.sessionId
+     },
+     data:{
+      isUsed:true
+     }
+    })
+  })
+
+  return null
+  
+};
+
 const AuthServices = {
   register,
   verifyRegisterUsingOTP,
   resendOtp,
   login,
+  logout,
   changePassword,
+  forgetPassword,
+  resetPassword,
+  getAccessTokenUsingRefreshToken,
 };
 
 export default AuthServices;

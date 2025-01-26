@@ -71,7 +71,10 @@ const getProductReviews = catchAsync(async (req: Request, res: Response) => {
 });
 
 const updateReview = catchAsync(async (req: Request, res: Response) => {
-  const result = await ProductReviewServices.updateReviewIntoDB(req.body);
+  const result = await ProductReviewServices.updateReviewIntoDB(
+    req.user,
+    req.body,
+  );
   sendSuccessResponse(res, {
     statusCode: httpStatus.OK,
     message: "Product review updated successfully",

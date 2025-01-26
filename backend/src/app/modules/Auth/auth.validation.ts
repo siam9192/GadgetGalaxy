@@ -1,3 +1,4 @@
+import { Browser } from "@prisma/client";
 import { z } from "zod";
 
 const SignUpValidationSchema = z.object({
@@ -18,6 +19,8 @@ const ResendOtpValidationSchema = z.object({
 const LoginValidationSchema = z.object({
   email: z.string().email(),
   password: z.string(),
+  browser: z.nativeEnum(Browser),
+  ipAddress: z.string().optional(),
 });
 
 const ChangePasswordValidationSchema = z.object({
@@ -25,12 +28,18 @@ const ChangePasswordValidationSchema = z.object({
   oldPassword: z.string(),
 });
 
+const ResetPasswordValidation = z.object({
+  token:z.string().nonempty(),
+  newPassword:z.string().nonempty().min(6)
+})
+
 const AuthValidations = {
   SignUpValidationSchema,
   VerifyAccountOtpValidationSchema,
   ResendOtpValidationSchema,
   LoginValidationSchema,
   ChangePasswordValidationSchema,
+  ResetPasswordValidation
 };
 
 export default AuthValidations;

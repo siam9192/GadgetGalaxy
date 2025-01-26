@@ -1,4 +1,4 @@
-import { UserRole } from "@prisma/client";
+import { Browser, UserRole } from "@prisma/client";
 import { IName } from "../../reuse/types";
 
 export interface ISignUpData {
@@ -17,6 +17,8 @@ export interface IRegisterPayload {
 export interface ILoginData {
   email: string;
   password: string;
+  browser: `${Browser}`;
+  ipAddress?: string;
 }
 
 export interface IVerifyAccountData {
@@ -34,9 +36,16 @@ export interface IAuthUser {
   role: `${UserRole}`;
   customerId?: string;
   staffId?: string;
+  activityId: string;
 }
 
 export interface IChangePasswordPayload {
   oldPassword: string;
   newPassword: string;
+}
+
+
+export interface IResetPasswordPayload {
+  token:string,
+  newPassword:string
 }

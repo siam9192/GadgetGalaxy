@@ -10,6 +10,9 @@ declare global {
       user: {
         id: string;
         role: TRole;
+        staffId?: string;
+        customerId?: string;
+        activityId: string;
       };
       // Add other properties here as needed
     }
