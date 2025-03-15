@@ -1,0 +1,112 @@
+.responsive-searchbox {
+ animation: animation-searchbox 300ms ease-in-out;
+}
+
+@keyframes animation-searchbox{
+     from {
+        transform: translateY(20px);
+        opacity: 0.6;
+     }
+     to{
+        transform: translateY(0px);
+        opacity: 1;
+     }
+}
+
+.signup-otp-verify {
+    animation: animation-searchbox 300ms ease-in-out;
+}
+
+.otp-verify-success {
+   animation: animation-otp-verify-success 300ms ease-in-out;
+}
+
+@keyframes animation-otp-verify-success{
+   from {
+      transform: translateX(20px);
+      opacity: 0.6;
+   }
+   to{
+      transform: translateX(0px);
+      opacity: 1;
+   }
+}
+
+
+
+.otp-input::-webkit-outer-spin-button,
+.otp-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.otp-input {
+    -moz-appearance: textfield; /* Firefox */
+}
+
+
+
+@keyframes animation-arrive-fade-up{
+   from {
+      transform: translateY(20px);
+      opacity: 0.6;
+   }
+   to{
+      transform: translateY(0px);
+      opacity: 1;
+   }
+}
+
+.animation-arrive-fade-up {
+   animation: animation-arrive-fade-up 300ms ease-in-out;
+}
+
+.animate-popup {
+   animation: animation-popup 300ms ease-in-out;
+}
+
+
+
+@keyframes animation-popup{
+   from {
+      transform:scale(90);
+      opacity: 0.6;
+   }
+   to{
+      
+      opacity: 1;
+   }
+}
+
+.tab-wrapper {
+   position: relative;
+   display: flex;
+   flex-direction: column;
+ }
+ 
+ .responsive-sidebar-tab-container {
+   position: relative;
+   display: flex;
+   width: 100%;
+   overflow: hidden;
+ }
+ 
+ .responsive-sidebar-tab-container::after {
+   content: '';
+   position: absolute;
+   left: 0;
+   height: 100%;
+   background-color: #003092;
+   width: 50%;
+   transition: transform 400ms ease-in-out;
+ }
+ 
+ /* Correcting the selector */
+ #menu-tab:checked ~ .responsive-sidebar-tab-container::after {
+   transform: translateX(0%);
+ }
+ 
+ #categories-tab:checked ~ .responsive-sidebar-tab-container::after {
+   transform: translateX(100%);
+ }
+ 
