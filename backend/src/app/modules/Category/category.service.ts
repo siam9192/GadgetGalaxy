@@ -10,6 +10,7 @@ import { calculatePagination } from "../../helpers/paginationHelper";
 import { generateSlug } from "../../utils/function";
 import AppError from "../../Errors/AppError";
 import httpStatus from "../../shared/http-status";
+import { ISearchProductsFilterQuery } from "../Product/product.interface";
 
 const createCategoryIntoDB = async (payload: ICreateCategoryPayload) => {
   // Check parent category existence
@@ -94,10 +95,14 @@ const createCategoryIntoDB = async (payload: ICreateCategoryPayload) => {
   return result;
 };
 
-const updateCategoryIntoDB = async (payload: IUpdateCategoryPayload) => {
+const updateCategoryIntoDB = async (
+  id: string | number,
+  payload: IUpdateCategoryPayload,
+) => {
+  id = Number(id);
   const category = await prisma.category.findUnique({
     where: {
-      id: payload.id,
+      id,
     },
   });
   if (!category) {
@@ -109,32 +114,25 @@ const updateCategoryIntoDB = async (payload: IUpdateCategoryPayload) => {
   };
 
   // If name has changed then generate new slug base on new name
-  if (category.name !== payload.name) {
-    let slug = generateSlug(payload.name);
+  if (payload.name && category.name !== payload.name) {
     // Generate unique slug
     let counter = 1;
-    do {
-      const blog = await prisma.category.findUnique({
-        where: {
-          slug,
-        },
-        select: {
-          id: true,
-        },
-      });
-      if (!blog) {
-        break;
-      }
-      counter++;
-      slug = generateSlug(payload.name + " " + counter);
-    } while (true);
+    let slug = generateSlug(payload.name);
+    while (
+      await prisma.category.findUnique({
+        where: { slug },
+        select: { id: true },
+      })
+    ) {
+      slug = generateSlug(`${payload.name} ${counter++}`);
+    }
 
     data.slug = slug;
   }
 
   const result = await prisma.category.update({
     where: {
-      id: payload.id,
+      id,
     },
     data,
   });
@@ -159,6 +157,8 @@ const deleteCategoryByIdFromDB = async (id: string) => {
   });
   return null;
 };
+
+const softDeleteCategoryFromDB = async (id: string | number) => {};
 
 const getCategoriesFromDB = async (
   filterRequest: ICategoryFilterRequest,
@@ -249,11 +249,46 @@ const getFeaturedCategoriesFromDB = async () => {
   });
 };
 
+const getSearchRelatedCategoriesFromDB = async (filterQuery: {
+  searchTerm?: string;
+}) => {
+  const { searchTerm } = filterQuery;
+
+  // Group categories
+  const groupResult = await prisma.category.groupBy({
+    where: {
+      products: {
+        some: {
+          product: {
+            name: {
+              contains: searchTerm,
+              mode: "insensitive",
+            },
+          },
+        },
+      },
+      isVisible: true,
+    },
+    by: "id",
+  });
+
+  //  Retrieve group categories
+  const data = await prisma.category.findMany({
+    where: {
+      id: {
+        in: groupResult.map((_) => _.id),
+      },
+    },
+  });
+  return data;
+};
+
 const CategoryServices = {
   createCategoryIntoDB,
   getCategoriesFromDB,
   getPopularCategoriesFromDB,
   getFeaturedCategoriesFromDB,
+  getSearchRelatedCategoriesFromDB,
   updateCategoryIntoDB,
   deleteCategoryByIdFromDB,
 };

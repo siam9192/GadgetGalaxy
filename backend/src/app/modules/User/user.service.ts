@@ -1,11 +1,17 @@
-import { AccountStatus, AuthProvider, Prisma, UserRole } from "@prisma/client";
+import {
+  AuthProvider,
+  OrderStatus,
+  Prisma,
+  UserRole,
+  UserStatus,
+} from "@prisma/client";
 import AppError from "../../Errors/AppError";
 import httpStatus from "../../shared/http-status";
 import prisma from "../../shared/prisma";
 import {
-  ICreateStaffPayload,
-  ICustomerFilterRequest,
-  IUserFilterRequest,
+  IAdministratorFilterQuery,
+  ICreateAdministratorPayload,
+  ICustomerFilterQuery
 } from "./user.interface";
 import { IPaginationOptions } from "../../interfaces/pagination";
 import { calculatePagination } from "../../helpers/paginationHelper";
@@ -15,19 +21,20 @@ import { bcryptHash } from "../../utils/bycrypt";
 const ChangeUserStatusIntoDB = async (
   authUser: IAuthUser,
   payload: {
-    userId: string;
-    status: `${AccountStatus}`;
+    userId: number;
+    status: `${UserStatus}`;
   },
 ) => {
   const user = await prisma.user.findUnique({
     where: {
       id: payload.userId,
       status: {
-        not: "Deleted",
+        not: UserStatus.DELETED,
       },
     },
   });
 
+  // Checking user existence
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, "User not found");
   }
@@ -40,68 +47,84 @@ const ChangeUserStatusIntoDB = async (
         status: payload.status,
       },
     });
-    await txClient.activityLog.create({
+    await txClient.administratorActivityLog.create({
       data: {
-        staffId: authUser.staffId!,
-        action: `Changed user status ${user.status} to  ${payload.status} id:${payload.userId}`,
+        administratorId: authUser.administratorId!,
+        action: `User status updated from ${user.status} to ${payload.status} (User ID: ${payload.userId}).`,
       },
     });
   });
 };
 
 const getCustomersFromDB = async (
-  query: ICustomerFilterRequest,
+  filterQuery: ICustomerFilterQuery,
   paginationOptions: IPaginationOptions,
 ) => {
-  const { searchTerm, id, ...filterData } = query;
+  const { searchTerm, status } = filterQuery;
   const { limit, skip, page, sortOrder, orderBy } =
     calculatePagination(paginationOptions);
   const andConditions: Prisma.CustomerWhereInput[] = [];
 
-  if (filterData && Object.keys(filterData).length) {
+  // If search term exist then search data by search term
+  if (searchTerm && !Number.isNaN(searchTerm)) {
     andConditions.push({
-      AND: Object.keys(filterData).map((key) => ({
-        [key]: {
-          equals: (filterData as any)[key],
-        },
-      })),
+      id: Number(searchTerm),
     });
-  }
-
-  if (searchTerm) {
-    const searchableFields = ["fullName", "id"];
-    andConditions.push({
-      OR: [
-        ...searchableFields.map((field) => ({
-          [field]: {
-            contains: searchTerm,
-            mode: "insensitive",
+  } else {
+    if (searchTerm) {
+      andConditions.push({
+        OR: [
+          {
+            fullName: {
+              contains: searchTerm,
+              mode: "insensitive",
+            },
           },
-        })),
-        {
-          user: {
-            account: {
+          {
+            user: {
               email: {
                 contains: searchTerm,
                 mode: "insensitive",
               },
             },
           },
-        },
-      ],
-    });
+        ],
+      });
+    }
   }
 
   const whereConditions: Prisma.CustomerWhereInput = {
     AND: andConditions,
+    user: {
+      role: UserRole.Customer,
+      status: {
+        not: UserStatus.DELETED,
+      },
+    },
   };
 
   const customers = await prisma.customer.findMany({
     where: whereConditions,
     include: {
+      user: {
+        select: {
+          id: true,
+          email: true,
+          authProvider: true,
+          status: true,
+          lastLoginAt: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      },
       _count: {
         select: {
-          orders: true,
+          orders: {
+            where: {
+              status: OrderStatus.DELIVERED,
+            },
+          },
+          productReviews: true,
         },
       },
     },
@@ -111,105 +134,184 @@ const getCustomersFromDB = async (
       [orderBy]: sortOrder,
     },
   });
-  const total = await prisma.customer.count({
+
+  const totalResult = await prisma.customer.count({
     where: whereConditions,
   });
+  const total = await prisma.customer.count({
+    where: {
+      user: {
+        status: UserStatus.DELETED,
+      },
+    },
+  });
+
+  const data = customers.map((customer) => {
+    const { user } = customer;
+    return {
+      id: customer.id,
+      fullName: customer.fullName,
+      email: user.email,
+      profilePhoto: customer.profilePhoto,
+      phoneNumber: customer.phoneNumber,
+      gender: customer.gender,
+      authProvider: user.authProvider,
+      lastLoginAt: user.lastLoginAt,
+      createdAt: user.createdAt,
+      updated: customer.updatedAt,
+      count: customer._count,
+    };
+  });
+
   const meta = {
-    total,
     page,
     limit,
     skip,
+    totalResult,
+    total,
   };
   return {
-    data: customers,
+    data,
     meta,
   };
 };
 
-const getStaffsFromDB = async (
-  query: ICustomerFilterRequest,
+const getAdministratorsFromDB = async (
+  filterQuery: IAdministratorFilterQuery,
   paginationOptions: IPaginationOptions,
 ) => {
-  const { searchTerm, id, ...filterData } = query;
+  const { searchTerm, status, role } = filterQuery;
   const { limit, skip, page, sortOrder, orderBy } =
     calculatePagination(paginationOptions);
-  const andConditions: Prisma.StaffWhereInput[] = [];
+  const andConditions: Prisma.AdministratorWhereInput[] = [];
 
-  if (filterData && Object.keys(filterData).length) {
+  // If search term exist then search data by search term
+  if (searchTerm && !Number.isNaN(searchTerm)) {
     andConditions.push({
-      AND: Object.keys(filterData).map((key) => ({
-        [key]: {
-          equals: (filterData as any)[key],
-        },
-      })),
+      id: Number(searchTerm),
     });
-  }
-
-  if (searchTerm) {
-    const searchableFields = ["fullName", "id"];
-    andConditions.push({
-      OR: [
-        ...searchableFields.map((field) => ({
-          [field]: {
-            contains: searchTerm,
-            mode: "insensitive",
+  } else {
+    if (searchTerm) {
+      andConditions.push({
+        OR: [
+          {
+            fullName: {
+              contains: searchTerm,
+              mode: "insensitive",
+            },
           },
-        })),
-        {
-          user: {
-            account: {
+          {
+            user: {
               email: {
                 contains: searchTerm,
                 mode: "insensitive",
               },
             },
           },
-        },
-      ],
+        ],
+      });
+    }
+  }
+
+  if (role) {
+    andConditions.push({
+      user: {
+        role,
+      },
     });
   }
 
-  const whereConditions: Prisma.StaffWhereInput = {
+  if (status) {
+    andConditions.push({
+      user: {
+        role,
+      },
+    });
+  }
+
+  const whereConditions: Prisma.AdministratorWhereInput = {
     AND: andConditions,
+    user: {
+      role: UserRole.Customer,
+      status: {
+        not: UserStatus.DELETED,
+      },
+    },
   };
 
-  const staffs = await prisma.staff.findMany({
+  const administrators = await prisma.administrator.findMany({
     where: whereConditions,
+    include: {
+      user: {
+        select: {
+          id: true,
+          email: true,
+          authProvider: true,
+          status: true,
+          lastLoginAt: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      },
+    },
     take: limit,
     skip: skip,
     orderBy: {
       [orderBy]: sortOrder,
     },
   });
-  const total = await prisma.staff.count({
+
+  const totalResult = await prisma.administrator.count({
     where: whereConditions,
   });
+  const total = await prisma.administrator.count({
+    where: {
+      user: {
+        status: UserStatus.DELETED,
+      },
+    },
+  });
+
+  const data = administrators.map((administrator) => {
+    const { user } = administrator;
+    return {
+      id: administrator.id,
+      fullName: administrator.fullName,
+      email: user.email,
+      profilePhoto: administrator.profilePhoto,
+      phoneNumber: administrator.phoneNumber,
+      gender: administrator.gender,
+      authProvider: user.authProvider,
+      lastLoginAt: user.lastLoginAt,
+      createdAt: user.createdAt,
+      updated: administrator.updatedAt,
+    };
+  });
+
   const meta = {
-    total,
     page,
     limit,
     skip,
+    totalResult,
+    total,
   };
   return {
-    data: staffs,
+    data,
     meta,
   };
 };
 
-const getUsersFromDB = async (
-  query: IUserFilterRequest,
-  paginationOptions: IPaginationOptions,
+const softDeleteUserByIdIntoDB = async (
+  authUser: IAuthUser,
+  id: string | number,
 ) => {
-  // const {} = calculatePagination()
-};
-
-const softDeleteUserByIdIntoDB = async (authUser: IAuthUser, id: string) => {
+  id = Number(id);
   // Check user existence
   const user = await prisma.user.findUnique({
     where: {
       id,
       status: {
-        not: "Deleted",
+        not: UserStatus.DELETED,
       },
     },
   });
@@ -224,14 +326,14 @@ const softDeleteUserByIdIntoDB = async (authUser: IAuthUser, id: string) => {
         id,
       },
       data: {
-        status: "Deleted",
+        status: UserStatus.DELETED,
       },
     });
 
-    await txClient.activityLog.create({
+    await txClient.administratorActivityLog.create({
       data: {
-        staffId: authUser.staffId!,
-        action: `Deleted user id:${id}`,
+        administratorId: authUser.administratorId!,
+        action: `User (ID: ${id}) has been deleted.`,
       },
     });
   });
@@ -239,17 +341,17 @@ const softDeleteUserByIdIntoDB = async (authUser: IAuthUser, id: string) => {
   return null;
 };
 
-const createStaffIntoDB = async (
+const createAdministratorIntoDB = async (
   authUser: IAuthUser,
-  payload: ICreateStaffPayload,
+  payload: ICreateAdministratorPayload,
 ) => {
   const user = await prisma.user.findFirst({
     where: {
-      account: {
-        email: payload.email,
-      },
+      email: payload.email,
     },
   });
+
+  // Checking user existence
   if (user) {
     throw new AppError(
       httpStatus.NOT_FOUND,
@@ -257,43 +359,37 @@ const createStaffIntoDB = async (
     );
   }
   const result = await prisma.$transaction(async (txClient) => {
+    const hashedPassword = await bcryptHash(payload.password);
+
     // Create user
     const createdUser = await txClient.user.create({
       data: {
-        role: UserRole.Admin,
-      },
-    });
-
-    const hashedPassword = await bcryptHash(payload.password);
-
-    // Create user account
-    await txClient.account.create({
-      data: {
-        userId: createdUser.id,
         email: payload.email,
+        role: payload.role,
         password: hashedPassword,
-        authProvider: AuthProvider.EmailPassword,
+        authProvider: AuthProvider.EMAIL_PASSWORD,
       },
     });
 
     // Create staff
-    const createdStaff = await txClient.staff.create({
+    const createAdministrator = await txClient.administrator.create({
       data: {
         userId: createdUser.id,
         fullName: payload.fullName,
         profilePhoto: payload.profilePhoto,
         gender: payload.gender || null,
+        phoneNumber: payload.phoneNumber || null,
       },
     });
 
-    await txClient.activityLog.create({
+    await txClient.administratorActivityLog.create({
       data: {
-        staffId: authUser.staffId!,
-        action: `Created new staff id:${createdStaff.id}`,
+        administratorId: authUser.administratorId!,
+        action: `New administrator (ID: ${createAdministrator.id}) has been created.`,
       },
     });
 
-    return createdStaff;
+    return createAdministrator;
   });
   return result;
 };
@@ -301,9 +397,9 @@ const createStaffIntoDB = async (
 const UserServices = {
   ChangeUserStatusIntoDB,
   getCustomersFromDB,
-  getStaffsFromDB,
+  getAdministratorsFromDB,
   softDeleteUserByIdIntoDB,
-  createStaffIntoDB,
+  createAdministratorIntoDB,
 };
 
 export default UserServices;

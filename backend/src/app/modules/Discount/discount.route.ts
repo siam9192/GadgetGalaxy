@@ -9,23 +9,27 @@ const router = Router();
 
 router.post(
   "/",
-  auth([UserRole.SuperAdmin, UserRole.Admin]),
   validateRequest(DiscountValidations.CreateDiscountValidation),
   DiscountControllers.createDiscount,
 );
 
 router.put(
   "/:id",
-  auth([UserRole.SuperAdmin, UserRole.Admin]),
   validateRequest(DiscountValidations.UpdateDiscountValidation),
   DiscountControllers.updateDiscount,
 );
 
 router.get(
   "/",
-  auth([UserRole.SuperAdmin, UserRole.Admin]),
   DiscountControllers.getDiscounts,
 );
+
+router.get(
+  "/manage",
+  DiscountControllers.getDiscountsForManage,
+);
+
+router.patch("/change-status",validateRequest(DiscountValidations.ChangeDiscountStatusValidation),DiscountControllers.changeDiscountStatus)
 
 router.post(
   "/apply",
@@ -33,6 +37,9 @@ router.post(
   validateRequest(DiscountValidations.ApplyDiscountValidation),
   DiscountControllers.applyDiscount,
 );
+
+
+
 
 const DiscountRouter = router;
 

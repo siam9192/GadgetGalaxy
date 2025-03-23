@@ -4,8 +4,8 @@ import { IPaginationOptions } from "../../interfaces/pagination";
 import httpStatus from "../../shared/http-status";
 import prisma from "../../shared/prisma";
 import {
+  IBrandsFilterQuery,
   ICreateBrandPayload,
-  IFilterBrands,
   IUpdateBrandPayload,
 } from "./brand.interface";
 import { calculatePagination } from "../../helpers/paginationHelper";
@@ -31,19 +31,19 @@ const createBrandIntoDB = async (
     const createdBrand = await txClient.brand.create({
       data: payload,
     });
-    await txClient.activityLog.create({
-      data: {
-        staffId: authUser.staffId!,
-        action: `New brand(${createdBrand.name}) created id:${createdBrand.id}`,
-      },
-    });
+    // await txClient.administratorActivityLog.create({
+    //   data: {
+    //     administratorId:authUser.administratorId!,
+    //     action: `✨ New Brand "${createdBrand.name}" has been successfully added. (ID: ${createdBrand.id})`
+    //   },
+    // });
     return createdBrand;
   });
   return result;
 };
 
 const getBrandsFromDB = async (
-  filter: IFilterBrands,
+  filter: IBrandsFilterQuery,
   paginationOptions: IPaginationOptions,
 ) => {
   const andConditions: Prisma.BrandWhereInput[] = [];
@@ -85,13 +85,78 @@ const getBrandsFromDB = async (
     },
   });
 
-  const total = await prisma.brand.count({
+  const totalResult = await prisma.brand.count({
     where: whereConditions,
   });
   const meta = {
     limit,
     page,
-    total,
+    totalResult,
+  };
+  return {
+    data,
+    meta,
+  };
+};
+
+const getBrandsForManageFromDB = async (
+  filter: IBrandsFilterQuery,
+  paginationOptions: IPaginationOptions,
+) => {
+  const andConditions: Prisma.BrandWhereInput[] = [];
+  const { searchTerm, origin } = filter;
+
+  // If the searchTerm is change to be id  than search brand base on id only  other wise apply
+  if (searchTerm && !Number.isNaN(searchTerm)) {
+    andConditions.push({
+      id: Number(searchTerm),
+    });
+  } else {
+    if (searchTerm) {
+      andConditions.push({
+        name: {
+          contains: searchTerm,
+          mode: "insensitive",
+        },
+      });
+    }
+    if (origin) {
+      andConditions.push({
+        origin,
+      });
+    }
+  }
+
+  const { skip, limit, page, orderBy, sortOrder } =
+    calculatePagination(paginationOptions);
+
+  const whereConditions = {
+    AND: andConditions,
+  };
+
+  const data = await prisma.brand.findMany({
+    where: whereConditions,
+    skip,
+    take: limit,
+    orderBy: {
+      [orderBy]: sortOrder,
+    },
+    include: {
+      _count: {
+        select: {
+          products: true,
+        },
+      },
+    },
+  });
+
+  const totalResult = await prisma.brand.count({
+    where: whereConditions,
+  });
+  const meta = {
+    limit,
+    page,
+    totalResult,
   };
   return {
     data,
@@ -119,7 +184,7 @@ const getPopularBrandsFromDB = async (
     },
   });
 
-  const total = await prisma.brand.count({
+  const totalResult = await prisma.brand.count({
     where: {
       isPopular: true,
     },
@@ -127,7 +192,43 @@ const getPopularBrandsFromDB = async (
   const meta = {
     limit,
     page,
-    total,
+    totalResult,
+  };
+  return {
+    data,
+    meta,
+  };
+};
+
+const getFeaturedBrandsFromDB = async (
+  paginationOptions: IPaginationOptions,
+) => {
+  const { skip, limit, page } = calculatePagination(paginationOptions);
+
+  const data = await prisma.brand.findMany({
+    where: {
+      isFeatured: true,
+    },
+    skip,
+    take: limit,
+    include: {
+      _count: {
+        select: {
+          products: true,
+        },
+      },
+    },
+  });
+
+  const totalResult = await prisma.brand.count({
+    where: {
+      isPopular: true,
+    },
+  });
+  const meta = {
+    limit,
+    page,
+    totalResult,
   };
   return {
     data,
@@ -137,9 +238,10 @@ const getPopularBrandsFromDB = async (
 
 const updateBrandIntoDB = async (
   authUser: IAuthUser,
-  id: string,
+  id: string | number,
   payload: IUpdateBrandPayload,
 ) => {
+  id = Number(id);
   const brand = await prisma.brand.findUnique({
     where: {
       id,
@@ -172,21 +274,75 @@ const updateBrandIntoDB = async (
       },
       data: payload,
     });
-    await txClient.activityLog.create({
-      data: {
-        staffId: authUser.staffId!,
-        action: `Updated brand  id:${updatedBrand.id}`,
-      },
-    });
+    // await txClient.activityLog.create({
+    //   data: {
+    //     staffId: authUser.staffId!,
+    //     action: `Updated brand  id:${updatedBrand.id}`,
+    //   },
+    // });
     return updatedBrand;
   });
   return result;
 };
 
+const getSearchRelatedBrandsFromDB = async (filterQuery: {
+  searchTerm?: string;
+}) => {
+  const { searchTerm } = filterQuery;
+
+  // Group categories
+  const groupResult = await prisma.brand.groupBy({
+    where: {
+      products: {
+        some: {
+          name: {
+            contains: searchTerm,
+            mode: "insensitive",
+          },
+        },
+      },
+    },
+    by: "id",
+  });
+
+  //  Retrieve group categories
+  const data = await prisma.brand.findMany({
+    where: {
+      id: {
+        in: groupResult.map((_) => _.id),
+      },
+    },
+  });
+  return data;
+};
+
+const getCategoryRelatedBrandsFromDB = async (slug: string) => {
+  const brands = await prisma.brand.findMany({
+    where: {
+      products: {
+        some: {
+          categories: {
+            some: {
+              category: {
+                slug,
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+  return brands;
+};
+
 const BrandServices = {
   createBrandIntoDB,
   getBrandsFromDB,
+  getBrandsForManageFromDB,
   getPopularBrandsFromDB,
+  getFeaturedBrandsFromDB,
+  getSearchRelatedBrandsFromDB,
+  getCategoryRelatedBrandsFromDB,
   updateBrandIntoDB,
 };
 

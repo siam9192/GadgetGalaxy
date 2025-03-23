@@ -8,7 +8,7 @@ export const CreateDiscountValidation = z.object({
   discountValue: z.number().positive("Discount value must be positive."),
   minOrderValue: z.number().positive().optional(),
   maxDiscount: z.number().positive().optional(),
-  usageLimit: z.number().positive().optional(),
+  usageLimit: z.number().positive().min(1).optional(),
   usageCount: z.number().nonnegative().optional(),
   validFrom: z.string().date(),
   validUntil: z.string().date(),
@@ -36,14 +36,14 @@ export const UpdateDiscountValidation = z.object({
   validUntil: z.string().datetime().optional(),
   new: z
     .object({
-      customersId: z.array(z.string()).optional(),
-      categoriesId: z.array(z.string()).optional(),
+      customersId: z.array(z.number()).optional(),
+      categoriesId: z.array(z.number()).optional(),
     })
     .optional(),
   removed: z
     .object({
-      customersId: z.array(z.string()).optional(),
-      categoriesId: z.array(z.string()).optional(),
+      customersId: z.array(z.number()).optional(),
+      categoriesId: z.array(z.number()).optional(),
     })
     .optional(),
   status: z.enum(Object.values(DiscountStatus) as any).optional(),
@@ -53,10 +53,15 @@ export const ApplyDiscountValidation = z.object({
   code: z.string(),
   cartItemsId: z.array(z.string()),
 });
+export const ChangeDiscountStatusValidation =  z.object({
+  id:z.number().positive(),
+  status:z.nativeEnum(DiscountStatus)
+})
 
 const DiscountValidations = {
   CreateDiscountValidation,
   UpdateDiscountValidation,
+  ChangeDiscountStatusValidation,
   ApplyDiscountValidation,
 };
 

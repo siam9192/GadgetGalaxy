@@ -9,25 +9,25 @@ export interface ICreateProductPayload {
   offerPrice?: number;
   sku: string;
   availableQuantity: number;
-  imageUrls: string[];
-  categoryIds: number[];
+  imagesUrl: string[];
+  categoriesId: number[];
   variants?: ICreateVariantPayload[];
   specifications: IProductSpecification[];
 }
 
 export interface IUpdateProductPayload {
-  name: string;
-  description: string;
+  name?: string;
+  description?: string;
   brandId?: number;
-  warrantyInfo: string;
-  price: number;
+  warrantyInfo?: string;
+  price?: number;
   offerPrice?: number;
-  sku: string;
-  availableQuantity: number;
-  images: { id?: string; url: string; isDeleted: boolean }[];
-  categories: { id: number; isDeleted: boolean }[];
-  variants?: IUpdateProductVariantPayload[];
-  specifications: IUpdateProductSpecificationPayload[];
+  sku?: string;
+  availableQuantity?: number;
+  imagesUrl?: string[];
+  categoriesId?: number[];
+  variants?: (ICreateVariantPayload & { id?: number; isDeleted?: true })[];
+  specifications?: IProductSpecification[];
 }
 
 interface ICreateVariantPayload {
@@ -51,43 +51,10 @@ interface IProductSpecification {
   value: string;
 }
 
-interface IUpdateProductVariantPayload extends ICreateVariantPayload {
-  id?: string;
-  isDeleted?: boolean;
-  attributes: IVariantAttribute[];
-}
-
-interface IUpdateProductSpecificationPayload extends IProductSpecification {
-  id?: string;
-  isDeleted?: boolean;
-}
-
-interface IUpdateProductTagPayload {
-  id?: string;
-  name: string;
-  isDeleted?: boolean;
-  isNewAdded?: boolean;
-}
-
-interface IUpdateProductSpecificationPayload {
-  id?: string;
-  name: string;
-  value: string;
-  isDeleted?: boolean;
-  isNewAdded?: boolean;
-}
-
-interface IUpdateProductImagePayload {
-  id?: string;
-  url: string;
-  isDeleted?: string;
-  isNewAdded: boolean;
-}
-
-export interface IProductFilterData {
+export interface IManageProductsFilterQuery {
   searchTerm?: string;
-  categories?: string;
-  brands?: string;
+  category?: number;
+  brand?: number;
   minPrice?: string;
   maxPrice?: string;
 }
@@ -98,4 +65,10 @@ export interface ISearchProductsFilterQuery {
   maxPrice?: string;
   category?: string;
   brand?: string;
+}
+
+export interface IUpdateProductStockPayload {
+  productId: number;
+  variantId: number;
+  availableQuantity: number;
 }

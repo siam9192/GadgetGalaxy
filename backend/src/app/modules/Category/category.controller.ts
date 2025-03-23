@@ -27,14 +27,11 @@ const getCategories = catchAsync(async (req: Request, res: Response) => {
   sendSuccessResponse(res, {
     statusCode: httpStatus.OK,
     message: "Categories retrieved successfully",
-    meta: result.meta,
-    data: result.data,
+    ...result,
   });
 });
 
 const getPopularCategories = catchAsync(async (req: Request, res: Response) => {
-  const filterOptions = Pick(req.query, ["searchTerm", "parentId"]);
-  const options = Pick(req.query, paginationOptionKeys);
   const result = await CategoryServices.getPopularCategoriesFromDB();
 
   sendSuccessResponse(res, {
@@ -43,6 +40,19 @@ const getPopularCategories = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+
+const getSearchRelatedCategories = catchAsync(
+  async (req: Request, res: Response) => {
+    const query = Pick(req.query, ["searchTerm"]);
+    const result =
+      await CategoryServices.getSearchRelatedCategoriesFromDB(query);
+    sendSuccessResponse(res, {
+      statusCode: httpStatus.OK,
+      message: "Related Categories retrieved successfully",
+      data: result,
+    });
+  },
+);
 
 const getFeaturedCategories = catchAsync(
   async (req: Request, res: Response) => {
@@ -69,6 +79,7 @@ const CategoryControllers = {
   getCategories,
   getPopularCategories,
   getFeaturedCategories,
+  getSearchRelatedCategories,
   updateCategory,
 };
 

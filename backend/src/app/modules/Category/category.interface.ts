@@ -16,7 +16,8 @@ export interface ICategoryFilterRequest {
 }
 
 export interface IUpdateCategoryPayload {
-  id: string;
-  name: string;
+  name?: string;
+  imageUrl?: string;
   isFeatured: boolean;
+  isVisible?: boolean;
 }

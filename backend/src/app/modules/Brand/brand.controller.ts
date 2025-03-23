@@ -21,7 +21,20 @@ const getBrands = catchAsync(async (req: Request, res: Response) => {
   const result = await BrandServices.getBrandsFromDB(filter, paginationOptions);
   sendSuccessResponse(res, {
     statusCode: httpStatus.OK,
-    message: "Brand created successfully",
+    message: "Brands retrieved successfully",
+    ...result,
+  });
+});
+const getBrandsForManage = catchAsync(async (req: Request, res: Response) => {
+  const filter = Pick(req.query, ["searchTerm", "origin"]);
+  const paginationOptions = Pick(req.query, paginationOptionKeys);
+  const result = await BrandServices.getBrandsForManageFromDB(
+    filter,
+    paginationOptions,
+  );
+  sendSuccessResponse(res, {
+    statusCode: httpStatus.OK,
+    message: "Brands retrieved successfully",
     ...result,
   });
 });
@@ -31,10 +44,46 @@ const getPopularBrands = catchAsync(async (req: Request, res: Response) => {
   const result = await BrandServices.getPopularBrandsFromDB(paginationOptions);
   sendSuccessResponse(res, {
     statusCode: httpStatus.OK,
-    message: "Brand created successfully",
+    message: "Popular Brands retrieved successfully",
     ...result,
   });
 });
+
+const getFeaturedBrands = catchAsync(async (req: Request, res: Response) => {
+  const paginationOptions = Pick(req.query, paginationOptionKeys);
+  const result = await BrandServices.getPopularBrandsFromDB(paginationOptions);
+  sendSuccessResponse(res, {
+    statusCode: httpStatus.OK,
+    message: "Featured Brands retrieved successfully",
+    ...result,
+  });
+});
+
+const getSearchRelatedBrands = catchAsync(
+  async (req: Request, res: Response) => {
+    const paginationOptions = Pick(req.query, ["searchTerm"]);
+    const result =
+      await BrandServices.getSearchRelatedBrandsFromDB(paginationOptions);
+    sendSuccessResponse(res, {
+      statusCode: httpStatus.OK,
+      message: "Related Brands retrieved successfully",
+      data: result,
+    });
+  },
+);
+
+const getCategoryRelatedBrands = catchAsync(
+  async (req: Request, res: Response) => {
+    const result = await BrandServices.getCategoryRelatedBrandsFromDB(
+      req.params.slug,
+    );
+    sendSuccessResponse(res, {
+      statusCode: httpStatus.OK,
+      message: "Related Brands retrieved successfully",
+      data: result,
+    });
+  },
+);
 
 const updateBrand = catchAsync(async (req: Request, res: Response) => {
   const result = await BrandServices.updateBrandIntoDB(
@@ -52,6 +101,10 @@ const updateBrand = catchAsync(async (req: Request, res: Response) => {
 const BrandControllers = {
   createBrand,
   getBrands,
+  getBrandsForManage,
+  getFeaturedBrands,
+  getSearchRelatedBrands,
+  getCategoryRelatedBrands,
   getPopularBrands,
   updateBrand,
 };

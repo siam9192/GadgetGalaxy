@@ -26,6 +26,20 @@ const getCustomers = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getAdministrators = catchAsync(async (req: Request, res: Response) => {
+  const filters = Pick(req.query, ["searchTerm", "status", "role"]);
+  const options = Pick(req.query, paginationOptionKeys);
+  const result = await UserServices.getAdministratorsFromDB(
+    filters,
+    options as any,
+  );
+  sendSuccessResponse(res, {
+    statusCode: httpStatus.OK,
+    message: "Administrators retrieved successfully",
+    ...result,
+  });
+});
+
 const getStaffsFromDB = catchAsync(async (req: Request, res: Response) => {
   const filters = Pick(req.query, ["searchTerm", "status"]);
   const options = Pick(req.query, paginationOptionKeys);
@@ -61,6 +75,7 @@ const createStaff = catchAsync(async (req: Request, res: Response) => {
 const UserControllers = {
   changeUserStatus,
   getCustomers,
+  getAdministrators,
   getStaffsFromDB,
   softDeleteUser,
   createStaff,

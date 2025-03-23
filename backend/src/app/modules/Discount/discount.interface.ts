@@ -11,8 +11,8 @@ export interface ICreateDiscountPayload {
   usageCount?: number;
   validFrom: Date;
   validUntil: Date;
-  customersId: string[];
-  categoriesId: string[];
+  customersId: number[];
+  categoriesId: number[];
   status: `${DiscountStatus}`;
 }
 
@@ -28,17 +28,17 @@ export interface IUpdateDiscountPayload {
   validFrom?: Date;
   validUntil?: Date;
   new?: {
-    customersId?: string[];
-    categoriesId?: string[];
+    customersId?: number[];
+    categoriesId?: number[];
   };
   removed?: {
-    customersId?: string[];
-    categoriesId?: string[];
+    customersId?: number[];
+    categoriesId?: number[];
   };
   status?: `${DiscountStatus}`;
 }
 
-export interface IFilterDiscount {
+export interface IDiscounTFilterQuery {
   code?: string;
   startDate?: string;
   endDate?: string;

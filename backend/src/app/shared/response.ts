@@ -17,7 +17,8 @@ export type TMeta = {
   page: number;
   limit: number;
   pages?: number[];
-  total: number;
+  totalResult: number;
+  total?: number;
 };
 
 export const sendSuccessResponse = (

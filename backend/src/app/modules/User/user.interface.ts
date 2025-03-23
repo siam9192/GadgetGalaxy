@@ -1,10 +1,15 @@
 import { AuthProvider, UserGender, UserRole, UserStatus } from "@prisma/client";
 import { IName } from "../../reuse/types";
 
-export interface ICustomerFilterRequest {
+export interface ICustomerFilterQuery {
   searchTerm?: string;
-  id?: string;
-  status?: string;
+  status?: `${UserStatus}`;
+}
+
+export interface IAdministratorFilterQuery {
+  searchTerm?: string;
+  status?: `${UserStatus}`;
+  role?: "SUPER_ADMIN" | "ADMIN" | "MODERATOR";
 }
 
 export interface IUserFilterRequest {
@@ -13,12 +18,14 @@ export interface IUserFilterRequest {
   status: UserStatus;
 }
 
-export interface ICreateStaffPayload {
+export interface ICreateAdministratorPayload {
   fullName: string;
   email: string;
   password: string;
   profilePhoto: string;
+  phoneNumber: string;
   gender?: `${UserGender}`;
+  role: "ADMIN" | "MODERATOR";
 }
 
 export type TRole = `${UserRole}`;

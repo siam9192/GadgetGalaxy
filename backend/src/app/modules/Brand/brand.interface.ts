@@ -6,7 +6,7 @@ export interface ICreateBrandPayload {
   isPopular?: boolean;
 }
 
-export interface IFilterBrands {
+export interface IBrandsFilterQuery {
   searchTerm?: string;
   origin?: string;
 }
@@ -17,4 +17,5 @@ export interface IUpdateBrandPayload {
   logoUrl: string;
   origin?: string;
   isPopular?: boolean;
+  isFeatured?: boolean;
 }

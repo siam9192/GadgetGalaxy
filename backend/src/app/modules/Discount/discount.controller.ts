@@ -32,14 +32,40 @@ const updateDiscount = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+
+const changeDiscountStatus = catchAsync(async (req: Request, res: Response) => {
+  const result = await DiscountServices.changeDiscountStatusIntoDB(req.body);
+  sendSuccessResponse(res, {
+    statusCode: httpStatus.OK,
+    message: "Discount status updated successfully",
+    data: result,
+  });
+});
+
+
 const getDiscounts = catchAsync(async (req: Request, res: Response) => {
   const filter = Pick(req.query, [
     "code",
-    "startDate",
-    "endDate",
+    "validUntil",
+  ]);
+  const paginationOptions = Pick(req.query, paginationOptionKeys);
+  const result = await DiscountServices.getDiscountsFromDB(
+    filter,
+    paginationOptions,
+  );
+  sendSuccessResponse(res, {
+    statusCode: httpStatus.OK,
+    message: "Discounts retrieved successfully",
+    ...result,
+  });
+});
+
+const getDiscountsForManage = catchAsync(async (req: Request, res: Response) => {
+  const filter = Pick(req.query, [
+    "code",
     "validFrom",
     "validUntil",
-    "status",
+    "status"
   ]);
   const paginationOptions = Pick(req.query, paginationOptionKeys);
   const result = await DiscountServices.getDiscountsFromDB(
@@ -62,10 +88,13 @@ const applyDiscount = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+
 const DiscountControllers = {
   createDiscount,
   updateDiscount,
+  changeDiscountStatus,
   getDiscounts,
+  getDiscountsForManage,
   applyDiscount,
 };
 
