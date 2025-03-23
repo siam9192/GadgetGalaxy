@@ -259,15 +259,15 @@ model Order {
  deletableCartItemsId String?
  status OrderStatus 
  paymentStatus OrderPaymentStatus @default(UNPAID)
- paymentId String?
- payment Payment?
+ paymentId String @unique
+ payment Payment @relation(fields: [paymentId],references: [id])
  itemReserve ItemReserve[]
  createdAt       DateTime  @default(now())
  updatedAt       DateTime  @updatedAt()
  @@map("orders")
 }
 
-model OrderItem {
+model OrderItem {j
    id String  @id  @default(cuid())
    orderId Int
    productId Int
@@ -320,8 +320,7 @@ model ShippingCharge {
 model Payment {
    id String @id  @default(cuid())
    transactionId String @unique 
-   orderId Int @unique
-   order Order @relation(fields: [orderId],references: [id])
+   order Order?
    customerId Int?
    amount Float
    method PaymentMethod
@@ -329,8 +328,6 @@ model Payment {
    gatewayGatewayData Json?
    createdAt DateTime @default(now())
    updatedAt DateTime @updatedAt
-
-   @@index([transactionId,orderId,id])
    @@map("payments")
 }
 
@@ -340,7 +337,7 @@ model ItemReserve {
     productId Int?
     variantId Int?
     quantity Int
-    expiredAt DateTime 
+    expireAt DateTime 
     order Order @relation(fields: [orderId],references: [id])
     @@map("item_reservers")
 }

@@ -1,4 +1,9 @@
-import { DiscountStatus, DiscountType, Prisma, UserStatus } from "@prisma/client";
+import {
+  DiscountStatus,
+  DiscountType,
+  Prisma,
+  UserStatus,
+} from "@prisma/client";
 import AppError from "../../Errors/AppError";
 import { IPaginationOptions } from "../../interfaces/pagination";
 import httpStatus from "../../shared/http-status";
@@ -8,7 +13,6 @@ import {
   IApplyDiscountPayload,
   ICreateDiscountPayload,
   IDiscounTFilterQuery,
-  IFilterDiscount,
   IUpdateDiscountPayload,
 } from "./discount.interface";
 import { calculatePagination } from "../../helpers/paginationHelper";
@@ -91,11 +95,11 @@ const createDiscountIntoDB = async (
         description: payload.description,
         discountType: payload.discountType,
         discountValue: payload.discountValue,
-        minOrderValue:payload.minOrderValue,
-        maxDiscount:payload.maxDiscount,
-        usageLimit:payload.usageLimit,
+        minOrderValue: payload.minOrderValue,
+        maxDiscount: payload.maxDiscount,
+        usageLimit: payload.usageLimit,
         validFrom: new Date(payload.validFrom),
-        validUntil: new Date(payload.validUntil)
+        validUntil: new Date(payload.validUntil),
       },
     });
 
@@ -136,10 +140,10 @@ const createDiscountIntoDB = async (
 
 const updateDiscountIntoDB = async (
   authUser: IAuthUser,
-  id: string|number,
+  id: string | number,
   payload: IUpdateDiscountPayload,
 ) => {
-  id =  Number(id)
+  id = Number(id);
   const discount = await prisma.discount.findUnique({
     where: {
       id,
@@ -374,12 +378,11 @@ const getDiscountsFromDB = async (
         });
       }
     }
-
   }
 
   const whereConditions: Prisma.DiscountWhereInput = {
     AND: andConditions,
-    status:DiscountStatus.ACTIVE
+    status: DiscountStatus.ACTIVE,
   };
 
   const { skip, limit, page, orderBy, sortOrder } =
@@ -398,13 +401,13 @@ const getDiscountsFromDB = async (
     where: whereConditions,
   });
 
-  const total =await prisma.discount.count()
+  const total = await prisma.discount.count();
 
   const meta = {
     page,
     limit,
     totalResult,
-    total
+    total,
   };
 
   return {
@@ -422,7 +425,7 @@ const getDiscountsForManageFromDB = async (
 
   if (code) {
     andConditions.push({
-      code
+      code,
     });
   } else {
     if (startDate || endDate) {
@@ -513,13 +516,13 @@ const getDiscountsForManageFromDB = async (
     where: whereConditions,
   });
 
-  const total =await prisma.discount.count()
+  const total = await prisma.discount.count();
 
   const meta = {
     page,
     limit,
     totalResult,
-    total
+    total,
   };
 
   return {
@@ -528,17 +531,20 @@ const getDiscountsForManageFromDB = async (
   };
 };
 
-const changeDiscountStatusIntoDB = async(payload:{id:number,status:DiscountStatus})=>{
+const changeDiscountStatusIntoDB = async (payload: {
+  id: number;
+  status: DiscountStatus;
+}) => {
   await prisma.discount.update({
-    where:{
-      id:payload.id
+    where: {
+      id: payload.id,
     },
-    data:{
-      status:payload.status
-    }
-  })
-  return ;
-}
+    data: {
+      status: payload.status,
+    },
+  });
+  return;
+};
 
 const applyDiscount = async (
   authUser: IAuthUser,
@@ -568,7 +574,7 @@ const applyDiscount = async (
     },
     include: {
       product: {
-        include:{categories:true}
+        include: { categories: true },
       },
       variant: true,
     },
@@ -631,9 +637,9 @@ const applyDiscount = async (
   totalAmount = cartItems.reduce((p, c) => {
     const { product, variant } = c;
     if (variant) {
-      return p + (variant.offerPrice||variant.price) * c.quantity;
+      return p + (variant.offerPrice || variant.price) * c.quantity;
     } else {
-      return p + (product.offerPrice||product.price) * c.quantity;
+      return p + (product.offerPrice || product.price) * c.quantity;
     }
   }, 0);
 

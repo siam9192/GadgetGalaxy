@@ -6,7 +6,6 @@ import {
   Prisma,
 } from "@prisma/client";
 import prisma from "../../shared/prisma";
-import { Response } from "express";
 import { IFilterPayments, IInitPaymentPayload } from "./payment.interface";
 import { generateTransactionId } from "../../utils/function";
 import SSLServices from "../SSL/ssl.service";
@@ -15,24 +14,19 @@ import config from "../../config";
 import { IAuthUser } from "../Auth/auth.interface";
 import { IPaginationOptions } from "../../interfaces/pagination";
 import { calculatePagination } from "../../helpers/paginationHelper";
-import OrderServices from "../Order/order.service";
+
 
 const initPayment = async (payload: IInitPaymentPayload) => {
-  let transactionId;
-
+  let transactionId = generateTransactionId();;
+  
   // Generate unique tran id
-  while (!transactionId) {
-    const generatedTranId = generateTransactionId();
-    const payment = await prisma.payment.findUnique({
+  while (await prisma.payment.findUnique({
       where: {
-        transactionId: generatedTranId,
+        transactionId: transactionId,
       },
-    });
-    if (payment) {
-      continue;
-    } else transactionId = generatedTranId;
+    })) {
+     transactionId = generateTransactionId();
   }
-  console.log("Tran id", transactionId);
   const SSLInitPayload: IInitSSLPaymentPayload = {
     transactionId,
     amount: payload.amount,
@@ -51,9 +45,8 @@ const initPayment = async (payload: IInitPaymentPayload) => {
   const createdPayment = await prisma.payment.create({
     data: {
       transactionId,
-      orderId: payload.orderId,
       amount: payload.amount,
-      method: PaymentMethod.SSLCommerz,
+      method: PaymentMethod.SSLCOMMERZ,
       gatewayGatewayData: result,
     },
   });
@@ -61,43 +54,6 @@ const initPayment = async (payload: IInitPaymentPayload) => {
   return {
     paymentId: createdPayment.id,
     paymentUrl: result.GatewayPageURL,
-  };
-};
-const validatePayment = async (payload: any) => {
-  // if (!payload || !payload.status || !(payload.status === 'VALID')) {
-  //     return {
-  //         message: "Invalid Payment!"
-  //     }
-  // }
-
-  // const response = await SSLService.validatePayment(payload);
-
-  // if (response?.status !== 'VALID') {
-  //     return {
-  //         message: "Payment Failed!"
-  //     }
-  // }
-
-  const response = payload;
-
-  await prisma.$transaction(async (tx) => {
-    const updatedPaymentData = await tx.payment.update({
-      where: {
-        transactionId: response.tran_id,
-      },
-      data: {
-        status: PaymentStatus.Successful,
-        gatewayGatewayData: response,
-      },
-    });
-    await OrderServices.PlaceOrderAfterPaymentIntoDB(
-      updatedPaymentData.orderId,
-      tx,
-    );
-  });
-
-  return {
-    message: "Payment success!",
   };
 };
 

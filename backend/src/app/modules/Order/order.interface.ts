@@ -2,7 +2,7 @@ import { OrderStatus, PaymentMethod } from "@prisma/client";
 
 export interface ICreateOrderPayload {
   discountCode?: string;
-  shippingChargeId: string;
+  shippingChargeId: number;
   shippingInfo: IShippingInfo;
   notes?: string;
   cartItemsId: string[];

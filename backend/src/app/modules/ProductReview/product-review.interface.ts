@@ -5,12 +5,19 @@ export interface ICreateProductReviewPayload {
 }
 
 export interface ICreateReviewResponsePayload {
-  reviewId: string;
+  id: number;
   comment: string;
 }
 
 export interface IUpdateProductReviewPayload {
-  reviewId: string;
+   id:number;
   comment: string;
   rating: number;
+}
+
+
+export interface IManageReviewFilterQuery {
+  productId?:number,
+  startDate?:string,
+  endDate?:string,
 }

@@ -53,10 +53,10 @@ export const ApplyDiscountValidation = z.object({
   code: z.string(),
   cartItemsId: z.array(z.string()),
 });
-export const ChangeDiscountStatusValidation =  z.object({
-  id:z.number().positive(),
-  status:z.nativeEnum(DiscountStatus)
-})
+export const ChangeDiscountStatusValidation = z.object({
+  id: z.number().positive(),
+  status: z.nativeEnum(DiscountStatus),
+});
 
 const DiscountValidations = {
   CreateDiscountValidation,

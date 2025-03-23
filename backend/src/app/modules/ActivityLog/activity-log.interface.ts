@@ -1,5 +1,5 @@
 export interface IFilterActivityLogs {
-  staffId?: string;
+  administratorId?: number;
   startDate?: string;
   endDate?: string;
 }

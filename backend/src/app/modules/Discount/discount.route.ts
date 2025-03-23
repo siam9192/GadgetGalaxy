@@ -19,17 +19,15 @@ router.put(
   DiscountControllers.updateDiscount,
 );
 
-router.get(
-  "/",
-  DiscountControllers.getDiscounts,
-);
+router.get("/", DiscountControllers.getDiscounts);
 
-router.get(
-  "/manage",
-  DiscountControllers.getDiscountsForManage,
-);
+router.get("/manage", DiscountControllers.getDiscountsForManage);
 
-router.patch("/change-status",validateRequest(DiscountValidations.ChangeDiscountStatusValidation),DiscountControllers.changeDiscountStatus)
+router.patch(
+  "/change-status",
+  validateRequest(DiscountValidations.ChangeDiscountStatusValidation),
+  DiscountControllers.changeDiscountStatus,
+);
 
 router.post(
   "/apply",
@@ -37,9 +35,6 @@ router.post(
   validateRequest(DiscountValidations.ApplyDiscountValidation),
   DiscountControllers.applyDiscount,
 );
-
-
-
 
 const DiscountRouter = router;
 

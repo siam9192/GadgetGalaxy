@@ -32,7 +32,6 @@ const updateDiscount = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-
 const changeDiscountStatus = catchAsync(async (req: Request, res: Response) => {
   const result = await DiscountServices.changeDiscountStatusIntoDB(req.body);
   sendSuccessResponse(res, {
@@ -42,12 +41,8 @@ const changeDiscountStatus = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-
 const getDiscounts = catchAsync(async (req: Request, res: Response) => {
-  const filter = Pick(req.query, [
-    "code",
-    "validUntil",
-  ]);
+  const filter = Pick(req.query, ["code", "validUntil"]);
   const paginationOptions = Pick(req.query, paginationOptionKeys);
   const result = await DiscountServices.getDiscountsFromDB(
     filter,
@@ -60,24 +55,26 @@ const getDiscounts = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const getDiscountsForManage = catchAsync(async (req: Request, res: Response) => {
-  const filter = Pick(req.query, [
-    "code",
-    "validFrom",
-    "validUntil",
-    "status"
-  ]);
-  const paginationOptions = Pick(req.query, paginationOptionKeys);
-  const result = await DiscountServices.getDiscountsFromDB(
-    filter,
-    paginationOptions,
-  );
-  sendSuccessResponse(res, {
-    statusCode: httpStatus.OK,
-    message: "Discounts retrieved successfully",
-    ...result,
-  });
-});
+const getDiscountsForManage = catchAsync(
+  async (req: Request, res: Response) => {
+    const filter = Pick(req.query, [
+      "code",
+      "validFrom",
+      "validUntil",
+      "status",
+    ]);
+    const paginationOptions = Pick(req.query, paginationOptionKeys);
+    const result = await DiscountServices.getDiscountsFromDB(
+      filter,
+      paginationOptions,
+    );
+    sendSuccessResponse(res, {
+      statusCode: httpStatus.OK,
+      message: "Discounts retrieved successfully",
+      ...result,
+    });
+  },
+);
 
 const applyDiscount = catchAsync(async (req: Request, res: Response) => {
   const result = await DiscountServices.applyDiscount(req.user, req.body);
@@ -87,7 +84,6 @@ const applyDiscount = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
-
 
 const DiscountControllers = {
   createDiscount,

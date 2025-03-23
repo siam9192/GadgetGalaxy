@@ -10,11 +10,11 @@ const getActivityLogsFromDB = async (
   filter: IFilterActivityLogs,
   paginationOptions: IPaginationOptions,
 ) => {
-  const { staffId, startDate, endDate } = filter;
+  const {administratorId, startDate, endDate } = filter;
   const { skip, limit, page, sortOrder } =
     calculatePagination(paginationOptions);
 
-  const andConditions: Prisma.ActivityLogWhereInput[] = [];
+  const andConditions: Prisma.AdministratorActivityLogWhereInput[] = [];
 
   if (startDate || endDate) {
     const validate = (date: string) => {
@@ -43,25 +43,25 @@ const getActivityLogsFromDB = async (
     }
   }
 
-  if (staffId) {
+  if (administratorId) {
     andConditions.push({
-      staffId,
+      administratorId,
     });
   }
 
   const whereConditions = {
     AND: andConditions,
   };
-  const data = await prisma.activityLog.findMany({
+  const data = await prisma.administratorActivityLog.findMany({
     where: whereConditions,
     skip,
     take: limit,
     orderBy: {
-      createdAt: sortOrder as "asc" | "desc",
+      createdAt: sortOrder,
     },
   });
 
-  const total = await prisma.activityLog.count({
+  const total = await prisma.administratorActivityLog.count({
     where: whereConditions,
   });
 
@@ -78,7 +78,7 @@ const getActivityLogsFromDB = async (
 };
 
 const deleteActivityFromDB = async (id: string) => {
-  const activity = await prisma.activityLog.findUnique({
+  const activity = await prisma.administratorActivityLog.findUnique({
     where: {
       id,
     },
@@ -87,7 +87,7 @@ const deleteActivityFromDB = async (id: string) => {
   if (!activity) {
     throw new AppError(httpStatus.NOT_FOUND, "Activity not found");
   }
-  await prisma.activityLog.delete({
+  await prisma.administratorActivityLog.delete({
     where: {
       id,
     },

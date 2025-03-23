@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { Prisma, ProductStatus } from "@prisma/client";
 import AppError from "../../Errors/AppError";
 import httpStatus from "../../shared/http-status";
 import prisma from "../../shared/prisma";
@@ -11,9 +11,13 @@ const createCartItemIntoDB = async (
   const product = await prisma.product.findUnique({
     where: {
       id: payload.productId,
+      status: {
+        not: ProductStatus.DELETED,
+      },
     },
     select: {
       id: true,
+      variants: true,
       _count: {
         select: {
           variants: true,
@@ -27,61 +31,44 @@ const createCartItemIntoDB = async (
     throw new AppError(httpStatus.BAD_REQUEST, "Variant id is required");
   }
   // If variant id exist then check variant existence in db
-  if (payload.variantId) {
-    const variant = await prisma.variant.findUnique({
-      where: {
-        id: payload.variantId,
-        productId: payload.productId,
-      },
-      select: {
-        id: true,
-      },
-    });
-    if (!variant) {
-      throw new AppError(httpStatus.NOT_FOUND, "Variant not found");
-    }
+  if (
+    payload.variantId &&
+    !product.variants.find((_) => _.id === payload.variantId)
+  ) {
+    throw new AppError(httpStatus.NOT_FOUND, "Variant not found");
   }
 
   const whereConditions: Prisma.CartItemWhereInput = {
     customerId: authUser.customerId!,
     productId: payload.productId,
-    // id:"sss"
   };
 
+  if (payload.variantId) whereConditions.variantId = payload.variantId;
+
   const cartItem = await prisma.cartItem.findFirst({
-    where: {
-      customerId: authUser.customerId!,
-      productId: payload.productId,
-    },
+    where: whereConditions,
   });
-  let result;
 
   if (cartItem) {
-    result = await prisma.cartItem.update({
+    await prisma.cartItem.update({
       where: {
         id: cartItem.id,
       },
       data: {
-        variantId: payload.variantId,
         quantity: payload.quantity,
       },
     });
   } else {
-    const data: any = {
-      customerId: authUser.customerId!,
-      productId: payload.productId,
-      quantity: payload.quantity,
-    };
-
-    if (payload.variantId) {
-      data.variantId = payload.variantId;
-    }
-    result = await prisma.cartItem.create({
-      data: data,
+    await prisma.cartItem.create({
+      data: {
+        customerId: authUser.customerId!,
+        productId: payload.productId,
+        variantId: payload.variantId,
+        quantity: payload.quantity,
+      },
     });
   }
-
-  return result;
+  return null;
 };
 
 const deleteCartItemFromDB = async (authUser: IAuthUser, id: string) => {
@@ -107,8 +94,8 @@ const getMyCartItemsFromDB = async (authUser: IAuthUser) => {
         select: {
           id: true,
           name: true,
-          regularPrice: true,
-          salePrice: true,
+          price: true,
+          offerPrice: true,
           images: true,
         },
       },
@@ -126,8 +113,57 @@ const getMyCartItemsFromDB = async (authUser: IAuthUser) => {
   return result;
 };
 
+const changeProductQuantity = async (payload:{id:string,quantity:number})=>{
+   await prisma.cartItem.update({
+   where:{
+    id:payload.id
+   },
+   data:{
+    quantity:payload.quantity
+   }
+   })
+   return null
+}
+
+const changeItemVariantIntoDB = async (authUser:IAuthUser,payload:{
+  id:string,
+  variantId:number
+})=>{
+  const cartItem = await prisma.cartItem.findUnique({
+    where:{
+      id:payload.id,
+      customerId:authUser.customerId
+    }
+  })
+  if(!cartItem) throw new AppError(httpStatus.NOT_FOUND,"Cart item not found")
+  
+   // Checking is that variant already exist in the cart
+   if( await prisma.cartItem.findFirst({
+    where:{
+      customerId:authUser.customerId,
+      productId:cartItem.productId,
+      variantId:payload.variantId
+    }
+  })){
+    throw new AppError(httpStatus.NOT_ACCEPTABLE,"Already exist")
+  }
+ 
+
+  await prisma.cartItem.update({
+    where:{
+     id:payload.id
+    },
+    data:{
+      variantId:payload.variantId
+    }
+  })
+ 
+  return null
+}
+
 const CartItemServices = {
   createCartItemIntoDB,
+  changeItemVariantIntoDB,
   getMyCartItemsFromDB,
   deleteCartItemFromDB,
 };

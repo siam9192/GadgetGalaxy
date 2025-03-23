@@ -12,6 +12,7 @@ import {
   OrderPaymentStatus,
   OrderStatus,
   Prisma,
+  ProductStatus,
   UserRole,
 } from "@prisma/client";
 import { IAuthUser } from "../Auth/auth.interface";
@@ -30,8 +31,8 @@ const initOrderIntoDB = async (
         in: payload.cartItemsId,
       },
       product: {
-        status: "Active",
-      },
+        status:ProductStatus.ACTIVE,
+      }, 
     },
     include: {
       product: {
@@ -71,7 +72,7 @@ const initOrderIntoDB = async (
 
   const items = cartItems.map((item) => {
     const variant = item.variant;
-    const price = variant ? variant.salePrice : item.product?.salePrice!;
+    const price = variant ? (variant.offerPrice||variant.price) :(item.product.offerPrice||item.product.price);
     const quantity = item.quantity;
     return {
       productId: item.productId,
@@ -93,14 +94,14 @@ const initOrderIntoDB = async (
     const variant = item.variant;
 
     if (product && !variant) {
-      if (product.stock! < item.quantity) {
+      if (product.availableQuantity! < item.quantity) {
         throw new AppError(
           httpStatus.NOT_ACCEPTABLE,
           `Stock not available.${product.name} ${item.quantity} quantity not available`,
         );
       }
     } else {
-      if (variant!.stock < item.quantity) {
+      if (variant!.availableQuantity < item.quantity) {
         throw new AppError(
           httpStatus.NOT_ACCEPTABLE,
           `Stock not available.${product.name} ${item.quantity} quantity not available`,
@@ -133,7 +134,7 @@ const initOrderIntoDB = async (
     }
 
     if (discount.discountValue) {
-      if (discount.discountType === DiscountType.Fixed) {
+      if (discount.discountType === DiscountType.FIXED) {
         discountAmount = discount.discountValue;
       } else {
         discountAmount = (discount.discountValue / 100) * subTotal;
@@ -150,28 +151,63 @@ const initOrderIntoDB = async (
   );
 
   const result = await prisma.$transaction(async (txClient) => {
+    
+
+    const shippingInfo = payload.shippingInfo;
+  
+    // Init payment first
+  const { paymentId, paymentUrl } = await PaymentServices.initPayment({
+    method: payload.paymentMethod,
+    amount: grossAmount,
+    customer: {
+      name: shippingInfo.fullName,
+      email: shippingInfo.emailAddress,
+      phone: shippingInfo.phoneNumber,
+    },
+    shippingAddress: Object.values(shippingInfo.address).join(","),
+  });
+
     const createdOrder = await txClient.order.create({
       data: {
         customerId: authUser.customerId!,
+        paymentId,
         totalAmount,
         discountAmount,
         grossAmount,
         shippingAmount,
         netAmount,
-        discountCode: payload.discountCode || null,
+        discountData:{
+          code:payload.discountCode,
+          discountAmount
+        },
         shippingChargeData: {
+          id:shippingCharge.id,
           title: shippingCharge.title,
           description: shippingCharge.description,
           cost: shippingCharge.cost,
         },
         notes: payload.notes,
         exceptedDeliveryDate,
+        status:OrderStatus.PENDING,
         deletableCartItemsId: payload.removeCartItemsAfterPurchase
           ? payload.cartItemsId.join(",")
           : null,
       },
+      
     });
-
+     
+    const expireAt =  new Date()
+    expireAt.setHours(new Date().getHours()+24)
+     await prisma.itemReserve.createMany({
+      data:cartItems.map((item)=>(
+        { orderId:createdOrder.id,
+          productId:item.productId,
+          variantId:item.variantId,
+          quantity:item.quantity,
+          expireAt:expireAt
+        }
+      ))
+     })
     await txClient.orderItem.createMany({
       data: items.map((item) => ({
         orderId: createdOrder.id,
@@ -179,12 +215,11 @@ const initOrderIntoDB = async (
       })),
     });
 
-    const shippingInfo = payload.shippingInfo;
-
+   
     let { address, addressId, ...otherShippingInfo } = shippingInfo;
 
     if (addressId) {
-      const findAddress = await txClient.address.findUnique({
+      const findAddress = await txClient.customerAddress.findUnique({
         where: {
           id: addressId,
         },
@@ -230,7 +265,7 @@ const initOrderIntoDB = async (
           id: data.id!,
         },
         data: {
-          stock: {
+        availableQuantity: {
             decrement: data.quantity,
           },
         },
@@ -245,7 +280,7 @@ const initOrderIntoDB = async (
           id: data.id!,
         },
         data: {
-          stock: {
+          availableQuantity: {
             decrement: data.quantity,
           },
         },
@@ -253,35 +288,15 @@ const initOrderIntoDB = async (
     }
 
     return {
-      orderId: createdOrder.id,
+     paymentUrl
     };
   });
 
-  const shippingInfo = payload.shippingInfo;
+  
 
-  const { paymentId, paymentUrl } = await PaymentServices.initPayment({
-    method: payload.paymentMethod,
-    orderId: result.orderId,
-    amount: grossAmount,
-    customer: {
-      name: shippingInfo.fullName,
-      email: shippingInfo.emailAddress,
-      phone: shippingInfo.phoneNumber,
-    },
-    shippingAddress: Object.values(shippingInfo.address).join(","),
-  });
-
-  await prisma.order.update({
-    where: {
-      id: result.orderId,
-    },
-    data: {
-      paymentId,
-    },
-  });
-
+  
   return {
-    paymentUrl,
+   paymentUrl:result.paymentUrl
   };
 };
 

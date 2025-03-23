@@ -79,7 +79,7 @@ const createReviewResponseIntoDB = async (
 ) => {
   const result = await prisma.productReview.update({
     where: {
-      id: payload.reviewId,
+      id: payload.id,
     },
     data: {
       response: payload.comment,
@@ -141,9 +141,11 @@ const getMyNotReviewedProductsFromDB = async (
 };
 
 const getProductReviewsFromDB = async (
-  productId: string,
+  productId: string|number,
   paginationOptions: IPaginationOptions,
 ) => {
+  productId = Number(productId)
+
   const { skip, limit, page, orderBy, sortOrder } =
     calculatePagination(paginationOptions);
 
@@ -233,13 +235,18 @@ const getMyReviewsFromDB = async (
   };
 };
 
+const getReviewsFromDBForManageFromDB = ()=>{
+  
+} 
+
 const updateReviewIntoDB = async (
   authUser: IAuthUser,
   payload: IUpdateProductReviewPayload,
 ) => {
+
   const review = await prisma.productReview.findUnique({
     where: {
-      id: payload.reviewId,
+      id: payload.id,
       customerId: authUser.customerId,
     },
   });
@@ -251,7 +258,7 @@ const updateReviewIntoDB = async (
   const result = await prisma.$transaction(async (tx) => {
     const updatedReview = await tx.productReview.update({
       where: {
-        id: payload.reviewId,
+        id: payload.id,
       },
       data: {
         ...payload,

@@ -2,7 +2,6 @@ import { PaymentMethod, PaymentStatus } from "@prisma/client";
 
 export interface IInitPaymentPayload {
   method: `${PaymentMethod}`;
-  orderId: string;
   amount: number;
   customer: {
     name: string;

@@ -1,6 +1,6 @@
 interface ICreateCartItemPayload {
-  productId: string;
-  variantId?: string;
+  productId: number;
+  variantId?: number;
   quantity: number;
 }
 

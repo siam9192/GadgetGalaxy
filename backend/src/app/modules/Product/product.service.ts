@@ -1009,8 +1009,6 @@ const getProductBySlugForCustomerViewFromDB = async (
   return product;
 };
 
-
-
 const getFeaturedProductsFromDB = async (
   paginationOptions: IPaginationOptions,
 ) => {
@@ -1253,7 +1251,7 @@ const ProductServices = {
   getRelatedProductsByProductSlugFromDB,
   getRecentlyViewedProductsFromDB,
   getProductsForManageFromDB,
-  getStockOutProductsFromDB
+  getStockOutProductsFromDB,
 };
 
 export default ProductServices;

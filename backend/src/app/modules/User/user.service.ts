@@ -11,7 +11,7 @@ import prisma from "../../shared/prisma";
 import {
   IAdministratorFilterQuery,
   ICreateAdministratorPayload,
-  ICustomerFilterQuery
+  ICustomerFilterQuery,
 } from "./user.interface";
 import { IPaginationOptions } from "../../interfaces/pagination";
 import { calculatePagination } from "../../helpers/paginationHelper";
