@@ -6,75 +6,14 @@ import AppError from "../../Errors/AppError";
 import httpStatus from "../../shared/http-status";
 import {
   IUpdateCustomerProfilePayload,
-  IUpdateStaffProfilePayload,
+  IUpdateAdministratorProfilePayload,
 } from "./profile.interface";
-
-const getUserProfileByIdFromDB = async (id: string) => {
-  // Get user if user not exist then throw user not found error
-  const user = await prisma.user.findUniqueOrThrow({
-    where: {
-      id: id,
-    },
-    include: {
-      customer: {
-        include: {
-          _count: {
-            select: {
-              orders: {
-                where: {
-                  status: {
-                    not: "Pending",
-                  },
-                },
-              },
-              productReviews: true,
-            },
-          },
-        },
-      },
-      staff: true,
-      account: true,
-    },
-  });
-
-  const userRole = user.role;
-  let result;
-  if (userRole === UserRole.Customer) {
-    const profile = user.customer;
-    if (profile) {
-      result = {
-        email: user.account?.email,
-        role: user.role,
-        fullName: profile.fullName,
-        profilePhoto: profile.profilePhoto,
-        status: user.status,
-        join_date: user.createdAt,
-      };
-    }
-  } else {
-    const profile = user.staff;
-    if (profile) {
-      result = {
-        email: user.account?.email,
-        role: user.role,
-        fullName: profile.fullName,
-        profilePhoto: profile.profilePhoto,
-        gender: profile.gender,
-        status: user.status,
-        lastLoginAt: user.lastLoginAt,
-        joinDate: user.createdAt,
-      };
-    }
-  }
-
-  return result;
-};
 
 const updateMyProfileIntoDB = async (authUser: IAuthUser, payload: any) => {
   // Check user existence
   const user = await prisma.user.findUnique({
     where: {
-      id: authUser.id,
+      id: authUser.id
     },
   });
 
@@ -84,17 +23,12 @@ const updateMyProfileIntoDB = async (authUser: IAuthUser, payload: any) => {
 
   let result;
 
-  if (user.role === UserRole.Customer) {
+  if (user.role === UserRole.CUSTOMER) {
     const data = payload as IUpdateCustomerProfilePayload;
     ProfileValidations.UpdateCustomerProfileValidation.parse(data);
 
     result = await prisma.$transaction(async (txClient) => {
-      const {
-        updatedAddresses,
-        newAddedAddresses,
-        deletedAddressesIds,
-        ...othersData
-      } = data;
+      const { addresses, ...othersData } = data;
 
       await txClient.customer.update({
         where: {
@@ -102,52 +36,73 @@ const updateMyProfileIntoDB = async (authUser: IAuthUser, payload: any) => {
         },
         data: othersData,
       });
+ 
 
-      if (updatedAddresses && updatedAddresses.length) {
-        for (let i = 0; i < updatedAddresses.length; i++) {
-          const { id, ...othersData } = updatedAddresses[i];
-          await txClient.address.update({
+      // Update addresses
+      if (addresses && addresses.length) {
+        const deletedAddresses = addresses?.filter((_) => _.id && _.isDeleted);
+        const newAddedAddresses = addresses?.filter(
+          (_) => !_.id && !_.isDeleted,
+        );
+        const updatedAddresses = addresses.filter((_) => _.id && !_.isDeleted);
+        if (deletedAddresses.length) {
+          await txClient.customerAddress.deleteMany({
             where: {
-              id,
+              id: {
+                in: deletedAddresses.map((_) => _.id),
+              },
             },
-            data: othersData,
           });
         }
+
+        if (newAddedAddresses.length) {
+          await txClient.customerAddress.createMany({
+            data: newAddedAddresses.map((address) => ({
+              customerId: authUser.customerId!,
+              district: address.district,
+              zone: address.zone,
+              line: address.line,
+              isDefault: address.isDefault || false,
+            })),
+          });
+        }
+
+        if (updatedAddresses.length) {
+          await Promise.all(
+            updatedAddresses.map((address) =>
+              txClient.customerAddress.updateMany({
+                where: {
+                  id: address.id!,
+                },
+                data: {
+                  district: address.district,
+                  zone: address.zone,
+                  line: address.line,
+                  isDefault: address.isDefault || false,
+                },
+              }),
+            ),
+          );
+        }        
       }
 
-      if (deletedAddressesIds && deletedAddressesIds.length) {
-        await txClient.address.deleteMany({
-          where: {
-            id: {
-              in: deletedAddressesIds,
-            },
-          },
-        });
-      }
-
-      if (newAddedAddresses && newAddedAddresses.length) {
-        await txClient.address.createMany({
-          data: newAddedAddresses.map((ele) => ({
-            customerId: authUser.customerId!,
-            ...ele,
-          })),
-        });
-      }
       return await txClient.customer.findUnique({
         where: {
           id: authUser.customerId!,
         },
+        include:{
+          addresses:true
+        }
       });
     });
   }
-
-  // Update staff data
+  // Update administrator
   else {
-    const data = payload as IUpdateStaffProfilePayload;
-    ProfileValidations.UpdateStaffProfileValidation.parse(data);
-    result = await prisma.staff.update({
+    const data = payload as IUpdateAdministratorProfilePayload;
+    ProfileValidations.UpdateAdministratorProfileValidation.parse(data);
+    result = await prisma.administrator.update({
       where: {
-        id: authUser.staffId,
+        id: authUser.administratorId,
       },
       data,
     });
@@ -156,7 +111,6 @@ const updateMyProfileIntoDB = async (authUser: IAuthUser, payload: any) => {
 };
 
 const ProfileServices = {
-  getUserProfileByIdFromDB,
   updateMyProfileIntoDB,
 };
 

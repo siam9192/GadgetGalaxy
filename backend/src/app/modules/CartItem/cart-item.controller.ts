@@ -25,6 +25,15 @@ const getMyCartItems = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const changeItemQuantity = catchAsync(async (req: Request, res: Response) => {
+  const result = await CartItemServices.changeItemQuantity(req.body);
+  sendSuccessResponse(res, {
+    statusCode: httpStatus.OK,
+    message: "Item quantity changed successfully",
+    data: result,
+  });
+});
+
 const deleteCartItemFromDB = catchAsync(async (req: Request, res: Response) => {
   const result = await CartItemServices.deleteCartItemFromDB(
     req.user,
@@ -41,6 +50,7 @@ const CartItemControllers = {
   createCartItem,
   getMyCartItems,
   deleteCartItemFromDB,
+  changeItemQuantity,
 };
 
 export default CartItemControllers;

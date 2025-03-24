@@ -8,10 +8,13 @@ import PaymentRouter from "../modules/Payment/payment.route";
 import CartItemRouter from "../modules/CartItem/cart-item.route";
 import ShippingChargeRouter from "../modules/ShippingCharge/shipping-charge.route";
 import NotificationRouter from "../modules/Notification/notification.route";
-import ActivityLogRouter from "../modules/ActivityLog/activity-log.route";
+import ActivityLogRouter from "../modules/AdministratorActivityLog/administratorActivityLog.route";
 import DiscountRouter from "../modules/Discount/discount.route";
 import BrandRouter from "../modules/Brand/brand.route";
 import ProfileRouter from "../modules/Profile/profile.route";
+import ProductReviewRouter from "../modules/ProductReview/product-review.route";
+import AdministratorActivityLogRouter from "../modules/AdministratorActivityLog/administratorActivityLog.route";
+import OverviewRouter from "../modules/Overview/overview.route";
 
 type TModuleRoutes = { path: string; router: IRouter }[];
 const router = Router();
@@ -56,10 +59,10 @@ const moduleRoutes: TModuleRoutes = [
     path: "/orders",
     router: OrderRouter,
   },
-  // {
-  //   path: "/product-reviews",
-  //   router: ProductReviewRouter,
-  // },
+  {
+    path: "/product-reviews",
+    router: ProductReviewRouter,
+  },
   {
     path: "/payments",
     router: PaymentRouter,
@@ -69,8 +72,12 @@ const moduleRoutes: TModuleRoutes = [
     router: NotificationRouter,
   },
   {
-    path: "/activity-logs",
-    router: ActivityLogRouter,
+    path: "/administrator-activity-logs",
+    router: AdministratorActivityLogRouter,
+  },
+  {
+    path: "/overview",
+    router: OverviewRouter,
   },
 ];
 

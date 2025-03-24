@@ -1,4 +1,4 @@
-import { UserRole } from "@prisma/client";
+import { UserRole, UserStatus } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
 import catchAsync from "../shared/catchAsync";
 import AppError from "../Errors/AppError";
@@ -7,6 +7,7 @@ import config from "../config";
 import jwtHelpers from "../shared/jwtHelpers";
 import { JwtPayload } from "jsonwebtoken";
 import prisma from "../shared/prisma";
+import { IAuthUser } from "../modules/Auth/auth.interface";
 
 function auth(
   requiredRoles: UserRole[],
@@ -14,7 +15,7 @@ function auth(
 ) {
   return catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const token = req.headers.authorization?.replace("Bearer ", "");
-
+    console.log(token);
     // checking if the token is missing
     if (!token) {
       if (authConfig?.providerMode === true) {
@@ -28,7 +29,7 @@ function auth(
     try {
       decoded = jwtHelpers.verifyToken(
         token,
-        config.jwt.access_secret as string,
+        config.jwt.access_token_secret as string,
       ) as JwtPayload;
     } catch (error) {
       throw new AppError(httpStatus.UNAUTHORIZED, "Unauthorized");
@@ -41,22 +42,19 @@ function auth(
       where: {
         id,
       },
-      include: {
-        account: true,
-      },
     });
 
     if (!user) {
       throw new AppError(httpStatus.NOT_FOUND, "This user is not found !");
     }
     // checking if the user is already deleted
-    if (user.status === "Deleted") {
+    if (user.status === UserStatus.DELETED) {
       throw new AppError(httpStatus.FORBIDDEN, "This user is deleted ! !");
     }
 
     // checking if the user is blocked
 
-    if (user.status === "Blocked") {
+    if (user.status === UserStatus.BLOCKED) {
       throw new AppError(httpStatus.FORBIDDEN, "This user is blocked ! !");
     }
 
@@ -74,7 +72,7 @@ function auth(
       throw new AppError(httpStatus.UNAUTHORIZED, "You are not authorized  !");
     }
 
-    req.user = decoded as { id: string; role: UserRole };
+    req.user = decoded as IAuthUser;
     next();
   });
 }

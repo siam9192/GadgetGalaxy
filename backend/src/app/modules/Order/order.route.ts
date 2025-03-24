@@ -9,29 +9,40 @@ const router = Router();
 
 router.post(
   "/init",
-  auth([UserRole.Customer]),
+  auth([UserRole.CUSTOMER]),
   validateRequest(OrderValidations.InitOrderValidation),
   OrderControllers.initOrder,
 );
 
-router.get("/", OrderControllers.getOrders);
-router.get("/my", auth([UserRole.Customer]), OrderControllers.getMyOrders);
+router.post(
+  "/place",
+  auth([UserRole.CUSTOMER]),
+  validateRequest(OrderValidations.PlaceOrderValidation),
+  OrderControllers.placeOrder,
+);
+router.get("/manage", OrderControllers.getOrdersForManage);
+router.get("/my", auth([UserRole.CUSTOMER]), OrderControllers.getMyOrders);
 router.get(
-  "/get-by-id/:id",
-  auth(Object.values(UserRole)),
-  OrderControllers.getOrderById,
+  "/my/:id",
+  auth([UserRole.CUSTOMER]),
+  OrderControllers.getMyOrderById,
+);
+router.get(
+  "/manage/:id",
+  auth([UserRole.SUPER_ADMIN, UserRole.ADMIN]),
+  OrderControllers.getOrderByIdForManage,
 );
 router.get(
   "/not-reviewed",
-  auth([UserRole.Customer]),
+  auth([UserRole.SUPER_ADMIN, UserRole.ADMIN]),
   OrderControllers.getNotReviewedOrderItems,
 );
 
 router.patch(
   "/update-status",
-  auth([UserRole.Admin, UserRole.SuperAdmin]),
+  auth([UserRole.SUPER_ADMIN, UserRole.ADMIN]),
   validateRequest(OrderValidations.UpdateOrderStatusByStaffValidation),
-  OrderControllers.UpdateOrderStatusByStaff,
+  OrderControllers.updateOrderStatus,
 );
 const OrderRouter = router;
 

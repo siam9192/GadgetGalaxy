@@ -5,20 +5,8 @@ import ProfileControllers from "./profile.controller";
 
 const router = Router();
 
-router.get(
-  "/my",
-  auth(Object.values(UserRole)),
-  ProfileControllers.getMyProfile,
-);
-
-router.get(
-  "/:id",
-  auth([UserRole.SuperAdmin, UserRole.Admin]),
-  ProfileControllers.getUserProfileById,
-);
-
 router.put(
-  "/",
+  "/my",
   auth(Object.values(UserRole)),
   ProfileControllers.updateMyProfile,
 );

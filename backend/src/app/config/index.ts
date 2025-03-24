@@ -20,6 +20,7 @@ export default {
     reset_password_token_expire_time:
       process.env.JWT_RESET_PASSWORD_TOKEN_EXPIRE_TIME,
     account_verification_secret: process.env.JWT_ACCOUNT_VERIFICATION_SECRET,
+    payment_secret: process.env.JWT_PAYMENT_SECRET,
   },
   app: {
     user_name: process.env.APP_USER_NAME,

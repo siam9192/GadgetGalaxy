@@ -38,7 +38,7 @@ const getPayments = catchAsync(async (req: Request, res: Response) => {
     "customerId",
   ]);
   const paginationOptions = Pick(req.query, paginationOptionKeys);
-  const result = await PaymentServices.getPaymentsFromDB(
+  const result = await PaymentServices.getPaymentsFromForManageDB(
     filter,
     paginationOptions,
   );

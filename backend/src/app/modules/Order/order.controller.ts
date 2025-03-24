@@ -17,6 +17,15 @@ const initOrder = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const placeOrder = catchAsync(async (req: Request, res: Response) => {
+  const result = await OrderServices.PlaceOrderIntoDB(req.user, req.body);
+  sendSuccessResponse(res, {
+    statusCode: httpStatus.OK,
+    message: "Order placed successfully",
+    data: result,
+  });
+});
+
 const getMyOrders = catchAsync(async (req: Request, res: Response) => {
   const paginationOptions = Pick(req.params, paginationOptionKeys);
   const filter = Pick(req.query, ["status", "startDate", "endDate"]);
@@ -33,16 +42,17 @@ const getMyOrders = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const getOrders = catchAsync(async (req: Request, res: Response) => {
+const getOrdersForManage = catchAsync(async (req: Request, res: Response) => {
   const paginationOptions = Pick(req.query, paginationOptionKeys);
   const filter = Pick(req.query, [
     "customerId",
     "orderId",
     "status",
-    "orderDate",
+    "startDare",
+    "endDate",
   ]);
 
-  const result = await OrderServices.getOrdersFromDB(
+  const result = await OrderServices.getOrdersForManageFromDB(
     filter,
     paginationOptions as any,
   );
@@ -53,8 +63,21 @@ const getOrders = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const getOrderById = catchAsync(async (req: Request, res: Response) => {
-  const result = await OrderServices.getOrderByIdFromDB(
+const getOrderByIdForManage = catchAsync(
+  async (req: Request, res: Response) => {
+    const result = await OrderServices.getOrderByIdForManageFromDB(
+      req.params.id,
+    );
+    sendSuccessResponse(res, {
+      statusCode: httpStatus.CREATED,
+      message: "Order retrieved successfully",
+      data: result,
+    });
+  },
+);
+
+const getMyOrderById = catchAsync(async (req: Request, res: Response) => {
+  const result = await OrderServices.getMyOrderByIdFromDB(
     req.user,
     req.params.id,
   );
@@ -80,27 +103,27 @@ const getNotReviewedOrderItems = catchAsync(
   },
 );
 
-const UpdateOrderStatusByStaff = catchAsync(
-  async (req: Request, res: Response) => {
-    const result = await OrderServices.UpdateOrderStatusByStaffIntoDB(
-      req.user,
-      req.body,
-    );
-    sendSuccessResponse(res, {
-      statusCode: httpStatus.CREATED,
-      message: "Order status updated successfully",
-      data: result,
-    });
-  },
-);
+const updateOrderStatus = catchAsync(async (req: Request, res: Response) => {
+  const result = await OrderServices.updateOrderStatusIntoDB(
+    req.user,
+    req.body,
+  );
+  sendSuccessResponse(res, {
+    statusCode: httpStatus.CREATED,
+    message: "Order status updated successfully",
+    data: result,
+  });
+});
 
 const OrderControllers = {
   initOrder,
+  placeOrder,
   getMyOrders,
-  getOrders,
-  getOrderById,
+  getOrdersForManage,
+  getOrderByIdForManage,
+  getMyOrderById,
   getNotReviewedOrderItems,
-  UpdateOrderStatusByStaff,
+  updateOrderStatus,
 };
 
 export default OrderControllers;

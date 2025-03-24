@@ -6,7 +6,11 @@ import {
   Prisma,
 } from "@prisma/client";
 import prisma from "../../shared/prisma";
-import { IFilterPayments, IInitPaymentPayload } from "./payment.interface";
+import {
+  ICheckPaymentQuery,
+  IFilterPayments,
+  IInitPaymentPayload,
+} from "./payment.interface";
 import { generateTransactionId } from "../../utils/function";
 import SSLServices from "../SSL/ssl.service";
 import { IInitSSLPaymentPayload } from "../SSL/ssl.interface";
@@ -14,47 +18,67 @@ import config from "../../config";
 import { IAuthUser } from "../Auth/auth.interface";
 import { IPaginationOptions } from "../../interfaces/pagination";
 import { calculatePagination } from "../../helpers/paginationHelper";
-
+import jwtHelpers from "../../shared/jwtHelpers";
+import AppError from "../../Errors/AppError";
+import httpStatus from "../../shared/http-status";
 
 const initPayment = async (payload: IInitPaymentPayload) => {
-  let transactionId = generateTransactionId();;
-  
+  let transactionId = generateTransactionId();
+
   // Generate unique tran id
-  while (await prisma.payment.findUnique({
+  while (
+    await prisma.payment.findUnique({
       where: {
         transactionId: transactionId,
       },
-    })) {
-     transactionId = generateTransactionId();
+    })
+  ) {
+    transactionId = generateTransactionId();
   }
-  const SSLInitPayload: IInitSSLPaymentPayload = {
-    transactionId,
-    amount: payload.amount,
-    url: {
-      success: config.ssl.success_url as string,
-      cancel: config.ssl.success_url as string,
-      fail: config.ssl.success_url as string,
-    },
-    customer: payload.customer,
-    shippingAddress: payload.shippingAddress,
-  };
 
-  const result = await SSLServices.initPayment(SSLInitPayload);
+  if (payload.method === PaymentMethod.COD) {
+    // Insert  payment into db
+    const createdPayment = await prisma.payment.create({
+      data: {
+        transactionId,
+        amount: payload.amount,
+        method: PaymentMethod.COD,
+      },
+    });
 
-  // Insert  payment into db
-  const createdPayment = await prisma.payment.create({
-    data: {
+    return {
+      paymentId: createdPayment.id,
+    };
+  } else {
+    const SSLInitPayload: IInitSSLPaymentPayload = {
       transactionId,
       amount: payload.amount,
-      method: PaymentMethod.SSLCOMMERZ,
-      gatewayGatewayData: result,
-    },
-  });
+      url: {
+        success: config.ssl.success_url as string,
+        cancel: config.ssl.success_url as string,
+        fail: config.ssl.success_url as string,
+      },
+      customer: payload.customer,
+      shippingAddress: payload.shippingAddress,
+    };
 
-  return {
-    paymentId: createdPayment.id,
-    paymentUrl: result.GatewayPageURL,
-  };
+    const result = await SSLServices.initPayment(SSLInitPayload);
+
+    // Insert  payment into db
+    const createdPayment = await prisma.payment.create({
+      data: {
+        transactionId,
+        amount: payload.amount,
+        method: PaymentMethod.SSLCOMMERZ,
+        gatewayGatewayData: result,
+      },
+    });
+
+    return {
+      paymentId: createdPayment.id,
+      paymentUrl: result.GatewayPageURL,
+    };
+  }
 };
 
 const getMyPaymentsFromDB = async (
@@ -68,9 +92,9 @@ const getMyPaymentsFromDB = async (
     order: {
       customerId: authUser.customerId!,
     },
-    status: PaymentStatus.Successful,
+    status: PaymentStatus.SUCCESS,
   };
-  const data = await prisma.payment.findMany({
+  const payments = await prisma.payment.findMany({
     where: whereConditions,
     skip,
     take: limit,
@@ -78,9 +102,20 @@ const getMyPaymentsFromDB = async (
       [orderBy]: sortOrder,
     },
   });
-  const total = await prisma.payment.count({
+  const totalResult = await prisma.payment.count({
     where: whereConditions,
   });
+
+  const total = await prisma.payment.count({
+    where:{
+      customerId:authUser.customerId
+    }
+  });
+
+  const data =  payments.map((payment)=>{
+    const {gatewayGatewayData,...main} = payment
+    return main
+  })
 
   const meta = {
     page,
@@ -93,7 +128,7 @@ const getMyPaymentsFromDB = async (
   };
 };
 
-const getPaymentsFromDB = async (
+const getPaymentsFromForManageDB = async (
   filter: IFilterPayments,
   paginationOptions: IPaginationOptions,
 ) => {
@@ -165,18 +200,19 @@ const getPaymentsFromDB = async (
     });
   }
 
-  if (customerId) {
+  if (customerId && !Number.isNaN(customerId)) {
     andConditions.push({
       order: {
-        customerId,
+        customerId:Number(customerId),
       },
     });
   }
+  
   const whereConditions: Prisma.PaymentWhereInput = {
     AND: andConditions,
   };
 
-  const data = await prisma.payment.findMany({
+  const payments  = await prisma.payment.findMany({
     where: whereConditions,
     skip,
     take: limit,
@@ -184,14 +220,22 @@ const getPaymentsFromDB = async (
       [orderBy]: sortOrder,
     },
   });
-  const total = await prisma.payment.count({
+  const totalResult = await prisma.payment.count({
     where: whereConditions,
   });
+
+  const total = await prisma.payment.count();
+
+  const data =  payments.map((payment)=>{
+    const {gatewayGatewayData,...main} = payment
+    return main
+  })
 
   const meta = {
     page,
     limit,
-    total,
+    totalResult,
+    total
   };
   return {
     data,
@@ -199,11 +243,30 @@ const getPaymentsFromDB = async (
   };
 };
 
+const checkPayment = async (query: ICheckPaymentQuery, token: string) => {
+  try {
+    const decode = (await jwtHelpers.verifyToken(
+      token,
+      config.jwt.payment_secret as string,
+    )) as { transactionId: string };
+    if (!decode) throw new AppError(httpStatus.BAD_REQUEST, "Bad request");
+
+    const payment = await prisma.payment.findUnique({
+      where: {
+        transactionId: decode.transactionId,
+      },
+    });
+
+    if (!payment) throw new Error();
+  } catch (error) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Bad request");
+  }
+};
+
 const PaymentServices = {
   initPayment,
-  validatePayment,
   getMyPaymentsFromDB,
-  getPaymentsFromDB,
+  getPaymentsFromForManageDB,
 };
 
 export default PaymentServices;

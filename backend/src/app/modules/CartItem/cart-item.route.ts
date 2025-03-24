@@ -9,16 +9,23 @@ const router = Router();
 
 router.post(
   "/",
-  auth([UserRole.Customer]),
+  auth([UserRole.CUSTOMER]),
   validateRequest(CartItemValidations.CreateCartItemValidation),
   CartItemControllers.createCartItem,
 );
 
-router.get("/", auth([UserRole.Customer]), CartItemControllers.getMyCartItems);
+router.patch(
+  "/change-quantity",
+  auth([UserRole.CUSTOMER]),
+  validateRequest(CartItemValidations.ChangeItemQuantity),
+  CartItemControllers.changeItemQuantity,
+);
+
+router.get("/", auth([UserRole.CUSTOMER]), CartItemControllers.getMyCartItems);
 
 router.delete(
   "/:id",
-  auth([UserRole.Customer]),
+  auth([UserRole.CUSTOMER]),
   CartItemControllers.deleteCartItemFromDB,
 );
 

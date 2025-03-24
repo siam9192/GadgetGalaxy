@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { OrderStatus, Prisma, ProductReviewStatus } from "@prisma/client";
 import AppError from "../../Errors/AppError";
 import { calculatePagination } from "../../helpers/paginationHelper";
 import { IPaginationOptions } from "../../interfaces/pagination";
@@ -20,6 +20,7 @@ const createReviewIntoDB = async (
       id: payload.orderItemId,
       order: {
         customerId: authUser.customerId!,
+        status:OrderStatus.DELIVERED
       },
     },
     include: {
@@ -41,6 +42,7 @@ const createReviewIntoDB = async (
         customerId: orderItem.order.customerId,
         comment: payload.comment,
         rating: payload.rating,
+        imagesUrl:payload.imagesUrl,
         orderItemId: payload.orderItemId,
         productId: orderItem.productId,
       },
@@ -106,16 +108,6 @@ const getMyNotReviewedProductsFromDB = async (
 
   const data = await prisma.orderItem.findMany({
     where: whereConditions,
-    include: {
-      product: {
-        select: {
-          name: true,
-          images: {
-            take: 1,
-          },
-        },
-      },
-    },
     take: limit,
     skip,
     orderBy: {
@@ -141,10 +133,10 @@ const getMyNotReviewedProductsFromDB = async (
 };
 
 const getProductReviewsFromDB = async (
-  productId: string|number,
+  productId: string | number,
   paginationOptions: IPaginationOptions,
 ) => {
-  productId = Number(productId)
+  productId = Number(productId);
 
   const { skip, limit, page, orderBy, sortOrder } =
     calculatePagination(paginationOptions);
@@ -235,15 +227,10 @@ const getMyReviewsFromDB = async (
   };
 };
 
-const getReviewsFromDBForManageFromDB = ()=>{
-  
-} 
-
 const updateReviewIntoDB = async (
   authUser: IAuthUser,
   payload: IUpdateProductReviewPayload,
 ) => {
-
   const review = await prisma.productReview.findUnique({
     where: {
       id: payload.id,
@@ -286,6 +273,24 @@ const updateReviewIntoDB = async (
   return result;
 };
 
+const changeReviewStatusIntoDB = async(payload:{id:number,status:`${ProductReviewStatus}`})=>{
+  const review = await prisma.productReview.findUnique({
+    where:{
+      id:payload.id
+    }
+  })
+  if(!review) throw new AppError(httpStatus.NOT_FOUND,'Review not found')
+  await prisma.productReview.update({
+where:{
+  id:payload.id
+},
+data:{
+  status:payload.status
+}
+  })
+}
+
+
 const ProductReviewServices = {
   createReviewIntoDB,
   createReviewResponseIntoDB,
@@ -293,6 +298,7 @@ const ProductReviewServices = {
   getMyReviewsFromDB,
   getProductReviewsFromDB,
   updateReviewIntoDB,
+  changeReviewStatusIntoDB
 };
 
 export default ProductReviewServices;

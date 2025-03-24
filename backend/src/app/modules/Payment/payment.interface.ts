@@ -19,3 +19,19 @@ export interface IFilterPayments {
   status?: `${PaymentStatus}`;
   customerId?: string;
 }
+
+export enum ECheckPaymentStatus {
+  VALID = "VALID",
+  FAILED = "FAILED",
+  CANCELLED = "CANCELLED",
+  UNATTEMPTED = "UNATTEMPTED",
+  EXPIRED = "EXPIRED",
+}
+
+export interface ICheckPaymentQuery {
+  status: "VALID";
+  tran_date: string;
+  val_id: string;
+  amount: string;
+  store_amount: string;
+}

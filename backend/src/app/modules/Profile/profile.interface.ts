@@ -6,24 +6,19 @@ export interface IUpdateCustomerProfilePayload {
   phoneNumber?: string;
   gender?: `${UserGender}`;
   dateOfBirth?: string;
-  updatedAddresses?: {
+  addresses?: {
     id: string;
-    district?: string;
-    zone?: string;
-    line?: string;
-    isDefault?: boolean;
-  }[];
-  newAddedAddresses?: {
     district: string;
     zone: string;
     line: string;
     isDefault: boolean;
+    isDeleted?: boolean;
   }[];
-  deletedAddressesIds?: string[];
 }
 
-export interface IUpdateStaffProfilePayload {
+export interface IUpdateAdministratorProfilePayload {
   fullName?: string;
   profilePhoto?: string;
   gender?: `${UserGender}`;
+  phoneNumber?: string;
 }

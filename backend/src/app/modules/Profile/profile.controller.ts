@@ -4,23 +4,6 @@ import httpStatus from "../../shared/http-status";
 import { sendSuccessResponse } from "../../shared/response";
 import ProfileServices from "./profile.service";
 
-const getUserProfileById = catchAsync(async (req: Request, res: Response) => {
-  const result = await ProfileServices.getUserProfileByIdFromDB(req.params.id);
-  sendSuccessResponse(res, {
-    statusCode: httpStatus.OK,
-    message: "User profile retrieved successfully",
-    data: result,
-  });
-});
-
-const getMyProfile = catchAsync(async (req: Request, res: Response) => {
-  const result = await ProfileServices.getUserProfileByIdFromDB(req.user.id);
-  sendSuccessResponse(res, {
-    statusCode: httpStatus.OK,
-    message: "User profile retrieved successfully",
-    data: result,
-  });
-});
 
 const updateMyProfile = catchAsync(async (req: Request, res: Response) => {
   const result = await ProfileServices.updateMyProfileIntoDB(
@@ -35,9 +18,7 @@ const updateMyProfile = catchAsync(async (req: Request, res: Response) => {
 });
 
 const ProfileControllers = {
-  getUserProfileById,
-  getMyProfile,
-  updateMyProfile,
+  updateMyProfile
 };
 
 export default ProfileControllers;

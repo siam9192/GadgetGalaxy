@@ -9,14 +9,14 @@ const router = Router();
 
 router.post(
   "/",
-  auth([UserRole.SuperAdmin, UserRole.Admin]),
+  auth([UserRole.SUPER_ADMIN, UserRole.ADMIN]),
   validateRequest(NotificationValidations.CreateNotificationValidation),
   NotificationControllers.createNotification,
 );
 
 router.get(
   "/",
-  auth([UserRole.SuperAdmin, UserRole.Admin]),
+  auth([UserRole.SUPER_ADMIN, UserRole.ADMIN]),
   NotificationControllers.getNotifications,
 );
 

@@ -96,7 +96,7 @@ const getCustomersFromDB = async (
   const whereConditions: Prisma.CustomerWhereInput = {
     AND: andConditions,
     user: {
-      role: UserRole.Customer,
+      role: UserRole.CUSTOMER,
       status: {
         not: UserStatus.DELETED,
       },
@@ -232,7 +232,7 @@ const getAdministratorsFromDB = async (
   const whereConditions: Prisma.AdministratorWhereInput = {
     AND: andConditions,
     user: {
-      role: UserRole.Customer,
+      role: UserRole.CUSTOMER,
       status: {
         not: UserStatus.DELETED,
       },

@@ -1,8 +1,9 @@
 import { z } from "zod";
 
 const CreateReviewValidation = z.object({
-  comment: z.string({ required_error: "Comment is required" }),
   orderItemId: z.string({ required_error: "orderItemId is required" }),
+  comment: z.string({ required_error: "Comment is required" }),
+  imagesUrl:z.array(z.string().url()),
   rating: z
     .number()
     .min(1, "Rating minimum 1 and maximum 5")
@@ -18,7 +19,8 @@ const UpdateReviewValidation = z.object({
   reviewId: z.string(),
   rating: z.number(),
   comment: z.string(),
-});
+  imagesUrl:z.array(z.string().url())
+}).partial();
 
 const ProductReviewValidations = {
   CreateReviewValidation,

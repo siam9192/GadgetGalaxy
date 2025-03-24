@@ -10,6 +10,15 @@ export interface ICreateOrderPayload {
   removeCartItemsAfterPurchase: boolean;
 }
 
+export interface IPlaceOrderPayload {
+  discountCode?: string;
+  shippingChargeId: number;
+  shippingInfo: IShippingInfo;
+  notes?: string;
+  cartItemsId: string[];
+  removeCartItemsAfterPurchase: boolean;
+}
+
 interface IShippingInfo {
   fullName: string;
   phoneNumber: string;
@@ -29,12 +38,12 @@ interface IOrderItem {
 }
 
 export interface IUpdateOrderStatusPayload {
-  orderId: string;
-  status: `${OrderStatus}`;
+  orderId: number;
+  status: "PROCESSING" | "IN_TRANSIT" | "DELIVERED";
   isNext?: boolean;
 }
 
-export interface IFilterOrder {
+export interface IMyOrderFilterQuery {
   status?: `${OrderStatus}`;
   customerId?: string;
   orderId?: string;
@@ -43,7 +52,7 @@ export interface IFilterOrder {
   endDate?: string;
 }
 
-export interface IFilterMyOrder {
+export interface IMyOrderFilterQuery {
   startDate?: string;
   endDate?: string;
   status?: `${OrderStatus}`;

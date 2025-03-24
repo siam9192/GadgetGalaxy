@@ -1,16 +1,17 @@
 import { Prisma } from "@prisma/client";
 import { calculatePagination } from "../../helpers/paginationHelper";
 import { IPaginationOptions } from "../../interfaces/pagination";
-import { IFilterActivityLogs } from "./activity-log.interface";
+import { IFilterActivityLogs } from "./administratorActivityLog.interface";
 import prisma from "../../shared/prisma";
 import AppError from "../../Errors/AppError";
 import httpStatus from "../../shared/http-status";
+import { log } from "console";
 
 const getActivityLogsFromDB = async (
   filter: IFilterActivityLogs,
   paginationOptions: IPaginationOptions,
 ) => {
-  const {administratorId, startDate, endDate } = filter;
+  const { administratorId, startDate, endDate } = filter;
   const { skip, limit, page, sortOrder } =
     calculatePagination(paginationOptions);
 
@@ -61,21 +62,57 @@ const getActivityLogsFromDB = async (
     },
   });
 
-  const total = await prisma.administratorActivityLog.count({
+  const totalResult = await prisma.administratorActivityLog.count({
     where: whereConditions,
   });
+
+  const total = await prisma.administratorActivityLog.count();
+
 
   const meta = {
     page,
     limit,
-    total,
+    totalResult,
+    total
   };
+
 
   return {
     data,
     meta,
   };
 };
+
+const getAdministratorActivities  =  async (id:string|number,paginationOptions:IPaginationOptions)=>{
+  const {skip,page,limit,sortOrder,orderBy} =  calculatePagination(paginationOptions)
+  const logs =  await prisma.administratorActivityLog.findMany({
+    where:{
+      administratorId:Number(id)
+    },
+    take:limit,
+    skip,
+    orderBy:{
+      [orderBy]:sortOrder
+    }
+  })
+  const totalResult = await prisma.administratorActivityLog.count({
+    where:{
+      administratorId:Number(id)
+    }
+  })
+
+  const data = logs
+  const meta  ={
+    page,
+    limit,
+    totalResult
+  }
+
+  return {
+    data,
+    meta
+  }
+}
 
 const deleteActivityFromDB = async (id: string) => {
   const activity = await prisma.administratorActivityLog.findUnique({
@@ -98,6 +135,7 @@ const deleteActivityFromDB = async (id: string) => {
 const ActivityLogServices = {
   getActivityLogsFromDB,
   deleteActivityFromDB,
+  getAdministratorActivities
 };
 
 export default ActivityLogServices;

@@ -15,9 +15,11 @@ router.get("/popular", CategoryControllers.getPopularCategories);
 router.get("/featured", CategoryControllers.getFeaturedCategories);
 router.get("/search-related", CategoryControllers.getSearchRelatedCategories);
 router.put(
-  "/",
+  "/:id",
   validateRequest(CategoryValidations.UpdateCategoryValidationSchema),
   CategoryControllers.updateCategory,
 );
+
+router.get("/visible",CategoryControllers.getAllVisibleCategories)
 const CategoryRouter = router;
 export default CategoryRouter;

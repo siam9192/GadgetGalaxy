@@ -10,7 +10,7 @@ import { calculatePagination } from "../../helpers/paginationHelper";
 import { generateSlug } from "../../utils/function";
 import AppError from "../../Errors/AppError";
 import httpStatus from "../../shared/http-status";
-import { ISearchProductsFilterQuery } from "../Product/product.interface";
+
 
 const createCategoryIntoDB = async (payload: ICreateCategoryPayload) => {
   // Check parent category existence
@@ -140,7 +140,8 @@ const updateCategoryIntoDB = async (
   return result;
 };
 
-const deleteCategoryByIdFromDB = async (id: string) => {
+const deleteCategoryByIdFromDB = async (id: string | number) => {
+  id = Number(id);
   // Check category existence
   const category = await prisma.category.findUnique({
     where: {
@@ -158,7 +159,6 @@ const deleteCategoryByIdFromDB = async (id: string) => {
   return null;
 };
 
-const softDeleteCategoryFromDB = async (id: string | number) => {};
 
 const getCategoriesFromDB = async (
   filterRequest: ICategoryFilterRequest,
@@ -200,6 +200,7 @@ const getCategoriesFromDB = async (
 
   const whereConditions: Prisma.CategoryWhereInput = {
     AND: andConditions,
+    isVisible:true
   };
 
   const data = await prisma.category.findMany({
@@ -214,14 +215,14 @@ const getCategoriesFromDB = async (
     take: limit,
   });
 
-  const total = await prisma.category.count({
+  const totalResult = await prisma.category.count({
     where: whereConditions,
   });
 
   const meta = {
     page,
     limit,
-    total,
+    totalResult,
   };
 
   return {
@@ -282,6 +283,43 @@ const getSearchRelatedCategoriesFromDB = async (filterQuery: {
   });
   return data;
 };
+const  getAllVisibleCategoriesFromDB = async () => {
+  const categories =  await prisma.category.findMany({
+    where: {
+      parentId: null, // Fetch only root categories
+    },
+    include: {
+      children: {
+        include: {
+          children: {
+            include: {
+              children: {
+                include: {
+                  children: true, // Continue nesting as deep as needed
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  const data = categories.map((category)=>{
+    const hierarchyStr  = category.slug
+    const item  = {
+      ...category,
+      hierarchyStr
+    }
+    if(!category.parentId)return item
+
+  })
+
+  return data
+
+};
+
+
 
 const CategoryServices = {
   createCategoryIntoDB,
@@ -291,6 +329,7 @@ const CategoryServices = {
   getSearchRelatedCategoriesFromDB,
   updateCategoryIntoDB,
   deleteCategoryByIdFromDB,
+  getAllVisibleCategoriesFromDB
 };
 
 export default CategoryServices;

@@ -91,6 +91,15 @@ const resetPassword = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+
+const getMe = catchAsync(async (req: Request, res: Response) => {
+  const result = await AuthServices.getMeFromDB(req.user);
+  sendSuccessResponse(res, {
+    statusCode: httpStatus.OK,
+    message: "Retrieved successfully",
+    data: result,
+  });
+});
 const AuthControllers = {
   register,
   verifyRegisterUsingOTP,
@@ -101,6 +110,7 @@ const AuthControllers = {
   forgetPassword,
   resetPassword,
   getAccessTokenUsingRefreshToken,
+  getMe
 };
 
 export default AuthControllers;

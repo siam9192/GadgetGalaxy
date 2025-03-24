@@ -1,4 +1,4 @@
-import { NotificationType, Prisma, UserRole } from "@prisma/client";
+import { Prisma, UserRole, UserStatus } from "@prisma/client";
 import prisma from "../../shared/prisma";
 import {
   ICreateNotificationPayload,
@@ -28,25 +28,26 @@ const createNotificationIntoDB = async (
     } else {
       const users = await prisma.user.findMany({
         where: {
-          role: UserRole.Customer,
-          status: "Active",
+          role: UserRole.CUSTOMER,
+          status: UserStatus.ACTIVE,
         },
         select: {
           id: true,
         },
       });
-
-      for (let i = 0; i < users.length; i++) {
-        await txClient.notification.create({
-          data: {
-            userId: users[i].id,
-            type: payload.type,
-            title: payload.title,
-            message: payload.message,
-            imageUrl: payload.imageUrl,
-          },
-        });
-      }
+      await Promise.all(
+        users.map((user) => {
+          return txClient.notification.create({
+            data: {
+              userId: user.id,
+              type: payload.type,
+              title: payload.title,
+              message: payload.message,
+              imageUrl: payload.imageUrl,
+            },
+          });
+        }),
+      );
     }
   });
 };
@@ -62,7 +63,7 @@ const getNotificationsFromDB = async (
   const andConditions: Prisma.NotificationWhereInput[] = [];
   if (userId) {
     andConditions.push({
-      userId,
+      userId: Number(userId),
     });
   }
   if (type) {
@@ -163,6 +164,7 @@ const notificationsSetAsReadIntoDB = async (authUser: IAuthUser) => {
   await prisma.notification.updateMany({
     where: {
       userId: authUser.id,
+      isRead: false,
     },
     data: {
       isRead: true,

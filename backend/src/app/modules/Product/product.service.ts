@@ -1238,6 +1238,58 @@ const updateProductStockIntoDB = async (
   return null;
 };
 
+const getMyNotReviewedProductsFromDB = async (
+  authUser: IAuthUser,
+  paginationOptions: IPaginationOptions,
+) => {
+  const { skip, limit, page, orderBy, sortOrder } =
+    calculatePagination(paginationOptions);
+
+  const whereConditions: Prisma.OrderItemWhereInput = {
+    order: {
+      customer: {
+        userId: authUser.id,
+      },
+    },
+    isReviewed: false,
+  };
+
+  const data = await prisma.orderItem.findMany({
+    where: whereConditions,
+    include: {
+      product: {
+        select: {
+          name: true,
+          images: {
+            take: 1,
+          },
+        },
+      },
+    },
+    take: limit,
+    skip,
+    orderBy: {
+      order: {
+        [orderBy]: sortOrder,
+      },
+    },
+  });
+
+  const total = await prisma.orderItem.count({
+    where: whereConditions,
+  });
+
+  return {
+    data: data,
+    meta: {
+      total,
+      skip,
+      limit,
+      page,
+    },
+  };
+};
+
 const ProductServices = {
   createProductIntoDB,
   updateProductIntoDB,
@@ -1252,6 +1304,7 @@ const ProductServices = {
   getRecentlyViewedProductsFromDB,
   getProductsForManageFromDB,
   getStockOutProductsFromDB,
+  getMyNotReviewedProductsFromDB
 };
 
 export default ProductServices;

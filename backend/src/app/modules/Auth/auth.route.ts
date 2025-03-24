@@ -51,6 +51,7 @@ router.get(
   AuthControllers.getAccessTokenUsingRefreshToken,
 );
 
+router.get('/me',auth(allRoles),AuthControllers.getMe)
 const AuthRouter = router;
 
 export default AuthRouter;

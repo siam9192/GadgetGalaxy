@@ -66,13 +66,24 @@ const getFeaturedCategories = catchAsync(
 );
 
 const updateCategory = catchAsync(async (req: Request, res: Response) => {
-  const result = await CategoryServices.updateCategoryIntoDB(req.body);
+  const result = await CategoryServices.updateCategoryIntoDB(req.params.id,req.body);
   sendSuccessResponse(res, {
     statusCode: httpStatus.OK,
     message: "Category updated successfully",
     data: result,
   });
 });
+
+
+const getAllVisibleCategories = catchAsync(async (req: Request, res: Response) => {
+  const result = await CategoryServices.getAllVisibleCategoriesFromDB();
+  sendSuccessResponse(res, {
+    statusCode: httpStatus.OK,
+    message: "Category retrieved successfully",
+    data: result,
+  });
+});
+
 
 const CategoryControllers = {
   createCategory,
@@ -81,6 +92,7 @@ const CategoryControllers = {
   getFeaturedCategories,
   getSearchRelatedCategories,
   updateCategory,
+  getAllVisibleCategories
 };
 
 export default CategoryControllers;

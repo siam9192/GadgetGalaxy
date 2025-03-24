@@ -113,59 +113,68 @@ const getMyCartItemsFromDB = async (authUser: IAuthUser) => {
   return result;
 };
 
-const changeProductQuantity = async (payload:{id:string,quantity:number})=>{
-   await prisma.cartItem.update({
-   where:{
-    id:payload.id
-   },
-   data:{
-    quantity:payload.quantity
-   }
-   })
-   return null
-}
+const changeItemQuantity = async (payload: {
+  id: string;
+  quantity: number;
+}) => {
+  await prisma.cartItem.update({
+    where: {
+      id: payload.id,
+    },
+    data: {
+      quantity: payload.quantity,
+    },
+  });
+  return null;
+};
 
-const changeItemVariantIntoDB = async (authUser:IAuthUser,payload:{
-  id:string,
-  variantId:number
-})=>{
+const changeItemVariantIntoDB = async (
+  authUser: IAuthUser,
+  payload: {
+    id: string;
+    variantId: number;
+  },
+) => {
   const cartItem = await prisma.cartItem.findUnique({
-    where:{
-      id:payload.id,
-      customerId:authUser.customerId
-    }
-  })
-  if(!cartItem) throw new AppError(httpStatus.NOT_FOUND,"Cart item not found")
-  
-   // Checking is that variant already exist in the cart
-   if( await prisma.cartItem.findFirst({
-    where:{
-      customerId:authUser.customerId,
-      productId:cartItem.productId,
-      variantId:payload.variantId
-    }
-  })){
-    throw new AppError(httpStatus.NOT_ACCEPTABLE,"Already exist")
+    where: {
+      id: payload.id,
+      customerId: authUser.customerId,
+    },
+  });
+  if (!cartItem)
+    throw new AppError(httpStatus.NOT_FOUND, "Cart item not found");
+
+  // Checking is that variant already exist in the cart
+  if (
+    await prisma.cartItem.findFirst({
+      where: {
+        customerId: authUser.customerId,
+        productId: cartItem.productId,
+        variantId: payload.variantId,
+      },
+    })
+  ) {
+    throw new AppError(httpStatus.NOT_ACCEPTABLE, "Already exist");
   }
- 
 
   await prisma.cartItem.update({
-    where:{
-     id:payload.id
+    where: {
+      id: payload.id,
     },
-    data:{
-      variantId:payload.variantId
-    }
-  })
- 
-  return null
-}
+    data: {
+      variantId: payload.variantId,
+    },
+  });
+
+  return null;
+};
 
 const CartItemServices = {
   createCartItemIntoDB,
   changeItemVariantIntoDB,
   getMyCartItemsFromDB,
   deleteCartItemFromDB,
+  changeItemQuantity,
 };
 
 export default CartItemServices;

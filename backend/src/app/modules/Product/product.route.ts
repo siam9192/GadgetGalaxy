@@ -43,24 +43,14 @@ router.get("/stock-out", ProductControllers.getStockOutProducts);
 
 // router.get(
 //   "/recently-viewed",
-//   auth([UserRole.Customer], { providerMode: true }),
+//   auth([UserRole.CUSTOMER], { providerMode: true }),
 //   ProductControllers.getRecentlyViewedProducts,
 // );
 router.get("/featured", ProductControllers.getFeaturedProducts);
 
 // Only staff can access
 router.get("/manage", ProductControllers.getProductsForManage);
-// router.get(
-//   "/recommended",
-//   auth([UserRole.Customer]),
-//   ProductControllers.getRecommendedProducts,
-// );
 
-// router.get(
-//   "/check-sku",
-//   auth(Object.values(UserRole).filter((ite) => ite !== UserRole.Customer)),
-//   ProductControllers.CheckSku,
-// );
 
 const ProductRouter = router;
 

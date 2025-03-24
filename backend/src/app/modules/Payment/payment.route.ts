@@ -7,11 +7,11 @@ const router = Router();
 
 router.get("/ispn", PaymentControllers.validatePayment);
 
-router.get("/my", auth([UserRole.Customer]), PaymentControllers.getMyPayments);
+router.get("/my", auth([UserRole.CUSTOMER]), PaymentControllers.getMyPayments);
 
 router.get(
-  "/",
-  auth([UserRole.SuperAdmin, UserRole.Admin]),
+  "/manage",
+  // auth([UserRole.SUPER_ADMIN, UserRole.ADMIN]),
   PaymentControllers.getPayments,
 );
 

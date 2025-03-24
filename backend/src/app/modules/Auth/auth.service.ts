@@ -139,7 +139,7 @@ const verifyRegistrationUsingOTP = async (data: IVerifyAccountData) => {
     // Create user after successfully verified
     const createdUser = await tx.user.create({
       data: {
-        role: UserRole.Customer,
+        role: UserRole.CUSTOMER,
         email: verification.email,
         password: verification.password,
         authProvider: AuthProvider.EMAIL_PASSWORD,
@@ -316,7 +316,7 @@ const login = async (res: Response, data: ILoginData) => {
   };
 
   // Insert profile id base on user role
-  if (user.role === UserRole.Customer) {
+  if (user.role === UserRole.CUSTOMER) {
     tokenPayload.customerId = user.customer!.id;
   } else {
     tokenPayload.administratorId = user.administrator!.id;
@@ -537,6 +537,52 @@ const resetPassword = async (payload: IResetPasswordPayload) => {
   return null;
 };
 
+const getMeFromDB = async (authUser:IAuthUser)=>{
+  const user = (await prisma.user.findUnique({
+    where:{
+      id:authUser.id
+    },
+    include:{
+      customer:{
+        include:{
+          addresses:true,
+        }
+       
+      },
+      administrator:true
+    }
+  }))!
+
+  let data;
+   if(user.role === UserRole.CUSTOMER){
+     const customer = user.customer!
+    data = {
+      email:user.email,
+      authProvider:user.authProvider,
+      fullName:customer?.fullName,
+      profilePhoto:customer.profilePhoto,
+      phoneNumber:customer.phoneNumber,
+      gender:customer.gender,
+      addresses:customer.addresses,
+      status:user.status
+    }
+   }
+   else{
+    const administrator =user.administrator!
+    data = {
+      email:user.email,
+      authProvider:user.authProvider,
+      fullName:administrator.fullName,
+      profilePhoto:administrator.profilePhoto,
+      phoneNumber:administrator.phoneNumber,
+      gender:administrator.gender,
+      status:user.status
+    }
+  }
+
+  return data
+}
+
 const AuthServices = {
   register,
   verifyRegistrationUsingOTP,
@@ -547,6 +593,7 @@ const AuthServices = {
   forgetPassword,
   resetPassword,
   getAccessTokenUsingRefreshToken,
+  getMeFromDB
 };
 
 export default AuthServices;

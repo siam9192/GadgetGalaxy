@@ -4,13 +4,14 @@ import {
   PaymentStatus,
   Prisma,
   ProductStatus,
+  UserStatus,
 } from "@prisma/client";
 import prisma from "../../shared/prisma";
 
 const getAllOverviewDataFromDB = async () => {
   const userWhereConditions: Prisma.UserWhereInput = {
     status: {
-      not: "Deleted",
+      not:UserStatus.DELETED,
     },
   };
   const totalUsers = await prisma.user.count({
@@ -19,7 +20,9 @@ const getAllOverviewDataFromDB = async () => {
   const totalOrders = await prisma.order.count({
     where: {
       status: {
-        not: "Pending",
+        not:{
+          in:[OrderStatus.PENDING,OrderStatus.FAILED]
+        },
       },
     },
   });
@@ -29,7 +32,7 @@ const getAllOverviewDataFromDB = async () => {
       user: userWhereConditions,
     },
   });
-  const totalStaffs = await prisma.staff.count({
+  const totalAdministrators = await prisma.administrator.count({
     where: {
       user: userWhereConditions,
     },
@@ -42,68 +45,21 @@ const getAllOverviewDataFromDB = async () => {
 
   const totalBrands = await prisma.brand.count();
 
-  const startDate = new Date();
-  startDate.setDate(startDate.getDate() - 2);
-  const endDate = new Date();
-
-  const recentOrders = await prisma.order.findMany({
-    where: {
-      createdAt: {
-        gte: startDate,
-        lte: endDate,
-      },
-    },
-    select: {
-      id: true,
-      customer: true,
-      items: true,
-      totalAmount: true,
-      discountAmount: true,
-      grossAmount: true,
-      shippingAmount: true,
-      netAmount: true,
-      notes: true,
-      exceptedDeliveryDate: true,
-      status: true,
-      paymentStatus: true,
-      createdAt: true,
-    },
-    take: 6,
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
-
-  const recentPayments = await prisma.payment.findMany({
-    where: {
-      createdAt: {
-        gte: startDate,
-        lte: endDate,
-      },
-    },
-    take: 6,
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
-
   return {
     totalUsers,
     totalCustomers,
-    totalStaffs,
+    totalAdministrators,
     totalBrands,
     totalOrders,
     totalReviews,
-    totalRevenue,
-    recentOrders,
-    recentPayments,
+    totalRevenue
   };
 };
 
 const getUsersOverviewFromDB = async () => {
   const userWhereConditions: Prisma.UserWhereInput = {
     status: {
-      not: "Deleted",
+      not: UserStatus.DELETED,
     },
   };
   const total = await prisma.user.count({
@@ -112,19 +68,19 @@ const getUsersOverviewFromDB = async () => {
 
   const totalActive = await prisma.user.count({
     where: {
-      status: "Active",
+      status:UserStatus.ACTIVE,
     },
   });
 
-  const totalSuspended = await prisma.user.count({
+  const totalBlocked = await prisma.user.count({
     where: {
-      status: "Suspended",
+      status:UserStatus.BLOCKED ,
     },
   });
 
   const totalDeleted = await prisma.user.count({
     where: {
-      status: "Deleted",
+      status: UserStatus.DELETED,
     },
   });
 
@@ -132,118 +88,51 @@ const getUsersOverviewFromDB = async () => {
   startDate.setDate(startDate.getDate() - 2);
   const endDate = new Date();
 
-  const totalRecentlyJoined = await prisma.user.count({
-    where: {
-      createdAt: {
-        gte: startDate,
-        lte: endDate,
-      },
-    },
-  });
-
   return {
     total,
     totalActive,
-    totalSuspended,
-    totalDeleted,
-    totalRecentlyJoined,
+    totalBlocked,
+    totalDeleted
   };
 };
 
 const getOrdersOverviewFromDB = async () => {
-  const total = await prisma.order.count({
-    where: {
-      status: {
-        not: OrderStatus.Pending,
-      },
-    },
-  });
+  const total = await prisma.order.count();
 
-  const totalPlaced = await prisma.order.count({
-    where: {
-      status: OrderStatus.Placed,
-    },
-  });
+  const group = await prisma.order.groupBy({
+    by:'status',
+    _count:true
+  })
 
-  const totalProcessing = await prisma.order.count({
-    where: {
-      status: OrderStatus.Processing,
-    },
-  });
+  const totalPlaced =  group.find(_=>_.status === OrderStatus.PLACED)?._count||0
+  const totalProcessing =  group.find(_=>_.status === OrderStatus.PROCESSING)?._count||0
 
-  const totalInTransit = await prisma.order.count({
-    where: {
-      status: OrderStatus.InTransit,
-    },
-  });
+  const totalInTransit =  group.find(_=>_.status === OrderStatus.IN_TRANSIT)?._count||0
 
-  const totalOutForDelivery = await prisma.order.count({
-    where: {
-      status: OrderStatus.OutForDelivery,
-    },
-  });
+  const totalDelivered = group.find(_=>_.status === OrderStatus.DELIVERED)?._count||0
+  const totalFailed = group.find(_=>_.status === OrderStatus.FAILED)?._count||0
 
-  const totalDelivered = await prisma.order.count({
-    where: {
-      status: OrderStatus.Delivered,
-    },
-  });
+  const totalCanceled = group.find(_=>_.status === OrderStatus.CANCELED)?._count||0
 
-  const totalCanceled = await prisma.order.count({
-    where: {
-      status: OrderStatus.Canceled,
-    },
-  });
+  const totalReturned = group.find(_=>_.status === OrderStatus.RETURNED)?._count||0
 
-  const totalReturned = await prisma.order.count({
-    where: {
-      status: OrderStatus.Returned,
-    },
-  });
-
-  const totalYetToDelivery = await prisma.order.count({
-    where: {
-      status: {
-        in: [
-          OrderStatus.Processing,
-          OrderStatus.InTransit,
-          OrderStatus.OutForDelivery,
-        ],
-      },
-    },
-  });
-
-  const totalRunningOrder = await prisma.order.count({
-    where: {
-      status: {
-        in: [
-          OrderStatus.Placed,
-          OrderStatus.Processing,
-          OrderStatus.InTransit,
-          OrderStatus.OutForDelivery,
-        ],
-      },
-    },
-  });
 
   return {
     total,
     totalPlaced,
     totalProcessing,
     totalInTransit,
-    totalOutForDelivery,
     totalDelivered,
     totalReturned,
     totalCanceled,
-    totalYetToDelivery,
-    totalRunningOrder,
+    totalFailed
   };
 };
 
 const getProductsOverviewFromDB = async () => {
   const whereConditions = {
     status: {
-      not: ProductStatus.Deleted,
+      not: ProductStatus.DELETED,
     },
   };
   const total = await prisma.product.count({
@@ -252,13 +141,13 @@ const getProductsOverviewFromDB = async () => {
 
   const totalActive = await prisma.product.count({
     where: {
-      status: ProductStatus.Active,
+      status: ProductStatus.ACTIVE,
     },
   });
 
-  const totalInActive = await prisma.product.count({
+  const totalPaused = await prisma.product.count({
     where: {
-      status: ProductStatus.InActive,
+      status: ProductStatus.PAUSED,
     },
   });
 
@@ -266,30 +155,28 @@ const getProductsOverviewFromDB = async () => {
     where: {
       OR: [
         {
-          stock: 0,
+          availableQuantity: 0,
         },
         {
           variants: {
             some: {
-              stock: 0,
+              availableQuantity: 0,
             },
           },
         },
       ],
       status: {
-        not: ProductStatus.Deleted,
+        not: ProductStatus.DELETED,
       },
     },
   });
 
-  //    const bestSellingProducts = await prisma.product.findMany({
-
-  //    }).
+  
 
   return {
     total,
     totalActive,
-    totalInActive,
+    totalPaused,
     totalStockOut,
   };
 };
@@ -298,12 +185,12 @@ const getDiscountOverviewFromDB = async () => {
   const total = await prisma.discount.count();
   const totalActive = await prisma.discount.count({
     where: {
-      status: DiscountStatus.Active,
+      status: DiscountStatus.ACTIVE,
     },
   });
-  const totalInActive = await prisma.discount.count({
+  const totalPaused = await prisma.discount.count({
     where: {
-      status: DiscountStatus.InActive,
+      status: DiscountStatus.INACTIVE,
     },
   });
 
@@ -323,7 +210,7 @@ const getDiscountOverviewFromDB = async () => {
   return {
     total,
     totalActive,
-    totalInActive,
+    totalPaused,
     totalRecentlyAdded,
   };
 };
@@ -331,7 +218,7 @@ const getDiscountOverviewFromDB = async () => {
 const getPaymentsOverviewFromDB = async () => {
   const total = await prisma.payment.count({
     where: {
-      status: PaymentStatus.Successful,
+      status: PaymentStatus.SUCCESS,
     },
   });
 

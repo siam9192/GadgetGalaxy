@@ -3,18 +3,24 @@ import config from "../../config";
 import { IInitSSLPaymentPayload } from "./ssl.interface";
 import AppError from "../../Errors/AppError";
 import httpStatus from "../../shared/http-status";
-const SSL = require("sslcommerz-lts");
+import jwtHelpers from "../../shared/jwtHelpers";
 
 const initPayment = async (payload: IInitSSLPaymentPayload) => {
+  const token = jwtHelpers.generateToken(
+    { transactionId: payload.transactionId },
+    config.jwt.payment_secret as string,
+    "12h",
+  );
+
   const data = {
     store_id: config.ssl.store_id,
     store_passwd: config.ssl.store_password,
     total_amount: payload.amount,
     currency: "BDT",
     tran_id: payload.transactionId, // use unique tran_id for each api call
-    success_url: config.ssl.success_url,
-    fail_url: config.ssl.fail_url,
-    cancel_url: config.ssl.cancel_url,
+    success_url: `${config.backend_base_api}/payments/ispn/${token}`,
+    fail_url: `${config.backend_base_api}/payments/ispn/${token}`,
+    cancel_url: `${config.backend_base_api}/payments/ispn/${token}`,
     ipn_url: "http://localhost:3030/ipn",
     shipping_method: "N/A",
     product_name: "N/A",

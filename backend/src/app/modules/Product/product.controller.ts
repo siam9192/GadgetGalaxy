@@ -188,6 +188,8 @@ const getStockOutProducts = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+
+
 const ProductControllers = {
   createProduct,
   updateProduct,

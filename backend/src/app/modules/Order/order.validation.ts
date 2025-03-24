@@ -17,7 +17,15 @@ const shippingInfo = z.object({
 
 const InitOrderValidation = z.object({
   discountCode: z.string().nonempty().optional(),
-  shippingChargeId: z.string().nonempty(),
+  shippingChargeId: z.number(),
+  cartItemsId: z.array(z.string()).min(1),
+  shippingInfo,
+  removeCartItemsAfterPurchase: z.boolean(),
+});
+
+const PlaceOrderValidation = z.object({
+  discountCode: z.string().nonempty().optional(),
+  shippingChargeId: z.number(),
   cartItemsId: z.array(z.string()).min(1),
   shippingInfo,
   removeCartItemsAfterPurchase: z.boolean(),
@@ -31,6 +39,7 @@ const UpdateOrderStatusByStaffValidation = z.object({
 const OrderValidations = {
   InitOrderValidation,
   UpdateOrderStatusByStaffValidation,
+  PlaceOrderValidation,
 };
 
 export default OrderValidations;

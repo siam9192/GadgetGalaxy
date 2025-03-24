@@ -9,34 +9,28 @@ const router = Router();
 
 router.post(
   "/",
-  auth(UserRole.Customer),
+  auth([UserRole.CUSTOMER]),
   validateRequest(ProductReviewValidations.CreateReviewValidation),
   ProductReviewControllers.createReview,
 );
 
-router.post(
-  "/response",
-  auth(UserRole.Vendor),
-  validateRequest(ProductReviewValidations.CreateReviewResponseValidation),
-  ProductReviewControllers.createReviewResponse,
-);
 
 router.post(
   "/",
-  auth(UserRole.Customer),
+  auth([UserRole.CUSTOMER]),
   validateRequest(ProductReviewValidations.UpdateReviewValidation),
   ProductReviewControllers.updateReview,
 );
 
 router.get(
   "/my/not-reviewed",
-  auth(UserRole.Customer),
+  auth([UserRole.CUSTOMER]),
   ProductReviewControllers.getMyNotReviewedProducts,
 );
 
 router.get(
   "/my",
-  auth(UserRole.Customer),
+  auth([UserRole.CUSTOMER]),
   ProductReviewControllers.getMyReviews,
 );
 

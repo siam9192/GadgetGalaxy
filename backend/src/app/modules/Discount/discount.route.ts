@@ -31,7 +31,7 @@ router.patch(
 
 router.post(
   "/apply",
-  auth([UserRole.Customer]),
+  auth([UserRole.CUSTOMER]),
   validateRequest(DiscountValidations.ApplyDiscountValidation),
   DiscountControllers.applyDiscount,
 );

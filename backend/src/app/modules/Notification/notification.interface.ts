@@ -1,11 +1,11 @@
 import { NotificationType } from "@prisma/client";
 
 export interface ICreateNotificationPayload {
-  usersId: string[];
+  usersId: number[];
   type: `${NotificationType}`;
   title: string;
   message: string;
-  imageUrl: string;
+  imageUrl?: string;
 }
 
 export interface IFilterNotifications {
