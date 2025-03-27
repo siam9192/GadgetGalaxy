@@ -209,6 +209,7 @@ model ProductReview {
 model Discount {
   id Int @id  @default(autoincrement())
   code     String @unique @db.VarChar(20)   
+  title String @db.VarChar(200) 
   description    String  @db.VarChar(5000)
   discountType   DiscountType
   discountValue  Float
@@ -332,7 +333,17 @@ model Payment {
    gatewayGatewayData Json?
    createdAt DateTime @default(now())
    updatedAt DateTime @updatedAt
+   refundRequest PaymentRefundRequest?
    @@map("payments")
+}
+
+model PaymentRefundRequest {
+   id String @id  @default(cuid())
+   paymentId String
+   payment Payment @relation(fields: [id],references: [id],onDelete: Cascade)
+   status PaymentRefundStatus @default(PENDING)
+   createdAt DateTime @default(now())
+   updatedAt DateTime @updatedAt
 }
 
 model ItemReserve {
@@ -341,8 +352,8 @@ model ItemReserve {
     productId Int?
     variantId Int?
     quantity Int
-    expireAt DateTime 
-    order Order @relation(fields: [orderId],references: [id])
+    status ItemReserveStatus @default(RESERVED)
+    order Order @relation(fields: [orderId],references: [id],onDelete: Cascade)
     @@map("item_reservers")
 }
 
@@ -522,7 +533,7 @@ enum PaymentStatus {
   EXPIRED
   CANCELED
   UNATTEMPTED 
-
+  REFUNDED
 }
 
 
@@ -605,4 +616,14 @@ enum OrderPaymentStatus {
   PAID
   UNPAID
 }
+enum ItemReserveStatus {
+  RESERVED
+  RESTORED
+}
 
+enum PaymentRefundStatus {
+  PENDING
+  COMPLETED
+  REJECTED
+  EXPIRED
+}

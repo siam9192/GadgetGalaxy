@@ -68,14 +68,12 @@ const getActivityLogsFromDB = async (
 
   const total = await prisma.administratorActivityLog.count();
 
-
   const meta = {
     page,
     limit,
     totalResult,
-    total
+    total,
   };
-
 
   return {
     data,
@@ -83,36 +81,40 @@ const getActivityLogsFromDB = async (
   };
 };
 
-const getAdministratorActivities  =  async (id:string|number,paginationOptions:IPaginationOptions)=>{
-  const {skip,page,limit,sortOrder,orderBy} =  calculatePagination(paginationOptions)
-  const logs =  await prisma.administratorActivityLog.findMany({
-    where:{
-      administratorId:Number(id)
+const getAdministratorActivities = async (
+  id: string | number,
+  paginationOptions: IPaginationOptions,
+) => {
+  const { skip, page, limit, sortOrder, orderBy } =
+    calculatePagination(paginationOptions);
+  const logs = await prisma.administratorActivityLog.findMany({
+    where: {
+      administratorId: Number(id),
     },
-    take:limit,
+    take: limit,
     skip,
-    orderBy:{
-      [orderBy]:sortOrder
-    }
-  })
+    orderBy: {
+      [orderBy]: sortOrder,
+    },
+  });
   const totalResult = await prisma.administratorActivityLog.count({
-    where:{
-      administratorId:Number(id)
-    }
-  })
+    where: {
+      administratorId: Number(id),
+    },
+  });
 
-  const data = logs
-  const meta  ={
+  const data = logs;
+  const meta = {
     page,
     limit,
-    totalResult
-  }
+    totalResult,
+  };
 
   return {
     data,
-    meta
-  }
-}
+    meta,
+  };
+};
 
 const deleteActivityFromDB = async (id: string) => {
   const activity = await prisma.administratorActivityLog.findUnique({
@@ -135,7 +137,7 @@ const deleteActivityFromDB = async (id: string) => {
 const ActivityLogServices = {
   getActivityLogsFromDB,
   deleteActivityFromDB,
-  getAdministratorActivities
+  getAdministratorActivities,
 };
 
 export default ActivityLogServices;

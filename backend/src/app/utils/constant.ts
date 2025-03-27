@@ -16,6 +16,7 @@ export const productSelect = {
   availableQuantity: true,
   variants: {
     select: {
+      id: true,
       sku: true,
       price: true,
       offerPrice: true,
@@ -26,4 +27,5 @@ export const productSelect = {
 
     take: 1,
   },
+  images: true,
 };

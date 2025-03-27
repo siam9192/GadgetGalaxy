@@ -34,9 +34,10 @@ const getShippingChargesForManageFromDB = async (
 };
 
 const updateShippingChargeIntoDB = async (
-  shippingChargeId: string,
+  shippingChargeId: string | number,
   payload: IUpdateShippingChargePayload,
 ) => {
+  shippingChargeId = Number(shippingChargeId);
   // Find the existing shipping charge by ID
   const shippingCharge = await prisma.shippingCharge.findUnique({
     where: {
@@ -58,7 +59,8 @@ const updateShippingChargeIntoDB = async (
   });
 };
 
-const deleteShippingChargeByIdFromDB = async (id: string) => {
+const deleteShippingChargeByIdFromDB = async (id: string | number) => {
+  id = Number(id);
   const shippingCharge = await prisma.shippingCharge.findUnique({
     where: {
       id,

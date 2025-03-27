@@ -2,6 +2,7 @@ import { DiscountStatus, DiscountType } from "@prisma/client";
 
 export interface ICreateDiscountPayload {
   code: string;
+  title: string;
   description: string;
   discountType: `${DiscountType}`;
   discountValue: number;
@@ -18,6 +19,7 @@ export interface ICreateDiscountPayload {
 
 export interface IUpdateDiscountPayload {
   code?: string;
+  title?: string;
   description?: string;
   discountType?: `${DiscountType}`;
   discountValue?: number;

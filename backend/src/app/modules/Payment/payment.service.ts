@@ -21,6 +21,7 @@ import { calculatePagination } from "../../helpers/paginationHelper";
 import jwtHelpers from "../../shared/jwtHelpers";
 import AppError from "../../Errors/AppError";
 import httpStatus from "../../shared/http-status";
+import OrderServices from "../Order/order.service";
 
 const initPayment = async (payload: IInitPaymentPayload) => {
   let transactionId = generateTransactionId();
@@ -107,19 +108,20 @@ const getMyPaymentsFromDB = async (
   });
 
   const total = await prisma.payment.count({
-    where:{
-      customerId:authUser.customerId
-    }
+    where: {
+      customerId: authUser.customerId,
+    },
   });
 
-  const data =  payments.map((payment)=>{
-    const {gatewayGatewayData,...main} = payment
-    return main
-  })
+  const data = payments.map((payment) => {
+    const { gatewayGatewayData, ...main } = payment;
+    return main;
+  });
 
   const meta = {
     page,
     limit,
+    totalResult,
     total,
   };
   return {
@@ -203,16 +205,16 @@ const getPaymentsFromForManageDB = async (
   if (customerId && !Number.isNaN(customerId)) {
     andConditions.push({
       order: {
-        customerId:Number(customerId),
+        customerId: Number(customerId),
       },
     });
   }
-  
+
   const whereConditions: Prisma.PaymentWhereInput = {
     AND: andConditions,
   };
 
-  const payments  = await prisma.payment.findMany({
+  const payments = await prisma.payment.findMany({
     where: whereConditions,
     skip,
     take: limit,
@@ -226,16 +228,16 @@ const getPaymentsFromForManageDB = async (
 
   const total = await prisma.payment.count();
 
-  const data =  payments.map((payment)=>{
-    const {gatewayGatewayData,...main} = payment
-    return main
-  })
+  const data = payments.map((payment) => {
+    const { gatewayGatewayData, ...main } = payment;
+    return main;
+  });
 
   const meta = {
     page,
     limit,
     totalResult,
-    total
+    total,
   };
   return {
     data,
@@ -243,21 +245,71 @@ const getPaymentsFromForManageDB = async (
   };
 };
 
-const checkPayment = async (query: ICheckPaymentQuery, token: string) => {
+const checkPayment = async (query: ICheckPaymentQuery) => {
   try {
+    if (!query.token) throw new Error();
     const decode = (await jwtHelpers.verifyToken(
-      token,
+      query.token,
       config.jwt.payment_secret as string,
     )) as { transactionId: string };
     if (!decode) throw new AppError(httpStatus.BAD_REQUEST, "Bad request");
 
+    let url;
     const payment = await prisma.payment.findUnique({
       where: {
         transactionId: decode.transactionId,
       },
+      include: {
+        order: true,
+      },
     });
 
     if (!payment) throw new Error();
+
+    await prisma.$transaction(async (tx) => {
+      switch (query.status) {
+        case "SUCCESS":
+          await OrderServices.placeOrderAfterSuccessfulPaymentIntoDB(
+            payment.id,
+            tx,
+          );
+          url = config.payment.success_url;
+        case "CANCELED":
+          await tx.payment.update({
+            where: {
+              id: payment.id,
+            },
+            data: {
+              status: PaymentStatus.CANCELED,
+            },
+          });
+          config.payment.cancel_url;
+          await OrderServices.manageUnsuccessfulOrdersIntoDB(
+            "FAILED",
+            payment.order!.id,
+            tx,
+          );
+        case "FAILED":
+          await tx.payment.update({
+            where: {
+              id: payment.id,
+            },
+            data: {
+              status: PaymentStatus.CANCELED,
+            },
+          });
+
+          await OrderServices.manageUnsuccessfulOrdersIntoDB(
+            "FAILED",
+            payment.order!.id,
+            tx,
+          );
+          config.payment.cancel_url;
+      }
+    });
+    return {
+      url,
+    };
   } catch (error) {
     throw new AppError(httpStatus.BAD_REQUEST, "Bad request");
   }
@@ -267,6 +319,7 @@ const PaymentServices = {
   initPayment,
   getMyPaymentsFromDB,
   getPaymentsFromForManageDB,
+  checkPayment,
 };
 
 export default PaymentServices;

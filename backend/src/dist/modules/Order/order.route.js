@@ -1,0 +1,67 @@
+"use strict";
+var __importDefault =
+  (this && this.__importDefault) ||
+  function (mod) {
+    return mod && mod.__esModule ? mod : { default: mod };
+  };
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const auth_1 = __importDefault(require("../../middlewares/auth"));
+const client_1 = require("@prisma/client");
+const order_controller_1 = __importDefault(require("./order.controller"));
+const validateRequest_1 = __importDefault(
+  require("../../middlewares/validateRequest"),
+);
+const order_validation_1 = __importDefault(require("./order.validation"));
+const product_controller_1 = __importDefault(
+  require("../Product/product.controller"),
+);
+const router = (0, express_1.Router)();
+router.post(
+  "/init",
+  (0, auth_1.default)([client_1.UserRole.CUSTOMER]),
+  (0, validateRequest_1.default)(
+    order_validation_1.default.InitOrderValidation,
+  ),
+  order_controller_1.default.initOrder,
+);
+router.post(
+  "/place",
+  (0, auth_1.default)([client_1.UserRole.CUSTOMER]),
+  (0, validateRequest_1.default)(
+    order_validation_1.default.PlaceOrderValidation,
+  ),
+  order_controller_1.default.placeOrder,
+);
+router.get("/manage", order_controller_1.default.getOrdersForManage);
+router.get(
+  "/my",
+  (0, auth_1.default)([client_1.UserRole.CUSTOMER]),
+  order_controller_1.default.getMyOrders,
+);
+router.get(
+  "/my/:id",
+  (0, auth_1.default)([client_1.UserRole.CUSTOMER]),
+  order_controller_1.default.getMyOrderById,
+);
+router.get(
+  "/manage/:id",
+  (0, auth_1.default)([client_1.UserRole.SUPER_ADMIN, client_1.UserRole.ADMIN]),
+  order_controller_1.default.getOrderByIdForManage,
+);
+router.get("/stock-out", product_controller_1.default.getStockOutProducts);
+router.get(
+  "/not-reviewed",
+  (0, auth_1.default)([client_1.UserRole.SUPER_ADMIN, client_1.UserRole.ADMIN]),
+  order_controller_1.default.getNotReviewedOrderItems,
+);
+router.patch(
+  "/update-status",
+  (0, auth_1.default)([client_1.UserRole.SUPER_ADMIN, client_1.UserRole.ADMIN]),
+  (0, validateRequest_1.default)(
+    order_validation_1.default.UpdateOrderStatusByStaffValidation,
+  ),
+  order_controller_1.default.updateOrderStatus,
+);
+const OrderRouter = router;
+exports.default = OrderRouter;

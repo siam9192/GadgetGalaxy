@@ -13,19 +13,20 @@ const getAllOverviewData = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-
-const getOrdersOverviewData = catchAsync(async (req: Request, res: Response) => {
+const getOrdersOverviewData = catchAsync(
+  async (req: Request, res: Response) => {
     const result = await OverviewServices.getOrdersOverviewFromDB();
     sendSuccessResponse(res, {
       statusCode: httpStatus.OK,
       message: "Overview data retrieved successfully",
       data: result,
     });
-  });
+  },
+);
 
 const OverviewControllers = {
-    getAllOverviewData,
-    getOrdersOverviewData
-}
+  getAllOverviewData,
+  getOrdersOverviewData,
+};
 
-export default OverviewControllers
+export default OverviewControllers;

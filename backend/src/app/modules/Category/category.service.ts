@@ -11,7 +11,6 @@ import { generateSlug } from "../../utils/function";
 import AppError from "../../Errors/AppError";
 import httpStatus from "../../shared/http-status";
 
-
 const createCategoryIntoDB = async (payload: ICreateCategoryPayload) => {
   // Check parent category existence
   if (payload.parentId) {
@@ -159,7 +158,6 @@ const deleteCategoryByIdFromDB = async (id: string | number) => {
   return null;
 };
 
-
 const getCategoriesFromDB = async (
   filterRequest: ICategoryFilterRequest,
   options: IPaginationOptions,
@@ -200,7 +198,7 @@ const getCategoriesFromDB = async (
 
   const whereConditions: Prisma.CategoryWhereInput = {
     AND: andConditions,
-    isVisible:true
+    isVisible: true,
   };
 
   const data = await prisma.category.findMany({
@@ -283,8 +281,8 @@ const getSearchRelatedCategoriesFromDB = async (filterQuery: {
   });
   return data;
 };
-const  getAllVisibleCategoriesFromDB = async () => {
-  const categories =  await prisma.category.findMany({
+const getAllVisibleCategoriesFromDB = async () => {
+  const categories = await prisma.category.findMany({
     where: {
       parentId: null, // Fetch only root categories
     },
@@ -305,21 +303,52 @@ const  getAllVisibleCategoriesFromDB = async () => {
     },
   });
 
-  const data = categories.map((category)=>{
-    const hierarchyStr  = category.slug
-    const item  = {
+  const data = categories.map((category) => {
+    const hierarchyStr = category.slug;
+    const item = {
       ...category,
-      hierarchyStr
-    }
-    if(!category.parentId)return item
+      hierarchyStr,
+    };
+    if (!category.parentId) return item;
+  });
 
-  })
-
-  return data
-
+  return data;
 };
 
+const getSearchKeywordCategoriesFromDB = async (keyword: string) => {
+  const categories = await prisma.category.findMany({
+    where: {
+      name: {
+        contains: keyword,
+        mode: "insensitive",
+      },
+      isVisible: true,
+    },
+  });
+  return categories;
+};
 
+const getChildCategoriesBySlugFromDB = async (slug: string) => {
+  const categories = await prisma.category.findMany({
+    where: {
+      parent: {
+        slug,
+      },
+    },
+  });
+  return categories;
+};
+
+const getChildCategoriesByIdFromDB = async (id: string) => {
+  const categories = await prisma.category.findMany({
+    where: {
+      parent: {
+        id: Number(id),
+      },
+    },
+  });
+  return categories;
+};
 
 const CategoryServices = {
   createCategoryIntoDB,
@@ -327,9 +356,12 @@ const CategoryServices = {
   getPopularCategoriesFromDB,
   getFeaturedCategoriesFromDB,
   getSearchRelatedCategoriesFromDB,
+  getSearchKeywordCategoriesFromDB,
   updateCategoryIntoDB,
   deleteCategoryByIdFromDB,
-  getAllVisibleCategoriesFromDB
+  getAllVisibleCategoriesFromDB,
+  getChildCategoriesBySlugFromDB,
+  getChildCategoriesByIdFromDB,
 };
 
 export default CategoryServices;

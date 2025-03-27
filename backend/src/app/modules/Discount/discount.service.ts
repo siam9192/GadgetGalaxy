@@ -91,6 +91,7 @@ const createDiscountIntoDB = async (
   const result = await prisma.$transaction(async (txClient) => {
     const createdDiscount = await txClient.discount.create({
       data: {
+        title: payload.title,
         code: payload.code,
         description: payload.description,
         discountType: payload.discountType,
@@ -125,13 +126,33 @@ const createDiscountIntoDB = async (
       }
     }
 
-    // // Create activity log
-    // await txClient.administratorActivityLog.create({
-    //   data: {
-    //     administratorId:authUser.administratorId!,
-    //     action: `New discount has been created ${createdDiscount.code} ID:${createdDiscount.id}`,
-    //   },
-    // });
+    // Create activity log
+    await txClient.administratorActivityLog.create({
+      data: {
+        administratorId: authUser.administratorId!,
+        action: `Created New Discount ${createdDiscount.code} ID:${createdDiscount.id}`,
+      },
+    });
+
+    const usersId = (
+      await prisma.customer.findMany({
+        where: {
+          id: {
+            in: payload.customersId,
+          },
+          user: {
+            status: UserStatus.ACTIVE,
+          },
+        },
+      })
+    ).map((_) => _.userId);
+
+    //  await txClient.notification.createMany({
+    //   data:usersId.map((id)=>({
+    //   title:payload.title
+    //   }))
+    //  })
+
     return createdDiscount;
   });
 
@@ -287,12 +308,12 @@ const updateDiscountIntoDB = async (
       }
     }
 
-    // await prisma.activityLog.create({
-    //   data: {
-    //     staffId: authUser.staffId!,
-    //     action: `Updated discount id:${id}`,
-    //   },
-    // });
+    await prisma.administratorActivityLog.create({
+      data: {
+        administratorId: authUser.administratorId!,
+        action: `Updated discount id:${id}`,
+      },
+    });
     return await txClient.discount.findUnique({
       where: {
         id,
@@ -607,9 +628,15 @@ const applyDiscount = async (
   );
 
   if (applicableCategoriesId.length) {
-    const categoriesId = cartItems.map((item) => item.product.categories);
+    const categoriesId: number[] = [];
 
-    const notAvailableCategoriesId: string[] = [];
+    cartItems.forEach((item) => {
+      item.product.categories.forEach((_) => {
+        categoriesId.push(_.categoryId);
+      });
+    });
+
+    const notAvailableCategoriesId: number[] = [];
     categoriesId.forEach((ele) => {
       // If product category not  found in applicable categories then push it notAvailableCategoriesId
       if (!applicableCategoriesId.includes(ele)) {
@@ -667,120 +694,106 @@ const applyDiscount = async (
 const validateDiscount = async (
   payload: IApplyDiscountPayload & { customerId: string },
 ) => {
-  const { code, cartItemsId } = payload;
-  const discount = await prisma.discount.findUnique({
-    where: {
-      code: code,
-    },
-    include: {
-      categories: true,
-      customers: true,
-    },
-  });
-
-  if (!discount) {
-    throw new AppError(httpStatus.NOT_FOUND, "Discount coupon not found");
-  }
-
-  const cartItems = await prisma.cartItem.findMany({
-    where: {
-      id: {
-        in: cartItemsId,
-      },
-      customerId: payload.customerId,
-    },
-    include: {
-      product: true,
-      variant: true,
-    },
-  });
-
-  //  If any cart item not found then give error
-  if (cartItems.length !== cartItemsId.length) {
-    const notFoundCartItemsId = cartItems.filter(
-      (item) => cartItemsId.includes(item.id) === false,
-    );
-    throw new AppError(
-      httpStatus.NOT_FOUND,
-      `Cart item no found ids:${notFoundCartItemsId.join(",")}`,
-    );
-  }
-
-  if (
-    !discount.customers
-      .map((ele) => ele.customerId)
-      .includes(payload.customerId)
-  ) {
-    throw new AppError(
-      httpStatus.NOT_ACCEPTABLE,
-      "Sorry this discount can not be applicable for you",
-    );
-  }
-
-  const applicableCategoriesId = discount.categories.map(
-    (ele) => ele.categoryId,
-  );
-
-  if (applicableCategoriesId.length) {
-    const categoriesId = cartItems.map((item) => item.product.categoryId);
-
-    const notAvailableCategoriesId: string[] = [];
-    categoriesId.forEach((ele) => {
-      // If product category not  found in applicable categories then push it notAvailableCategoriesId
-      if (!applicableCategoriesId.includes(ele)) {
-        notAvailableCategoriesId.push(ele);
-      }
-    });
-
-    if (notAvailableCategoriesId.length) {
-      const categories = await prisma.category.findMany({
-        where: {
-          id: {
-            in: applicableCategoriesId,
-          },
-        },
-      });
-      throw new AppError(
-        httpStatus.NOT_ACCEPTABLE,
-        `This discount coupon is  applicable for categories:${categories.map((category) => category.name).join(",")}`,
-      );
-    }
-  }
-
-  let totalAmount, discountAmount, grossAmount;
-
-  totalAmount = cartItems.reduce((p, c) => {
-    const { product, variant } = c;
-    if (variant) {
-      return p + variant.salePrice * c.quantity;
-    } else {
-      return p + product.salePrice! * c.quantity;
-    }
-  }, 0);
-
-  if (discount.minOrderValue && discount.minOrderValue > totalAmount) {
-    throw new AppError(
-      httpStatus.NOT_ACCEPTABLE,
-      `Sorry, you need to purchase a minimum of ${discount.minOrderValue} to apply this discount coupon.`,
-    );
-  }
-
-  discountAmount =
-    discount.discountType === DiscountType.PERCENTAGE
-      ? (discount.discountValue / 100) * totalAmount
-      : discount.discountValue;
-
-  grossAmount = totalAmount - discountAmount;
-
-  return {
-    code: payload.code,
-    discountId: discount.id,
-    amount: {
-      total: totalAmount,
-      discount: discountAmount,
-      gross: grossAmount,
-    },
-  };
+  // const { code, cartItemsId } = payload;
+  // const discount = await prisma.discount.findUnique({
+  //   where: {
+  //     code: code,
+  //   },
+  //   include: {
+  //     categories: true,
+  //     customers: true,
+  //   },
+  // });
+  // if (!discount) {
+  //   throw new AppError(httpStatus.NOT_FOUND, "Discount coupon not found");
+  // }
+  // const cartItems = await prisma.cartItem.findMany({
+  //   where: {
+  //     id: {
+  //       in: cartItemsId,
+  //     },
+  //     customerId: payload.customerId,
+  //   },
+  //   include: {
+  //     product: true,
+  //     variant: true,
+  //   },
+  // });
+  // //  If any cart item not found then give error
+  // if (cartItems.length !== cartItemsId.length) {
+  //   const notFoundCartItemsId = cartItems.filter(
+  //     (item) => cartItemsId.includes(item.id) === false,
+  //   );
+  //   throw new AppError(
+  //     httpStatus.NOT_FOUND,
+  //     `Cart item no found ids:${notFoundCartItemsId.join(",")}`,
+  //   );
+  // }
+  // if (
+  //   !discount.customers
+  //     .map((ele) => ele.customerId)
+  //     .includes(payload.customerId)
+  // ) {
+  //   throw new AppError(
+  //     httpStatus.NOT_ACCEPTABLE,
+  //     "Sorry this discount can not be applicable for you",
+  //   );
+  // }
+  // const applicableCategoriesId = discount.categories.map(
+  //   (ele) => ele.categoryId,
+  // );
+  // if (applicableCategoriesId.length) {
+  //   const categoriesId = cartItems.map((item) => item.product.categoryId);
+  //   const notAvailableCategoriesId: string[] = [];
+  //   categoriesId.forEach((ele) => {
+  //     // If product category not  found in applicable categories then push it notAvailableCategoriesId
+  //     if (!applicableCategoriesId.includes(ele)) {
+  //       notAvailableCategoriesId.push(ele);
+  //     }
+  //   });
+  //   if (notAvailableCategoriesId.length) {
+  //     const categories = await prisma.category.findMany({
+  //       where: {
+  //         id: {
+  //           in: applicableCategoriesId,
+  //         },
+  //       },
+  //     });
+  //     throw new AppError(
+  //       httpStatus.NOT_ACCEPTABLE,
+  //       `This discount coupon is  applicable for categories:${categories.map((category) => category.name).join(",")}`,
+  //     );
+  //   }
+  // }
+  // let totalAmount, discountAmount, grossAmount;
+  // totalAmount = cartItems.reduce((p, c) => {
+  //   const { product, variant } = c;
+  //   if (variant) {
+  //     return p + variant.salePrice * c.quantity;
+  //   } else {
+  //     return p + product.salePrice! * c.quantity;
+  //   }
+  // }, 0);
+  // if (discount.minOrderValue && discount.minOrderValue > totalAmount) {
+  //   throw new AppError(
+  //     httpStatus.NOT_ACCEPTABLE,
+  //     `Sorry, you need to purchase a minimum of ${discount.minOrderValue} to apply this discount coupon.`,
+  //   );
+  // }
+  // discountAmount =
+  //   discount.discountType === DiscountType.PERCENTAGE
+  //     ? (discount.discountValue / 100) * totalAmount
+  //     : discount.discountValue;
+  // grossAmount = totalAmount - discountAmount;
+  // return {
+  //   code: payload.code,
+  //   discountId: discount.id,
+  //   amount: {
+  //     total: totalAmount,
+  //     discount: discountAmount,
+  //     gross: grossAmount,
+  //   },
+  // };
 };
 
 const DiscountServices = {

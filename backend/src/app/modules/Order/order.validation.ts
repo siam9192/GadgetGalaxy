@@ -32,8 +32,9 @@ const PlaceOrderValidation = z.object({
 });
 
 const UpdateOrderStatusByStaffValidation = z.object({
-  orderId: z.string(),
-  status: z.enum(Object.values(OrderStatus) as any),
+  orderId: z.number(),
+  status: z.enum(Object.values(OrderStatus) as any).optional(),
+  isNext: z.boolean().optional(),
 });
 
 const OrderValidations = {

@@ -4,6 +4,7 @@ import { IInitSSLPaymentPayload } from "./ssl.interface";
 import AppError from "../../Errors/AppError";
 import httpStatus from "../../shared/http-status";
 import jwtHelpers from "../../shared/jwtHelpers";
+import { PaymentStatus } from "@prisma/client";
 
 const initPayment = async (payload: IInitSSLPaymentPayload) => {
   const token = jwtHelpers.generateToken(
@@ -18,9 +19,9 @@ const initPayment = async (payload: IInitSSLPaymentPayload) => {
     total_amount: payload.amount,
     currency: "BDT",
     tran_id: payload.transactionId, // use unique tran_id for each api call
-    success_url: `${config.backend_base_api}/payments/ispn/${token}`,
-    fail_url: `${config.backend_base_api}/payments/ispn/${token}`,
-    cancel_url: `${config.backend_base_api}/payments/ispn/${token}`,
+    success_url: `${config.backend_base_api}/payments/ispn?token=${token}&status=${PaymentStatus.SUCCESS}`,
+    fail_url: `${config.backend_base_api}/payments/ispn?token=${token}&status=${PaymentStatus.FAILED}`,
+    cancel_url: `${config.backend_base_api}/payments/ispn?token=${token}&status=${PaymentStatus.CANCELED}`,
     ipn_url: "http://localhost:3030/ipn",
     shipping_method: "N/A",
     product_name: "N/A",

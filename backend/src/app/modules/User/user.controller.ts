@@ -40,17 +40,6 @@ const getAdministrators = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const getStaffsFromDB = catchAsync(async (req: Request, res: Response) => {
-  const filters = Pick(req.query, ["searchTerm", "status"]);
-  const options = Pick(req.query, paginationOptionKeys);
-  const result = await UserServices.getStaffsFromDB(filters, options as any);
-  sendSuccessResponse(res, {
-    statusCode: httpStatus.OK,
-    message: "staffs retrieved successfully",
-    ...result,
-  });
-});
-
 const softDeleteUser = catchAsync(async (req: Request, res: Response) => {
   const result = await UserServices.softDeleteUserByIdIntoDB(
     req.user,
@@ -63,11 +52,14 @@ const softDeleteUser = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const createStaff = catchAsync(async (req: Request, res: Response) => {
-  const result = await UserServices.createStaffIntoDB(req.user, req.body);
+const createAdministrator = catchAsync(async (req: Request, res: Response) => {
+  const result = await UserServices.createAdministratorIntoDB(
+    req.user,
+    req.body,
+  );
   sendSuccessResponse(res, {
     statusCode: httpStatus.OK,
-    message: "Staff created successfully",
+    message: "Administrator created successfully",
     data: result,
   });
 });
@@ -76,9 +68,8 @@ const UserControllers = {
   changeUserStatus,
   getCustomers,
   getAdministrators,
-  getStaffsFromDB,
   softDeleteUser,
-  createStaff,
+  createAdministrator,
 };
 
 export default UserControllers;

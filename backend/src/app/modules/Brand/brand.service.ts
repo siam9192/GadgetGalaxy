@@ -31,12 +31,12 @@ const createBrandIntoDB = async (
     const createdBrand = await txClient.brand.create({
       data: payload,
     });
-    // await txClient.administratorActivityLog.create({
-    //   data: {
-    //     administratorId:authUser.administratorId!,
-    //     action: `✨ New Brand "${createdBrand.name}" has been successfully added. (ID: ${createdBrand.id})`
-    //   },
-    // });
+    await txClient.administratorActivityLog.create({
+      data: {
+        administratorId: authUser.administratorId!,
+        action: `✨ Created New Brand "${createdBrand.name}". (ID: ${createdBrand.id})`,
+      },
+    });
     return createdBrand;
   });
   return result;
@@ -335,6 +335,18 @@ const getCategoryRelatedBrandsFromDB = async (slug: string) => {
   return brands;
 };
 
+const getSearchKeywordBrandsFromDB = async (keyword: string) => {
+  const brands = await prisma.brand.findMany({
+    where: {
+      name: {
+        contains: keyword,
+        mode: "insensitive",
+      },
+    },
+  });
+  return brands;
+};
+
 const BrandServices = {
   createBrandIntoDB,
   getBrandsFromDB,
@@ -343,6 +355,7 @@ const BrandServices = {
   getFeaturedBrandsFromDB,
   getSearchRelatedBrandsFromDB,
   getCategoryRelatedBrandsFromDB,
+  getSearchKeywordBrandsFromDB,
   updateBrandIntoDB,
 };
 

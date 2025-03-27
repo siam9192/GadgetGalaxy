@@ -4,6 +4,7 @@ import { UserRole } from "@prisma/client";
 import OrderControllers from "./order.controller";
 import validateRequest from "../../middlewares/validateRequest";
 import OrderValidations from "./order.validation";
+import ProductControllers from "../Product/product.controller";
 
 const router = Router();
 
@@ -32,6 +33,8 @@ router.get(
   auth([UserRole.SUPER_ADMIN, UserRole.ADMIN]),
   OrderControllers.getOrderByIdForManage,
 );
+
+router.get("/stock-out", ProductControllers.getStockOutProducts);
 router.get(
   "/not-reviewed",
   auth([UserRole.SUPER_ADMIN, UserRole.ADMIN]),

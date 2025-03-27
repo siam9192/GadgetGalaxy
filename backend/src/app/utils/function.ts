@@ -124,43 +124,4 @@ export function getOrderStatusMessage(status: OrderStatus): {
   }
 }
 
-
-
-const getCategoriesTree = async (categories:Category[]) => {
-
-  const buildTree = (parentId:null|number):any => {
-    parentId =  parentId ||null
-    return categories
-      .filter(category => category.parentId === parentId)
-      .map(category => ({
-        ...category,
-        children: buildTree(category.id),
-      }));
-  };
-
-  return buildTree(); // Build the full tree
-};
-
-
-const getCategorySlugExampleHierarchyStr = (
-  parentHierarchyStr = '',
-  categories: any[]
-): string[] => {
-  let slugs: string[] = [];
-
-  for (const category of categories) {
-    // Build the current slug hierarchy
-    const currentSlug = parentHierarchyStr
-      ? `${parentHierarchyStr}/${category.slug}`
-      : category.slug;
-
-    slugs.push(currentSlug); // Add to result
-
-    // If category has children, recurse
-    if (category.children && category.children.length > 0) {
-      slugs.push(...getCategorySlugExampleHierarchyStr(currentSlug, category.children));
-    }
-
-  }
-
-}
+export const isNumber = (num: string) => isNaN(parseInt(num));

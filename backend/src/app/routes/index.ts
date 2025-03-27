@@ -15,6 +15,7 @@ import ProfileRouter from "../modules/Profile/profile.route";
 import ProductReviewRouter from "../modules/ProductReview/product-review.route";
 import AdministratorActivityLogRouter from "../modules/AdministratorActivityLog/administratorActivityLog.route";
 import OverviewRouter from "../modules/Overview/overview.route";
+import WishListItemRouter from "../modules/WishListItem/wishListItem.route";
 
 type TModuleRoutes = { path: string; router: IRouter }[];
 const router = Router();
@@ -42,6 +43,10 @@ const moduleRoutes: TModuleRoutes = [
   {
     path: "/cart-items",
     router: CartItemRouter,
+  },
+  {
+    path: "/wishlist-items",
+    router: WishListItemRouter,
   },
   {
     path: "/discounts",

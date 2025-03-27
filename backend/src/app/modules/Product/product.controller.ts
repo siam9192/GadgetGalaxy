@@ -69,6 +69,24 @@ const getSearchProducts = catchAsync(async (req: Request, res: Response) => {
   const result = await ProductServices.getSearchProductsFromDB(
     filterQuery,
     paginationOptions as any,
+    req.user,
+  );
+  sendSuccessResponse(res, {
+    statusCode: httpStatus.OK,
+    message: "Products retrieved successfully",
+    ...result,
+  });
+});
+
+const getCategoryProducts = catchAsync(async (req: Request, res: Response) => {
+  const filterQuery = Pick(req.query, ["brand", "minPrice", "maxPrice"]);
+  const paginationOptions = Pick(req.query, paginationOptionKeys);
+
+  const result = await ProductServices.getCategoryProductsFromDB(
+    req.params.slug,
+    filterQuery,
+    paginationOptions as any,
+    req.user,
   );
   sendSuccessResponse(res, {
     statusCode: httpStatus.OK,
@@ -110,6 +128,7 @@ const getRelatedProductsByProductSlug = catchAsync(
   async (req: Request, res: Response) => {
     const result = await ProductServices.getRelatedProductsByProductSlugFromDB(
       req.params.slug,
+      req.user,
     );
     sendSuccessResponse(res, {
       statusCode: httpStatus.OK,
@@ -123,6 +142,7 @@ const getFeaturedProducts = catchAsync(async (req: Request, res: Response) => {
   const paginationOptions = Pick(req.query, paginationOptionKeys);
   const result = await ProductServices.getFeaturedProductsFromDB(
     paginationOptions as IPaginationOptions,
+    req.user,
   );
   sendSuccessResponse(res, {
     statusCode: httpStatus.OK,
@@ -136,6 +156,7 @@ const getNewArrivalProductsFromDB = catchAsync(
     const paginationOptions = Pick(req.query, paginationOptionKeys);
     const result = await ProductServices.getFeaturedProductsFromDB(
       paginationOptions as IPaginationOptions,
+      req.user,
     );
     sendSuccessResponse(res, {
       statusCode: httpStatus.OK,
@@ -147,12 +168,12 @@ const getNewArrivalProductsFromDB = catchAsync(
 
 const getRecommendedProducts = catchAsync(
   async (req: Request, res: Response) => {
-    const result = await ProductServices.getRecommendedProductsFromDB(req.user);
-    sendSuccessResponse(res, {
-      statusCode: httpStatus.OK,
-      message: "Product retrieved successfully",
-      data: result,
-    });
+    // const result = await ProductServices.getRecommendedProductsFromDB(req.user);
+    // sendSuccessResponse(res, {
+    //   statusCode: httpStatus.OK,
+    //   message: "Product retrieved successfully",
+    //   data: result,
+    // });
   },
 );
 
@@ -188,8 +209,6 @@ const getStockOutProducts = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-
-
 const ProductControllers = {
   createProduct,
   updateProduct,
@@ -197,6 +216,7 @@ const ProductControllers = {
   deleteProduct,
   softDeleteProduct,
   getSearchProducts,
+  getCategoryProducts,
   getRelatedProductsByProductSlug,
   getRecentlyViewedProducts,
   getFeaturedProducts,

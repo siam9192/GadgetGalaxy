@@ -11,7 +11,7 @@ import prisma from "../../shared/prisma";
 const getAllOverviewDataFromDB = async () => {
   const userWhereConditions: Prisma.UserWhereInput = {
     status: {
-      not:UserStatus.DELETED,
+      not: UserStatus.DELETED,
     },
   };
   const totalUsers = await prisma.user.count({
@@ -20,8 +20,8 @@ const getAllOverviewDataFromDB = async () => {
   const totalOrders = await prisma.order.count({
     where: {
       status: {
-        not:{
-          in:[OrderStatus.PENDING,OrderStatus.FAILED]
+        not: {
+          in: [OrderStatus.PENDING, OrderStatus.FAILED],
         },
       },
     },
@@ -52,7 +52,7 @@ const getAllOverviewDataFromDB = async () => {
     totalBrands,
     totalOrders,
     totalReviews,
-    totalRevenue
+    totalRevenue,
   };
 };
 
@@ -68,13 +68,13 @@ const getUsersOverviewFromDB = async () => {
 
   const totalActive = await prisma.user.count({
     where: {
-      status:UserStatus.ACTIVE,
+      status: UserStatus.ACTIVE,
     },
   });
 
   const totalBlocked = await prisma.user.count({
     where: {
-      status:UserStatus.BLOCKED ,
+      status: UserStatus.BLOCKED,
     },
   });
 
@@ -92,7 +92,7 @@ const getUsersOverviewFromDB = async () => {
     total,
     totalActive,
     totalBlocked,
-    totalDeleted
+    totalDeleted,
   };
 };
 
@@ -100,22 +100,28 @@ const getOrdersOverviewFromDB = async () => {
   const total = await prisma.order.count();
 
   const group = await prisma.order.groupBy({
-    by:'status',
-    _count:true
-  })
+    by: "status",
+    _count: true,
+  });
 
-  const totalPlaced =  group.find(_=>_.status === OrderStatus.PLACED)?._count||0
-  const totalProcessing =  group.find(_=>_.status === OrderStatus.PROCESSING)?._count||0
+  const totalPlaced =
+    group.find((_) => _.status === OrderStatus.PLACED)?._count || 0;
+  const totalProcessing =
+    group.find((_) => _.status === OrderStatus.PROCESSING)?._count || 0;
 
-  const totalInTransit =  group.find(_=>_.status === OrderStatus.IN_TRANSIT)?._count||0
+  const totalInTransit =
+    group.find((_) => _.status === OrderStatus.IN_TRANSIT)?._count || 0;
 
-  const totalDelivered = group.find(_=>_.status === OrderStatus.DELIVERED)?._count||0
-  const totalFailed = group.find(_=>_.status === OrderStatus.FAILED)?._count||0
+  const totalDelivered =
+    group.find((_) => _.status === OrderStatus.DELIVERED)?._count || 0;
+  const totalFailed =
+    group.find((_) => _.status === OrderStatus.FAILED)?._count || 0;
 
-  const totalCanceled = group.find(_=>_.status === OrderStatus.CANCELED)?._count||0
+  const totalCanceled =
+    group.find((_) => _.status === OrderStatus.CANCELED)?._count || 0;
 
-  const totalReturned = group.find(_=>_.status === OrderStatus.RETURNED)?._count||0
-
+  const totalReturned =
+    group.find((_) => _.status === OrderStatus.RETURNED)?._count || 0;
 
   return {
     total,
@@ -125,7 +131,7 @@ const getOrdersOverviewFromDB = async () => {
     totalDelivered,
     totalReturned,
     totalCanceled,
-    totalFailed
+    totalFailed,
   };
 };
 
@@ -170,8 +176,6 @@ const getProductsOverviewFromDB = async () => {
       },
     },
   });
-
-  
 
   return {
     total,

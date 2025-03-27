@@ -1,6 +1,5 @@
 import app from "./app";
-import OverviewServices from "./modules/Overview/overview.service";
-import prisma from "./shared/prisma";
+import RunningServices from "./modules/Running/running.service";
 
 const port = 5000;
 async function main() {
@@ -8,9 +7,7 @@ async function main() {
     app.listen(port, () => {
       console.log("GadgetGalaxy Server is Running on Port:", port);
     });
-
-    // const  res = await OverviewServices.getProductsOverviewFromDB()
-    // console.log(res)
+    RunningServices.Running();
   } catch (error) {
     console.log(error);
   }

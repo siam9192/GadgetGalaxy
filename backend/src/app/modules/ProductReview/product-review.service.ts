@@ -20,7 +20,7 @@ const createReviewIntoDB = async (
       id: payload.orderItemId,
       order: {
         customerId: authUser.customerId!,
-        status:OrderStatus.DELIVERED
+        status: OrderStatus.DELIVERED,
       },
     },
     include: {
@@ -42,7 +42,7 @@ const createReviewIntoDB = async (
         customerId: orderItem.order.customerId,
         comment: payload.comment,
         rating: payload.rating,
-        imagesUrl:payload.imagesUrl,
+        imagesUrl: payload.imagesUrl,
         orderItemId: payload.orderItemId,
         productId: orderItem.productId,
       },
@@ -229,11 +229,13 @@ const getMyReviewsFromDB = async (
 
 const updateReviewIntoDB = async (
   authUser: IAuthUser,
+  id: string | number,
   payload: IUpdateProductReviewPayload,
 ) => {
+  id = Number(id);
   const review = await prisma.productReview.findUnique({
     where: {
-      id: payload.id,
+      id: id,
       customerId: authUser.customerId,
     },
   });
@@ -245,51 +247,53 @@ const updateReviewIntoDB = async (
   const result = await prisma.$transaction(async (tx) => {
     const updatedReview = await tx.productReview.update({
       where: {
-        id: payload.id,
+        id: id,
       },
-      data: {
-        ...payload,
-      },
+      data: payload,
     });
-    const average = await tx.productReview.aggregate({
-      _avg: {
-        rating: true,
-      },
-      where: {
-        productId: review.productId,
-      },
-    });
+    if (payload.rating) {
+      const average = await tx.productReview.aggregate({
+        _avg: {
+          rating: true,
+        },
+        where: {
+          productId: review.productId,
+        },
+      });
 
-    await tx.product.update({
-      where: {
-        id: review.productId,
-      },
-      data: {
-        rating: average._avg.rating || 0,
-      },
-    });
+      await tx.product.update({
+        where: {
+          id: review.productId,
+        },
+        data: {
+          rating: average._avg.rating || 0,
+        },
+      });
+    }
     return updatedReview;
   });
   return result;
 };
 
-const changeReviewStatusIntoDB = async(payload:{id:number,status:`${ProductReviewStatus}`})=>{
+const changeReviewStatusIntoDB = async (payload: {
+  id: number;
+  status: `${ProductReviewStatus}`;
+}) => {
   const review = await prisma.productReview.findUnique({
-    where:{
-      id:payload.id
-    }
-  })
-  if(!review) throw new AppError(httpStatus.NOT_FOUND,'Review not found')
+    where: {
+      id: payload.id,
+    },
+  });
+  if (!review) throw new AppError(httpStatus.NOT_FOUND, "Review not found");
   await prisma.productReview.update({
-where:{
-  id:payload.id
-},
-data:{
-  status:payload.status
-}
-  })
-}
-
+    where: {
+      id: payload.id,
+    },
+    data: {
+      status: payload.status,
+    },
+  });
+};
 
 const ProductReviewServices = {
   createReviewIntoDB,
@@ -298,7 +302,7 @@ const ProductReviewServices = {
   getMyReviewsFromDB,
   getProductReviewsFromDB,
   updateReviewIntoDB,
-  changeReviewStatusIntoDB
+  changeReviewStatusIntoDB,
 };
 
 export default ProductReviewServices;

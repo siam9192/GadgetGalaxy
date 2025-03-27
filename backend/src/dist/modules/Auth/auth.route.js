@@ -1,0 +1,74 @@
+"use strict";
+var __importDefault =
+  (this && this.__importDefault) ||
+  function (mod) {
+    return mod && mod.__esModule ? mod : { default: mod };
+  };
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const validateRequest_1 = __importDefault(
+  require("../../middlewares/validateRequest"),
+);
+const auth_validation_1 = __importDefault(require("./auth.validation"));
+const auth_controller_1 = __importDefault(require("./auth.controller"));
+const auth_1 = __importDefault(require("../../middlewares/auth"));
+const constant_1 = require("../../utils/constant");
+const router = (0, express_1.Router)();
+router.post(
+  "/register",
+  (0, validateRequest_1.default)(
+    auth_validation_1.default.SignUpValidationSchema,
+  ),
+  auth_controller_1.default.register,
+);
+router.post("/resend-otp/:token", auth_controller_1.default.resendOtp);
+router.post(
+  "/register/verify",
+  (0, validateRequest_1.default)(
+    auth_validation_1.default.VerifyAccountOtpValidationSchema,
+  ),
+  auth_controller_1.default.verifyRegisterUsingOTP,
+);
+router.post(
+  "/login",
+  (0, validateRequest_1.default)(
+    auth_validation_1.default.LoginValidationSchema,
+  ),
+  auth_controller_1.default.login,
+);
+router.post(
+  "/logout",
+  (0, auth_1.default)(constant_1.allRoles),
+  auth_controller_1.default.login,
+);
+router.patch(
+  "/change-password",
+  (0, auth_1.default)(constant_1.allRoles),
+  (0, validateRequest_1.default)(
+    auth_validation_1.default.ChangePasswordValidationSchema,
+  ),
+  auth_controller_1.default.changePassword,
+);
+router.post(
+  "/forget-password/:email",
+  auth_controller_1.default.forgetPassword,
+);
+router.post(
+  "/reset-password",
+  (0, validateRequest_1.default)(
+    auth_validation_1.default.ResetPasswordValidation,
+  ),
+  auth_controller_1.default.resetPassword,
+);
+router.get(
+  "/accessToken",
+  (0, auth_1.default)(constant_1.allRoles),
+  auth_controller_1.default.getAccessTokenUsingRefreshToken,
+);
+router.get(
+  "/me",
+  (0, auth_1.default)(constant_1.allRoles),
+  auth_controller_1.default.getMe,
+);
+const AuthRouter = router;
+exports.default = AuthRouter;

@@ -7,7 +7,7 @@ import Pick from "../../utils/pick";
 import { paginationOptionKeys } from "../../utils/constant";
 
 const validatePayment = catchAsync(async (req: Request, res: Response) => {
-  const result = await PaymentServices.validatePayment(req.query);
+  const result = await PaymentServices.checkPayment(req.query as any);
   sendSuccessResponse(res, {
     statusCode: httpStatus.OK,
     message: "Payment validation successful",
@@ -49,8 +49,14 @@ const getPayments = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const checkPayment = catchAsync(async (req: Request, res: Response) => {
+  const result = await PaymentServices.checkPayment(req.query as any);
+  res.redirect(result.url!);
+});
+
 const PaymentControllers = {
   validatePayment,
+  checkPayment,
   getMyPayments,
   getPayments,
 };

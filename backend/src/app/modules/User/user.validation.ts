@@ -1,4 +1,4 @@
-import { UserGender } from "@prisma/client";
+import { UserGender, UserRole } from "@prisma/client";
 import { z } from "zod";
 
 const ChangeUserStatusValidation = z.object({
@@ -6,17 +6,19 @@ const ChangeUserStatusValidation = z.object({
   status: z.enum(["Active", "Blocked"]),
 });
 
-const CreateStaffValidation = z.object({
+const CreateAdministratorValidation = z.object({
   fullName: z.string(),
   email: z.string().email(),
   password: z.string().min(6).max(32),
   profilePhoto: z.string(),
   gender: z.enum(Object.values(UserGender) as any),
+  role: z.enum([UserRole.ADMIN, UserRole.MODERATOR]),
+  phoneNumber: z.string().optional(),
 });
 
 const UserValidations = {
   ChangeUserStatusValidation,
-  CreateStaffValidation,
+  CreateAdministratorValidation,
 };
 
 export default UserValidations;

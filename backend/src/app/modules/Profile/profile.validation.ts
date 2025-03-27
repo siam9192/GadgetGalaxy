@@ -8,19 +8,18 @@ const UpdatedAddressSchema = z.object({
   zone: z.string(),
   line: z.string(),
   isDefault: z.boolean(),
-  isDeleted:z.boolean().optional()
+  isDeleted: z.boolean().optional(),
 });
-
 
 // Zod schema for IUpdateCustomerProfilePayload
 export const UpdateCustomerProfileValidation = z.object({
-  id:z.string().optional(),
+  id: z.string().optional(),
   fullName: z.string().optional(),
   profilePhoto: z.string().optional(),
   phoneNumber: z.string().optional(),
   gender: z.nativeEnum(UserGender).optional(),
   dateOfBirth: z.string().optional(),
-  addresses:z.array(UpdatedAddressSchema).optional()
+  addresses: z.array(UpdatedAddressSchema).optional(),
 });
 
 // Zod schema for IUpdateStaffProfilePayload
@@ -33,7 +32,7 @@ export const UpdateAdministratorProfileValidation = z.object({
 
 const ProfileValidations = {
   UpdateCustomerProfileValidation,
-  UpdateAdministratorProfileValidation
+  UpdateAdministratorProfileValidation,
 };
 
 export default ProfileValidations;

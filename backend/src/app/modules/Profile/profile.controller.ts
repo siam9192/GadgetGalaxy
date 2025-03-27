@@ -4,7 +4,6 @@ import httpStatus from "../../shared/http-status";
 import { sendSuccessResponse } from "../../shared/response";
 import ProfileServices from "./profile.service";
 
-
 const updateMyProfile = catchAsync(async (req: Request, res: Response) => {
   const result = await ProfileServices.updateMyProfileIntoDB(
     req.user,
@@ -18,7 +17,7 @@ const updateMyProfile = catchAsync(async (req: Request, res: Response) => {
 });
 
 const ProfileControllers = {
-  updateMyProfile
+  updateMyProfile,
 };
 
 export default ProfileControllers;

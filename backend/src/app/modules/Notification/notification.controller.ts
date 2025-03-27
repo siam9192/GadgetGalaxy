@@ -46,7 +46,6 @@ const getMyNotifications = catchAsync(async (req: Request, res: Response) => {
 
 const notificationsSetAsRead = catchAsync(
   async (req: Request, res: Response) => {
-    const paginationOptions = Pick(req.query, paginationOptionKeys);
     const result = await NotificationServices.notificationsSetAsReadIntoDB(
       req.user,
     );

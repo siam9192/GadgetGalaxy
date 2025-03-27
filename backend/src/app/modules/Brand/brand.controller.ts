@@ -85,6 +85,19 @@ const getCategoryRelatedBrands = catchAsync(
   },
 );
 
+const getSearchKeywordBrands = catchAsync(
+  async (req: Request, res: Response) => {
+    const result = await BrandServices.getSearchKeywordBrandsFromDB(
+      req.params.keyword,
+    );
+    sendSuccessResponse(res, {
+      statusCode: httpStatus.OK,
+      message: "Related Brands retrieved successfully",
+      data: result,
+    });
+  },
+);
+
 const updateBrand = catchAsync(async (req: Request, res: Response) => {
   const result = await BrandServices.updateBrandIntoDB(
     req.user,
@@ -106,6 +119,7 @@ const BrandControllers = {
   getSearchRelatedBrands,
   getCategoryRelatedBrands,
   getPopularBrands,
+  getSearchKeywordBrands,
   updateBrand,
 };
 

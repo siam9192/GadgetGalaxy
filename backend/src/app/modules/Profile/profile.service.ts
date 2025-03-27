@@ -13,7 +13,7 @@ const updateMyProfileIntoDB = async (authUser: IAuthUser, payload: any) => {
   // Check user existence
   const user = await prisma.user.findUnique({
     where: {
-      id: authUser.id
+      id: authUser.id,
     },
   });
 
@@ -36,7 +36,6 @@ const updateMyProfileIntoDB = async (authUser: IAuthUser, payload: any) => {
         },
         data: othersData,
       });
- 
 
       // Update addresses
       if (addresses && addresses.length) {
@@ -83,16 +82,16 @@ const updateMyProfileIntoDB = async (authUser: IAuthUser, payload: any) => {
               }),
             ),
           );
-        }        
+        }
       }
 
       return await txClient.customer.findUnique({
         where: {
           id: authUser.customerId!,
         },
-        include:{
-          addresses:true
-        }
+        include: {
+          addresses: true,
+        },
       });
     });
   }

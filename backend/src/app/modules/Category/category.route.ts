@@ -20,6 +20,8 @@ router.put(
   CategoryControllers.updateCategory,
 );
 
-router.get("/visible",CategoryControllers.getAllVisibleCategories)
+router.get("/visible", CategoryControllers.getAllVisibleCategories);
+
+router.get("/search", CategoryControllers.getSearchKeywordCategories);
 const CategoryRouter = router;
 export default CategoryRouter;

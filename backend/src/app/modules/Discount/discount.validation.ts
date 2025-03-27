@@ -3,6 +3,7 @@ import { z } from "zod";
 
 export const CreateDiscountValidation = z.object({
   code: z.string().nonempty("Discount code is required."),
+  title: z.string().min(3).max(200),
   description: z.string().nonempty("Description is required."),
   discountType: z.enum(Object.values(DiscountType) as any),
   discountValue: z.number().positive("Discount value must be positive."),
@@ -25,7 +26,8 @@ export const CreateDiscountValidation = z.object({
 
 export const UpdateDiscountValidation = z.object({
   code: z.string().optional(),
-  description: z.string().optional(),
+  title: z.string().min(3).max(200).optional(),
+  description: z.string().max(2000).optional(),
   discountType: z.enum(Object.values(DiscountType) as any).optional(),
   discountValue: z.number().positive().optional(),
   minOrderValue: z.number().positive().optional(),

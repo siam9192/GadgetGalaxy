@@ -20,6 +20,7 @@ import { generateOtp } from "../../utils/function";
 import path from "path";
 import NodeMailerServices from "../NodeMailer/node-mailer.service";
 import { JwtPayload } from "jsonwebtoken";
+import axios from "axios";
 
 const register = async (payload: IRegisterPayload) => {
   const account = await prisma.user.findUnique({
@@ -180,11 +181,10 @@ const resendOtp = async (token: string) => {
 
   const verificationData = await prisma.registrationRequest.findUnique({
     where: {
-      id: decodedToken.verificationId,
+      id: decodedToken.requestId,
       isVerified: false,
     },
   });
-
   if (!verificationData) {
     throw new AppError(500, "OTP is expired! Or Used");
   }
@@ -208,7 +208,7 @@ const resendOtp = async (token: string) => {
 
   await prisma.registrationRequest.update({
     where: {
-      id: decodedToken.verificationId,
+      id: decodedToken.requestId,
     },
     data: {
       otp: hashedOtp,
@@ -253,6 +253,102 @@ const resendOtp = async (token: string) => {
   return {
     email: decodedToken.email,
     token: newToken,
+  };
+};
+
+const googleCallback = async ({
+  accessToken: googleAccessToken,
+}: {
+  accessToken: string;
+}) => {
+  const { data } = await axios.get(
+    "https://www.googleapis.com/oauth2/v2/userinfo",
+    {
+      headers: {
+        Authorization: `Bearer ${googleAccessToken}`,
+      },
+    },
+  );
+  let tokenPayload: any = {
+    authProvider: AuthProvider.GOOGLE,
+  };
+
+  const user = await prisma.user.findFirst({
+    where: {
+      googleId: data.id,
+      authProvider: AuthProvider.GOOGLE,
+    },
+  });
+
+  if (user) {
+    if (user.status === UserStatus.DELETED)
+      throw new AppError(httpStatus.NOT_FOUND, "Use not found");
+    if (user.status === UserStatus.BLOCKED)
+      throw new AppError(httpStatus.NOT_ACCEPTABLE, "Account is Blocked");
+    const updateData = {
+      fullName: data.name,
+      profilePhotoUrl: data.picture,
+    };
+
+    await prisma.customer.update({
+      where: {
+        userId: user.id,
+      },
+      data: updateData,
+    });
+    tokenPayload.id = user.id;
+    tokenPayload.role = user.role;
+  } else {
+    const isEmailUserExist = await prisma.user.findUnique({
+      where: {
+        email: data.email,
+      },
+    });
+
+    if (isEmailUserExist)
+      throw new AppError(
+        httpStatus.NOT_ACCEPTABLE,
+        "This email already in use",
+      );
+
+    await prisma.$transaction(async (tx) => {
+      const createdUser = await tx.user.create({
+        data: {
+          email: data.email,
+          authProvider: AuthProvider.GOOGLE,
+          googleId: data.id,
+          role: UserRole.CUSTOMER,
+        },
+      });
+      await tx.customer.create({
+        data: {
+          userId: createdUser.id,
+          fullName: data.name,
+          profilePhoto: data.picture,
+        },
+      });
+
+      tokenPayload.id = createdUser.id;
+      tokenPayload.role = createdUser.role;
+    });
+  }
+
+  // Generating access token
+  const accessToken = jwtHelpers.generateToken(
+    tokenPayload,
+    config.jwt.access_token_secret as string,
+    "7d",
+  );
+  // Generating refresh token
+  const refreshToken = jwtHelpers.generateToken(
+    tokenPayload,
+    config.jwt.access_token_secret as string,
+    config.jwt.refresh_token_secret as string,
+  );
+
+  return {
+    accessToken,
+    refreshToken,
   };
 };
 
@@ -537,51 +633,49 @@ const resetPassword = async (payload: IResetPasswordPayload) => {
   return null;
 };
 
-const getMeFromDB = async (authUser:IAuthUser)=>{
+const getMeFromDB = async (authUser: IAuthUser) => {
   const user = (await prisma.user.findUnique({
-    where:{
-      id:authUser.id
+    where: {
+      id: authUser.id,
     },
-    include:{
-      customer:{
-        include:{
-          addresses:true,
-        }
-       
+    include: {
+      customer: {
+        include: {
+          addresses: true,
+        },
       },
-      administrator:true
-    }
-  }))!
+      administrator: true,
+    },
+  }))!;
 
   let data;
-   if(user.role === UserRole.CUSTOMER){
-     const customer = user.customer!
+  if (user.role === UserRole.CUSTOMER) {
+    const customer = user.customer!;
     data = {
-      email:user.email,
-      authProvider:user.authProvider,
-      fullName:customer?.fullName,
-      profilePhoto:customer.profilePhoto,
-      phoneNumber:customer.phoneNumber,
-      gender:customer.gender,
-      addresses:customer.addresses,
-      status:user.status
-    }
-   }
-   else{
-    const administrator =user.administrator!
+      email: user.email,
+      authProvider: user.authProvider,
+      fullName: customer?.fullName,
+      profilePhoto: customer.profilePhoto,
+      phoneNumber: customer.phoneNumber,
+      gender: customer.gender,
+      addresses: customer.addresses,
+      status: user.status,
+    };
+  } else {
+    const administrator = user.administrator!;
     data = {
-      email:user.email,
-      authProvider:user.authProvider,
-      fullName:administrator.fullName,
-      profilePhoto:administrator.profilePhoto,
-      phoneNumber:administrator.phoneNumber,
-      gender:administrator.gender,
-      status:user.status
-    }
+      email: user.email,
+      authProvider: user.authProvider,
+      fullName: administrator.fullName,
+      profilePhoto: administrator.profilePhoto,
+      phoneNumber: administrator.phoneNumber,
+      gender: administrator.gender,
+      status: user.status,
+    };
   }
 
-  return data
-}
+  return data;
+};
 
 const AuthServices = {
   register,
@@ -593,7 +687,7 @@ const AuthServices = {
   forgetPassword,
   resetPassword,
   getAccessTokenUsingRefreshToken,
-  getMeFromDB
+  getMeFromDB,
 };
 
 export default AuthServices;

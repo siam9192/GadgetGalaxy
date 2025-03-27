@@ -1,3 +1,4 @@
+import { AuthProvider } from "@prisma/client";
 import { IName } from "../../reuse/types";
 import { TRole } from "../User/user.interface";
 
@@ -17,7 +18,7 @@ export interface IRegisterPayload {
 export interface ILoginData {
   email: string;
   password: string;
-  browser: `${Browser}`;
+  // browser: `${Browser}`;
   ipAddress?: string;
 }
 
@@ -37,6 +38,7 @@ export interface IAuthUser {
   administratorId?: number;
   customerId?: number;
   activityId?: string;
+  authProvider?: `${AuthProvider}`;
 }
 
 export interface IChangePasswordPayload {

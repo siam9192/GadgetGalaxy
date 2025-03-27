@@ -14,9 +14,8 @@ router.post(
   ProductReviewControllers.createReview,
 );
 
-
-router.post(
-  "/",
+router.put(
+  "/:id",
   auth([UserRole.CUSTOMER]),
   validateRequest(ProductReviewValidations.UpdateReviewValidation),
   ProductReviewControllers.updateReview,

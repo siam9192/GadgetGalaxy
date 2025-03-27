@@ -66,7 +66,10 @@ const getFeaturedCategories = catchAsync(
 );
 
 const updateCategory = catchAsync(async (req: Request, res: Response) => {
-  const result = await CategoryServices.updateCategoryIntoDB(req.params.id,req.body);
+  const result = await CategoryServices.updateCategoryIntoDB(
+    req.params.id,
+    req.body,
+  );
   sendSuccessResponse(res, {
     statusCode: httpStatus.OK,
     message: "Category updated successfully",
@@ -74,16 +77,29 @@ const updateCategory = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getAllVisibleCategories = catchAsync(
+  async (req: Request, res: Response) => {
+    const result = await CategoryServices.getAllVisibleCategoriesFromDB();
+    sendSuccessResponse(res, {
+      statusCode: httpStatus.OK,
+      message: "Category retrieved successfully",
+      data: result,
+    });
+  },
+);
 
-const getAllVisibleCategories = catchAsync(async (req: Request, res: Response) => {
-  const result = await CategoryServices.getAllVisibleCategoriesFromDB();
-  sendSuccessResponse(res, {
-    statusCode: httpStatus.OK,
-    message: "Category retrieved successfully",
-    data: result,
-  });
-});
-
+const getSearchKeywordCategories = catchAsync(
+  async (req: Request, res: Response) => {
+    const result = await CategoryServices.getSearchKeywordCategoriesFromDB(
+      req.params.keyword,
+    );
+    sendSuccessResponse(res, {
+      statusCode: httpStatus.OK,
+      message: "Category retrieved successfully",
+      data: result,
+    });
+  },
+);
 
 const CategoryControllers = {
   createCategory,
@@ -92,7 +108,8 @@ const CategoryControllers = {
   getFeaturedCategories,
   getSearchRelatedCategories,
   updateCategory,
-  getAllVisibleCategories
+  getAllVisibleCategories,
+  getSearchKeywordCategories,
 };
 
 export default CategoryControllers;

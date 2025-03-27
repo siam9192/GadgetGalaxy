@@ -29,7 +29,8 @@ export enum ECheckPaymentStatus {
 }
 
 export interface ICheckPaymentQuery {
-  status: "VALID";
+  status: "CANCELED" | "FAILED" | "SUCCESS";
+  token: string;
   tran_date: string;
   val_id: string;
   amount: string;

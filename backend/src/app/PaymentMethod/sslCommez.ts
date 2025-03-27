@@ -3,8 +3,8 @@ import { IPaymentMethodData } from "./payment-method.interface";
 const SSL = require("sslcommerz-lts");
 
 export const sslcommerzPayment = async (data: IPaymentMethodData) => {
-  const store_id = config.ssl_store_id;
-  const store_passwd = config.ssl_store_password;
+  const store_id = config.ssl.store_id;
+  const store_passwd = config.ssl.store_password;
   const is_live = false; //true for live, false for sandbox
 
   const paymentData = {

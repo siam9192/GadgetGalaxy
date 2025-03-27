@@ -3,19 +3,19 @@ import httpStatus from "../../shared/http-status";
 import prisma from "../../shared/prisma";
 import {
   ICreateOrderPayload,
-  IFilterOrder,
   IMyOrderFilterQuery,
   IPlaceOrderPayload,
   IUpdateOrderStatusPayload,
 } from "./order.interface";
 import {
   DiscountType,
+  ItemReserveStatus,
   OrderPaymentStatus,
   OrderStatus,
   PaymentMethod,
+  PaymentStatus,
   Prisma,
   ProductStatus,
-  UserRole,
 } from "@prisma/client";
 import { IAuthUser } from "../Auth/auth.interface";
 import { IPaginationOptions } from "../../interfaces/pagination";
@@ -120,9 +120,6 @@ const initOrderIntoDB = async (
   const netAmount = grossAmount + shippingAmount;
 
   return await prisma.$transaction(async (txClient) => {
-    const expireAt = new Date();
-    expireAt.setHours(expireAt.getHours() + 24);
-
     // **Create Order**
     const createdOrder = await txClient.order.create({
       data: {
@@ -157,7 +154,6 @@ const initOrderIntoDB = async (
         productId: item.productId,
         variantId: item.variantId,
         quantity: item.quantity,
-        expireAt,
       })),
     });
 
@@ -319,9 +315,6 @@ const PlaceOrderIntoDB = async (
   const netAmount = grossAmount + shippingAmount;
 
   return await prisma.$transaction(async (txClient) => {
-    const expireAt = new Date();
-    expireAt.setHours(expireAt.getHours() + 24);
-
     const data = {
       customerId: authUser.customerId!,
       totalAmount,
@@ -358,7 +351,6 @@ const PlaceOrderIntoDB = async (
         productId: item.productId,
         variantId: item.variantId,
         quantity: item.quantity,
-        expireAt,
       })),
     });
 
@@ -438,10 +430,18 @@ const PlaceOrderIntoDB = async (
   });
 };
 
-const PlaceOrderAfterSuccessfulPaymentIntoDB = async (
+const placeOrderAfterSuccessfulPaymentIntoDB = async (
   paymentId: string,
   tx: Prisma.TransactionClient,
 ) => {
+  await tx.payment.update({
+    where: {
+      id: paymentId,
+    },
+    data: {
+      status: PaymentStatus.SUCCESS,
+    },
+  });
   const updatedOrderData = await tx.order.update({
     where: {
       paymentId: paymentId,
@@ -466,24 +466,25 @@ const PlaceOrderAfterSuccessfulPaymentIntoDB = async (
   }
 };
 
-const ManageFailedPaymentOrderIntoDB = async (
-  paymentId: string,
+const manageUnsuccessfulOrdersIntoDB = async (
+  status: "CANCELED" | "FAILED",
+  id: number,
   tx: Prisma.TransactionClient,
 ) => {
-  // Update the order status to 'FAILED' due to payment failure
-  const updatedOrderData = await tx.order.update({
+  await tx.order.update({
     where: {
-      paymentId: paymentId, // Find the order using the payment ID
+      id,
     },
     data: {
-      status: OrderStatus.FAILED, // Mark the order as failed
+      status,
     },
   });
 
   // Retrieve all reserved stock items for the failed order
   const reserves = await tx.itemReserve.findMany({
     where: {
-      orderId: updatedOrderData.id, // Get item reservations related to this order
+      orderId: id, // Get item reservations related to this order
+      status: ItemReserveStatus.RESERVED,
     },
   });
 
@@ -522,6 +523,31 @@ const ManageFailedPaymentOrderIntoDB = async (
         });
       }),
   );
+
+  // Update reserve status
+  await tx.itemReserve.updateMany({
+    where: {
+      orderId: id,
+    },
+    data: {
+      status: ItemReserveStatus.RESTORED,
+    },
+  });
+  const payment = await tx.payment.findFirst({
+    where: {
+      order: {
+        id,
+      },
+    },
+  });
+
+  if (payment && payment.status === PaymentStatus.SUCCESS) {
+    await tx.paymentRefundRequest.create({
+      data: {
+        paymentId: payment.id,
+      },
+    });
+  }
 };
 
 const updateOrderStatusIntoDB = async (
@@ -553,28 +579,23 @@ const updateOrderStatusIntoDB = async (
   ) {
     throw new AppError(
       httpStatus.NOT_ACCEPTABLE,
-      "Order status can not  be updated",
+      "Order status update can not possible",
     );
   }
+
+  const nextStatus = {
+    [OrderStatus.PLACED]: OrderStatus.PROCESSING,
+    [OrderStatus.PROCESSING]: OrderStatus.IN_TRANSIT,
+    [OrderStatus.IN_TRANSIT]: OrderStatus.DELIVERED,
+  };
   //  If is next option is true then go to next order status
-  else if (payload.isNext) {
+  if (payload.isNext) {
     const currentStatus = order.status;
-    switch (currentStatus) {
-      case OrderStatus.PLACED:
-        payload.status = OrderStatus.PROCESSING;
-      case OrderStatus.IN_TRANSIT:
-        payload.status = OrderStatus.DELIVERED;
-    }
+    payload.status = (nextStatus as any)[currentStatus];
   }
 
-  const result = await prisma.$transaction(async (txClient) => {
-    await prisma.administratorActivityLog.create({
-      data: {
-        staffId: authUser.staffId!,
-        action: `Updated the order status ${order.status} to ${payload.status} orderId:${order.id}`,
-      },
-    });
-    return await prisma.order.update({
+  const result = await prisma.$transaction(async (tx) => {
+    await tx.order.update({
       where: {
         id: payload.orderId,
       },
@@ -584,6 +605,22 @@ const updateOrderStatusIntoDB = async (
       select: {
         id: true,
         status: true,
+      },
+    });
+
+    if (
+      [OrderStatus.CANCELED, OrderStatus.FAILED].includes(payload.status as any)
+    ) {
+      await manageUnsuccessfulOrdersIntoDB(
+        payload.status as any,
+        payload.orderId,
+        tx,
+      );
+    }
+    await tx.administratorActivityLog.create({
+      data: {
+        administratorId: authUser.administratorId!,
+        action: `Updated the order status ${order.status} to ${payload.status} orderId:${order.id}`,
       },
     });
   });
@@ -619,58 +656,17 @@ const cancelMyOrderIntoDB = async (
       "Sorry order can not be possible ",
     );
   }
+
   await prisma.$transaction(async (tx) => {
-    await tx.order.update({
-      where: {
-        id,
-      },
+    await manageUnsuccessfulOrdersIntoDB("CANCELED", id, tx);
+    await tx.notification.create({
       data: {
-        status: OrderStatus.CANCELED,
+        userId: authUser.id!,
+        title: `You have canceled your order ID:${id}`,
+        message:
+          "Your order has been successfully canceled. If this was a mistake or you need assistance, please contact our support team.",
+        type: "ORDER_STATUS",
       },
-    });
-    const reserveItems = order.itemReserve;
-    const reserveProducts = reserveItems.filter(
-      (_) => _.productId && !_.variantId,
-    );
-    const reserveVariants = reserveItems.filter(
-      (_) => _.productId && _.variantId,
-    );
-
-    await Promise.all(
-      reserveProducts.map((_) => {
-        tx.product.update({
-          where: {
-            id: _.productId!,
-          },
-          data: {
-            availableQuantity: {
-              increment: _.quantity,
-            },
-          },
-        });
-      }),
-    );
-    await Promise.all(
-      reserveVariants.map((_) => {
-        tx.variant.update({
-          where: {
-            id: _.variantId!,
-          },
-          data: {
-            availableQuantity: {
-              increment: _.quantity,
-            },
-          },
-        });
-      }),
-    );
-
-    await NotificationServices.createNotificationIntoDB({
-      usersId: [authUser.id!],
-      title: `You have canceled your order ID:${id}`,
-      message:
-        "Your order has been successfully canceled. If this was a mistake or you need assistance, please contact our support team.",
-      type: "ALERT",
     });
   });
 };
@@ -696,56 +692,16 @@ const cancelOrderIntoDB = async (id: string | number) => {
     );
   }
   await prisma.$transaction(async (tx) => {
-    await tx.order.update({
-      where: {
-        id,
-      },
-      data: {
-        status: OrderStatus.CANCELED,
-      },
-    });
-    const reserveItems = order.itemReserve;
-    const reserveProducts = reserveItems.filter(
-      (_) => _.productId && !_.variantId,
-    );
-    const reserveVariants = reserveItems.filter(
-      (_) => _.productId && _.variantId,
-    );
+    await manageUnsuccessfulOrdersIntoDB(OrderStatus.CANCELED, id, tx);
 
-    await Promise.all(
-      reserveProducts.map((_) => {
-        tx.product.update({
-          where: {
-            id: _.productId!,
-          },
-          data: {
-            availableQuantity: {
-              increment: _.quantity,
-            },
-          },
-        });
-      }),
-    );
-    await Promise.all(
-      reserveVariants.map((_) => {
-        tx.variant.update({
-          where: {
-            id: _.variantId!,
-          },
-          data: {
-            availableQuantity: {
-              increment: _.quantity,
-            },
-          },
-        });
-      }),
-    );
-    await NotificationServices.createNotificationIntoDB({
-      usersId: [order.customer.userId],
-      title: "Your order has been canceled",
-      message:
-        "We regret to inform you that your order has been canceled. If you have any questions, please contact our support team.",
-      type: "ORDER_STATUS",
+    await tx.notification.create({
+      data: {
+        userId: order.customer.userId,
+        title: "Your order has been canceled successfully",
+        message:
+          "We regret to inform you that your order has been canceled. If you have any questions, please contact our support team.",
+        type: "ORDER_STATUS",
+      },
     });
   });
 };
@@ -1063,7 +1019,7 @@ const getOrderByIdForManageFromDB = async (id: string | number) => {
   return order;
 };
 
-const getRecentOrdersFromDB = async ()=>{
+const getRecentOrdersFromDB = async () => {
   const startDate = new Date();
   startDate.setDate(startDate.getDate() - 2);
   const endDate = new Date();
@@ -1078,11 +1034,11 @@ const getRecentOrdersFromDB = async ()=>{
     select: {
       id: true,
       customer: {
-        select:{
-          id:true,
-          fullName:true,
-          profilePhoto:true
-        }
+        select: {
+          id: true,
+          fullName: true,
+          profilePhoto: true,
+        },
       },
       items: true,
       totalAmount: true,
@@ -1101,14 +1057,14 @@ const getRecentOrdersFromDB = async ()=>{
       createdAt: "desc",
     },
   });
-  return orders
-}
+  return orders;
+};
 
 const getNotReviewedOrderItemsFromDB = async (
   authUser: IAuthUser,
   paginationOptions: IPaginationOptions,
 ) => {
-  const { skip, limit } = calculatePagination(paginationOptions);
+  const { skip, limit, page } = calculatePagination(paginationOptions);
   const data = await prisma.orderItem.findMany({
     where: {
       order: {
@@ -1123,20 +1079,69 @@ const getNotReviewedOrderItemsFromDB = async (
   return data;
 };
 
-
 const getStockOutProductsFromDB = async (
   paginationOptions: IPaginationOptions,
 ) => {
-  //      await prisma.order.f
+  const whereConditions = {
+    OR: [
+      {
+        availableQuantity: 0,
+      },
+      {
+        variants: {
+          some: {
+            availableQuantity: 0,
+          },
+        },
+      },
+    ],
+  };
+  const { skip, limit, page } = calculatePagination(paginationOptions);
+  const products = await prisma.product.findMany({
+    where: whereConditions,
+    include: {
+      variants: {
+        where: {
+          availableQuantity: 0,
+        },
+      },
+    },
+    skip,
+    take: limit,
+  });
+
+  const data = products.map((product) => {
+    return {
+      id: product.id,
+      name: product.name,
+      slug: product.slug,
+      price: product.price,
+      offerPrice: product.price,
+      variants: product.variants,
+    };
+  });
+
+  const totalResult = prisma.product.count({ where: whereConditions });
+  const meta = {
+    page,
+    limit,
+    totalResult,
+  };
+
+  return {
+    data,
+    meta,
+  };
 };
 
 const OrderServices = {
   initOrderIntoDB,
-  PlaceOrderAfterSuccessfulPaymentIntoDB,
+  placeOrderAfterSuccessfulPaymentIntoDB,
   PlaceOrderIntoDB,
-  ManageFailedPaymentOrderIntoDB,
+  manageUnsuccessfulOrdersIntoDB,
   getMyOrdersFromDB,
   getOrdersForManageFromDB,
+  getStockOutProductsFromDB,
   getOrderByIdForManageFromDB,
   getMyOrderByIdFromDB,
   getNotReviewedOrderItemsFromDB,

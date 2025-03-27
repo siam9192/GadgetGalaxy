@@ -25,7 +25,7 @@ const CreateSpecificationValidationSchema = z.object({
 });
 
 const UpdateVariantValidationSchema = z.object({
-  id: z.string().optional(),
+  id: z.number().optional(),
   sku: z.string(),
   colorName: z.string(),
   colorCode: z.string(),

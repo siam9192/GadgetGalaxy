@@ -1,7 +1,7 @@
 export interface ICreateProductReviewPayload {
   orderItemId: string;
   comment: string;
-  imagesUrl?:string[]
+  imagesUrl?: string[];
   rating: number;
 }
 
@@ -11,9 +11,9 @@ export interface ICreateReviewResponsePayload {
 }
 
 export interface IUpdateProductReviewPayload {
-  id: number;
-  comment: string;
-  rating: number;
+  comment?: string;
+  rating?: number;
+  imagesUrl: string[];
 }
 
 export interface IManageReviewFilterQuery {

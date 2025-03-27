@@ -17,6 +17,7 @@ import { IPaginationOptions } from "../../interfaces/pagination";
 import { calculatePagination } from "../../helpers/paginationHelper";
 import { IAuthUser } from "../Auth/auth.interface";
 import { bcryptHash } from "../../utils/bycrypt";
+import { isNumber } from "../../utils/function";
 
 const ChangeUserStatusIntoDB = async (
   authUser: IAuthUser,
@@ -66,7 +67,7 @@ const getCustomersFromDB = async (
   const andConditions: Prisma.CustomerWhereInput[] = [];
 
   // If search term exist then search data by search term
-  if (searchTerm && !Number.isNaN(searchTerm)) {
+  if (searchTerm && !isNumber(searchTerm)) {
     andConditions.push({
       id: Number(searchTerm),
     });
@@ -89,6 +90,13 @@ const getCustomersFromDB = async (
             },
           },
         ],
+      });
+    }
+    if (status) {
+      andConditions.push({
+        user: {
+          status: status.toUpperCase() as any,
+        },
       });
     }
   }
@@ -141,7 +149,10 @@ const getCustomersFromDB = async (
   const total = await prisma.customer.count({
     where: {
       user: {
-        status: UserStatus.DELETED,
+        role: UserRole.CUSTOMER,
+        status: {
+          not: UserStatus.DELETED,
+        },
       },
     },
   });
@@ -186,7 +197,7 @@ const getAdministratorsFromDB = async (
   const andConditions: Prisma.AdministratorWhereInput[] = [];
 
   // If search term exist then search data by search term
-  if (searchTerm && !Number.isNaN(searchTerm)) {
+  if (searchTerm && isNumber(searchTerm)) {
     andConditions.push({
       id: Number(searchTerm),
     });
@@ -224,7 +235,7 @@ const getAdministratorsFromDB = async (
   if (status) {
     andConditions.push({
       user: {
-        role,
+        status: status.toUpperCase() as any,
       },
     });
   }

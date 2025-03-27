@@ -29,21 +29,25 @@ const deleteActivity = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-
-const getAdministratorActivityLogs =  catchAsync(async (req: Request, res: Response) => {
-  const paginationOptions = Pick(req.query, paginationOptionKeys);
-  const result = await ActivityLogServices.getAdministratorActivities(req.params.id,paginationOptions);
-  sendSuccessResponse(res, {
-    statusCode: httpStatus.OK,
-    message: "Activity logs retrieved successfully",
-    data: result,
-  });
-});
+const getAdministratorActivityLogs = catchAsync(
+  async (req: Request, res: Response) => {
+    const paginationOptions = Pick(req.query, paginationOptionKeys);
+    const result = await ActivityLogServices.getAdministratorActivities(
+      req.params.id,
+      paginationOptions,
+    );
+    sendSuccessResponse(res, {
+      statusCode: httpStatus.OK,
+      message: "Activity logs retrieved successfully",
+      data: result,
+    });
+  },
+);
 
 const ActivityLogControllers = {
   getActivityLogs,
   deleteActivity,
-  getAdministratorActivityLogs
+  getAdministratorActivityLogs,
 };
 
 export default ActivityLogControllers;

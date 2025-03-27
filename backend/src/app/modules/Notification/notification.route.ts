@@ -26,6 +26,12 @@ router.get(
   NotificationControllers.getMyNotifications,
 );
 
+router.patch(
+  "/read",
+  auth(Object.values(UserRole)),
+  NotificationControllers.notificationsSetAsRead,
+);
+
 const NotificationRouter = router;
 
 export default NotificationRouter;

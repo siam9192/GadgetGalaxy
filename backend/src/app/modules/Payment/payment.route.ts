@@ -5,7 +5,7 @@ import { UserRole } from "@prisma/client";
 
 const router = Router();
 
-router.get("/ispn", PaymentControllers.validatePayment);
+router.post("/ispn", PaymentControllers.checkPayment);
 
 router.get("/my", auth([UserRole.CUSTOMER]), PaymentControllers.getMyPayments);
 

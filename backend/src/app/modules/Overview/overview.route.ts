@@ -1,13 +1,12 @@
 import { Router } from "express";
 import OverviewControllers from "./overview.controller";
 
-const router =  Router()
+const router = Router();
 
+router.get("/all", OverviewControllers.getAllOverviewData);
 
-router.get('/all',OverviewControllers.getAllOverviewData)
+router.get("/order", OverviewControllers.getOrdersOverviewData);
 
-router.get('/order',OverviewControllers.getOrdersOverviewData)
+const OverviewRouter = router;
 
-const OverviewRouter =  router
-
-export default OverviewRouter
+export default OverviewRouter;

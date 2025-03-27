@@ -91,7 +91,6 @@ const resetPassword = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-
 const getMe = catchAsync(async (req: Request, res: Response) => {
   const result = await AuthServices.getMeFromDB(req.user);
   sendSuccessResponse(res, {
@@ -110,7 +109,7 @@ const AuthControllers = {
   forgetPassword,
   resetPassword,
   getAccessTokenUsingRefreshToken,
-  getMe
+  getMe,
 };
 
 export default AuthControllers;
