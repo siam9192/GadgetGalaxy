@@ -3,15 +3,17 @@ import { z } from "zod";
 const CreateCategoryValidationSchema = z.object({
   name: z.string().min(1).max(50),
   imageUrl: z.string().url().optional(),
-  parentId: z.string().optional(),
+  parentId: z.number().optional(),
   isFeatured: z.boolean().default(false),
   isVisible: z.boolean().optional(),
-  children: z.array(
-    z.object({
-      name: z.string(),
-      isFeatured: z.boolean(),
-    }),
-  ),
+  children: z
+    .array(
+      z.object({
+        name: z.string(),
+        isFeatured: z.boolean(),
+      }),
+    )
+    .optional(),
 });
 
 const UpdateCategoryValidationSchema = z.object({

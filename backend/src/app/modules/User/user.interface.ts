@@ -1,5 +1,5 @@
 import { AuthProvider, UserGender, UserRole, UserStatus } from "@prisma/client";
-import { IName } from "../../reuse/types";
+
 
 export interface ICustomerFilterQuery {
   searchTerm?: string;

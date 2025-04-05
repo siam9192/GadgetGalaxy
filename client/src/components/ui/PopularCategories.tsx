@@ -1,48 +1,51 @@
 "use client";
 import Container from "@/components/container/Container";
+import { getPopularCategories } from "@/services/category.service";
+import { ICategory } from "@/types/category.type";
 import React, { useState, useEffect, useRef } from "react";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
-const categories = [
-  {
-    name: "Smartphones",
-    imageUrl: "https://example.com/images/smartphones.jpg",
-    slug: "smartphones",
-  },
-  { name: "Laptops", imageUrl: "https://example.com/images/laptops.jpg", slug: "laptops" },
-  { name: "Tablets", imageUrl: "https://example.com/images/tablets.jpg", slug: "tablets" },
-  {
-    name: "Smartwatches",
-    imageUrl: "https://example.com/images/smartwatches.jpg",
-    slug: "smartwatches",
-  },
-  { name: "Headphones", imageUrl: "https://example.com/images/headphones.jpg", slug: "headphones" },
-  {
-    name: "Gaming Consoles",
-    imageUrl: "https://example.com/images/gaming-consoles.jpg",
-    slug: "gaming-consoles",
-  },
-  { name: "Cameras", imageUrl: "https://example.com/images/cameras.jpg", slug: "cameras" },
-  { name: "Drones", imageUrl: "https://example.com/images/drones.jpg", slug: "drones" },
-  { name: "TVs", imageUrl: "https://example.com/images/tvs.jpg", slug: "tvs" },
-  { name: "Speakers", imageUrl: "https://example.com/images/speakers.jpg", slug: "speakers" },
-  {
-    name: "Accessories",
-    imageUrl: "https://example.com/images/accessories.jpg",
-    slug: "accessories",
-  },
-  {
-    name: "Wearable Tech",
-    imageUrl: "https://example.com/images/wearable-tech.jpg",
-    slug: "wearable-tech",
-  },
-];
+// const categories = [
+//   {
+//     name: "Smartphones",
+//     imageUrl: "https://example.com/images/smartphones.jpg",
+//     slug: "smartphones",
+//   },
+//   { name: "Laptops", imageUrl: "https://example.com/images/laptops.jpg", slug: "laptops" },
+//   { name: "Tablets", imageUrl: "https://example.com/images/tablets.jpg", slug: "tablets" },
+//   {
+//     name: "Smartwatches",
+//     imageUrl: "https://example.com/images/smartwatches.jpg",
+//     slug: "smartwatches",
+//   },
+//   { name: "Headphones", imageUrl: "https://example.com/images/headphones.jpg", slug: "headphones" },
+//   {
+//     name: "Gaming Consoles",
+//     imageUrl: "https://example.com/images/gaming-consoles.jpg",
+//     slug: "gaming-consoles",
+//   },
+//   { name: "Cameras", imageUrl: "https://example.com/images/cameras.jpg", slug: "cameras" },
+//   { name: "Drones", imageUrl: "https://example.com/images/drones.jpg", slug: "drones" },
+//   { name: "TVs", imageUrl: "https://example.com/images/tvs.jpg", slug: "tvs" },
+//   { name: "Speakers", imageUrl: "https://example.com/images/speakers.jpg", slug: "speakers" },
+//   {
+//     name: "Accessories",
+//     imageUrl: "https://example.com/images/accessories.jpg",
+//     slug: "accessories",
+//   },
+//   {
+//     name: "Wearable Tech",
+//     imageUrl: "https://example.com/images/wearable-tech.jpg",
+//     slug: "wearable-tech",
+//   },
+// ];
 
 const PopularCategories = () => {
   const [current, setCurrent] = useState(0);
   const [showLength, setShowLength] = useState(6);
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
+  const [categories, setCategories] = useState<ICategory[]>([]);
   useEffect(() => {
     const updateShowLength = () => {
       if (window.innerWidth < 640) {
@@ -69,8 +72,23 @@ const PopularCategories = () => {
       setCurrent((prev) => (prev - 1 >= 0 ? prev - 1 : total - showLength));
     }
   };
-  const showedLength = (current + 1) * showLength;
-  console.log("current", current, "length", current + showLength);
+  // const showedLength = (current + 1) * showLength;
+  // console.log("current", current, "length", current + showLength);
+
+  useEffect(() => {
+    fetchPopularCategories();
+  }, []);
+
+  async function fetchPopularCategories() {
+    try {
+      const categories = await getPopularCategories();
+      if (categories && categories.length) {
+        setCategories(categories);
+      }
+    } catch (error) {
+      console.log("Popular category fetch failed");
+    }
+  }
 
   return (
     <Container className="bg-white mt-5 p-5 md:p-10 shadow relative ">
@@ -89,7 +107,10 @@ const PopularCategories = () => {
               style={{ width: `${containerWidth! / showLength}px` }}
             >
               <img
-                src={"https://opsg-img-cdn-gl.heytapimg.com/epb/202412/19/AceLeaXtntKw1AZf.png"}
+                src={
+                  category.imageUrl ||
+                  "https://icons.veryicon.com/png/o/miscellaneous/fangshan-design_icon/category-18.png"
+                }
                 alt={category.name}
                 className="w-24 h-24 md:w-32 md:h-32 object-cover rounded-md"
               />

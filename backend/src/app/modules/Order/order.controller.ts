@@ -38,7 +38,7 @@ const getMyOrders = catchAsync(async (req: Request, res: Response) => {
   sendSuccessResponse(res, {
     statusCode: httpStatus.CREATED,
     message: "Orders retrieved successfully",
-    data: result,
+    ...result,
   });
 });
 
@@ -122,8 +122,31 @@ const updateOrderStatus = catchAsync(async (req: Request, res: Response) => {
     req.body,
   );
   sendSuccessResponse(res, {
-    statusCode: httpStatus.CREATED,
+    statusCode: httpStatus.OK,
     message: "Order status updated successfully",
+    data: result,
+  });
+});
+
+const cancelOrderIntoDB = catchAsync(async (req: Request, res: Response) => {
+  const result = await OrderServices.cancelMyOrderIntoDB(
+    req.user,
+    req.params.id,
+  );
+  sendSuccessResponse(res, {
+    statusCode: httpStatus.CREATED,
+    message: "Order canceled successfully",
+    data: result,
+  });
+});
+
+
+const getRecentOrders = catchAsync(async (req: Request, res: Response) => {
+  const result = await OrderServices.getRecentOrdersFromDB(
+  );
+  sendSuccessResponse(res, {
+    statusCode: httpStatus.CREATED,
+    message: "Recent orders retrieved  successfully",
     data: result,
   });
 });
@@ -138,6 +161,8 @@ const OrderControllers = {
   getStockOutProducts,
   getNotReviewedOrderItems,
   updateOrderStatus,
+  cancelOrderIntoDB,
+  getRecentOrders
 };
 
 export default OrderControllers;

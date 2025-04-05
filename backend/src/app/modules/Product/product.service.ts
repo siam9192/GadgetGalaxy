@@ -652,6 +652,9 @@ const getSearchProductsFromDB = async (
   const whereConditions: Prisma.ProductWhereInput = {
     AND: andConditions,
     status: ProductStatus.ACTIVE,
+    availableQuantity: {
+      gt: 0,
+    },
   };
 
   const products = await prisma.product.findMany({
@@ -694,6 +697,7 @@ const getSearchProductsFromDB = async (
     product.variants = product.variants.filter(
       (variant) => variant.isHighlighted,
     );
+
     const upd = {
       ...product,
       isWishListed: wishListedProductIds.includes(product.id),
@@ -904,6 +908,9 @@ const getProductsForManageFromDB = async (
     status: {
       not: ProductStatus.DELETED,
     },
+    availableQuantity: {
+      gt: 0,
+    },
   };
 
   const data = await prisma.product.findMany({
@@ -972,6 +979,7 @@ const getRelatedProductsByProductSlugFromDB = async (
   productSlug: string,
   authUser?: IAuthUser,
 ) => {
+  
   const product = await prisma.product.findUnique({
     where: {
       slug: productSlug,
@@ -1071,6 +1079,7 @@ const getProductBySlugForCustomerViewFromDB = async (
           attributes: true,
         },
       },
+      images:true
     },
   });
 
@@ -1103,7 +1112,7 @@ const getProductBySlugForCustomerViewFromDB = async (
     },
   });
 
-  return product;
+  return { ...product, isWishListed };
 };
 
 const getFeaturedProductsFromDB = async (
@@ -1117,6 +1126,9 @@ const getFeaturedProductsFromDB = async (
     where: {
       isFeatured: true,
       status: ProductStatus.ACTIVE,
+      availableQuantity: {
+        gt: 0,
+      },
     },
     select: productSelect,
     skip,
@@ -1158,6 +1170,7 @@ const getFeaturedProductsFromDB = async (
     return upd;
   });
 
+  
   const totalResult = await prisma.product.count({
     where: {
       isFeatured: true,
@@ -1183,6 +1196,9 @@ const getNewArrivalProductsFromDB = async (
 
   const whereConditions = {
     status: ProductStatus.ACTIVE,
+    availableQuantity: {
+      gt: 0,
+    },
   };
   const products = await prisma.product.findMany({
     where: whereConditions,
@@ -1487,6 +1503,9 @@ const getCategoryProductsFromDB = async (
   const whereConditions: Prisma.ProductWhereInput = {
     AND: andConditions,
     status: ProductStatus.ACTIVE,
+    availableQuantity: {
+      gt: 0,
+    },
   };
 
   const products = await prisma.product.findMany({
@@ -1675,6 +1694,57 @@ const updateProductStockIntoDB = async (
   return null;
 };
 
+
+const getTopBrandProductsFromDB = async (authUser:IAuthUser,id:string|number)=>{
+  id = Number(id)
+
+  const products = await prisma.product.findMany({
+    where:{
+      brand:{
+        id
+      }
+    },
+    select: productSelect,
+    take:20
+  });
+
+  const wishListedProductIds: number[] = [];
+  if (authUser) {
+    const wishListedItems = await prisma.wishListItem.findMany({
+      where: {
+        customerId: authUser.customerId,
+      },
+    });
+
+    wishListedItems.forEach((item) =>
+      wishListedProductIds.push(item.productId),
+    );
+  }
+
+  const data = products.map((product) => {
+    // Calculate stock
+    product.availableQuantity = product.variants.reduce(
+      (p, c) => p + c.availableQuantity,
+      0,
+    );
+    // Shot description
+    product.description = product.description.slice(0, 300);
+    product.variants = product.variants.filter(
+      (variant) => variant.isHighlighted,
+    );
+
+    const upd = {
+      ...product,
+      isWishListed: wishListedProductIds.includes(product.id),
+    };
+
+    return upd;
+  });
+  
+  return data
+}
+
+
 const getMyNotReviewedProductsFromDB = async (
   authUser: IAuthUser,
   paginationOptions: IPaginationOptions,
@@ -1738,6 +1808,7 @@ const ProductServices = {
   getSearchProductsFromDB,
   getCategoryProductsFromDB,
   getProductBySlugForCustomerViewFromDB,
+  getTopBrandProductsFromDB,
   getRelatedProductsByProductSlugFromDB,
   getRecentlyViewedProductsFromDB,
   getProductsForManageFromDB,

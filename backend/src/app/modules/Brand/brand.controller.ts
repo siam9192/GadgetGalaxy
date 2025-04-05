@@ -49,6 +49,16 @@ const getPopularBrands = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getTopBrands = catchAsync(async (req: Request, res: Response) => {
+  const paginationOptions = Pick(req.query, paginationOptionKeys);
+  const result = await BrandServices.getTopBrandsFromDB(paginationOptions);
+  sendSuccessResponse(res, {
+    statusCode: httpStatus.OK,
+    message: "Top Brands retrieved successfully",
+    ...result,
+  });
+});
+
 const getFeaturedBrands = catchAsync(async (req: Request, res: Response) => {
   const paginationOptions = Pick(req.query, paginationOptionKeys);
   const result = await BrandServices.getPopularBrandsFromDB(paginationOptions);
@@ -119,6 +129,7 @@ const BrandControllers = {
   getSearchRelatedBrands,
   getCategoryRelatedBrands,
   getPopularBrands,
+  getTopBrands,
   getSearchKeywordBrands,
   updateBrand,
 };

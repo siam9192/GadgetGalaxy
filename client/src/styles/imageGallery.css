@@ -1,0 +1,46 @@
+
+.previewImageAnimate1 {
+    animation: animation1 0.4s ease-in ;
+}
+
+@keyframes animation1 {
+    from {
+        transform: translateX(80%);
+    }
+
+    to{
+         transform: translateX(0px);
+    }
+}
+
+
+
+.previewImageAnimate2 {
+    animation: animation2 0.4s ease-in ;
+}
+
+@keyframes animation2 {
+    from {
+        transform: translateX(-80%);
+    }
+
+    to{
+         transform: translateX(0px);
+    }
+}
+
+
+.previewImageAnimate3 {
+    animation: animation3 0.4s ease-in ;
+}
+
+@keyframes animation3 {
+    from {
+       opacity: 0; 
+       
+    }
+
+    to{
+        opacity: 100;
+    }
+}

@@ -1,7 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
 import "@/styles/rangeSlider.css";
 
-const RangeSlider: React.FC = () => {
+interface IProps {
+  onChange: (range: { min: number; max: number }) => void | any;
+}
+
+const RangeSlider: React.FC<IProps> = ({ onChange }) => {
   const sliderContainerRef = useRef<HTMLDivElement | null>(null);
   const thumbMinRef = useRef<HTMLDivElement | null>(null);
   const thumbMaxRef = useRef<HTMLDivElement | null>(null);
@@ -69,6 +73,7 @@ const RangeSlider: React.FC = () => {
 
   useEffect(() => {
     updateSlider();
+    onChange && onChange({ min: currentMin, max: currentMax });
   }, [currentMin, currentMax]);
 
   return (

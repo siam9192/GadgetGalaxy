@@ -3,9 +3,14 @@ import ProductDescription from "@/components/ui/ProductDescription";
 import ProductReviews from "@/components/ui/ProductReviews";
 import ProductSpecification from "@/components/ui/ProductSpecification";
 import ProductWarranty from "@/components/ui/ProductWarranty";
+import { IProduct } from "@/types/product.type";
 import React, { useEffect, useState } from "react";
 
-const ProductDetails = () => {
+interface IProps {
+  product:IProduct
+}
+
+const ProductDetails = ({product}:IProps) => {
   const [active, setActive] = useState(0);
   const tabs = [
     {
@@ -50,9 +55,9 @@ const ProductDetails = () => {
         ))}
       </div>
       <div className="mt-5 space-y-8">
-        <ProductSpecification />
-        <ProductDescription />
-        <ProductWarranty />
+        <ProductSpecification specifications={product.specifications}/>
+        <ProductDescription  description={product.description}/>
+        <ProductWarranty  warranty={product.warrantyInfo}/>
         <ProductReviews />
       </div>
     </div>

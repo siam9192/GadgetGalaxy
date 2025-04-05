@@ -1,17 +1,10 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { AiOutlineProduct } from "react-icons/ai";
-import { FcAbout } from "react-icons/fc";
-import { ImBlogger } from "react-icons/im";
-import { IoHomeOutline } from "react-icons/io5";
-import { MdOutlineContactSupport } from "react-icons/md";
 import { RiMenuFill } from "react-icons/ri";
 import "@/styles/util.css";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import ResponsiveNavbar from "./ResponsiveNavbar";
 import ResponsiveBrowseCategories from "./ResponsiveBrowseCategories";
-
 
 const ResponsiveSidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -73,12 +66,7 @@ const ResponsiveSidebar = () => {
               />
             </button>
           </div>
-         {
-          active === 1 ?
-          <ResponsiveNavbar/>
-          :
-          <ResponsiveBrowseCategories/>
-         }
+          {active === 1 ? <ResponsiveNavbar /> : <ResponsiveBrowseCategories />}
         </div>
       </div>
     </>

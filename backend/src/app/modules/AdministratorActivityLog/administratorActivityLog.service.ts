@@ -6,8 +6,10 @@ import prisma from "../../shared/prisma";
 import AppError from "../../Errors/AppError";
 import httpStatus from "../../shared/http-status";
 import { log } from "console";
+import { IAuthUser } from "../Auth/auth.interface";
 
 const getActivityLogsFromDB = async (
+  authUser: IAuthUser,
   filter: IFilterActivityLogs,
   paginationOptions: IPaginationOptions,
 ) => {

@@ -13,6 +13,7 @@ router.post(
   validateRequest(ProductValidations.CreateProductValidation),
   ProductControllers.createProduct,
 );
+router.post("/many",ProductControllers.createMany)
 router.put(
   "/:id",
   validateRequest(ProductValidations.UpdateProductValidation),
@@ -37,16 +38,30 @@ router.get(
   auth([UserRole.CUSTOMER], { providerMode: true }),
   ProductControllers.getSearchProducts,
 );
+
 router.get(
   "/details/:slug",
   auth([UserRole.CUSTOMER], { providerMode: true }),
   ProductControllers.getProductBySlugForCustomerView,
 );
+router.get("/related/:slug", auth([UserRole.CUSTOMER], { providerMode: true }),
+ProductControllers.getRelatedProductsByProductSlug)
+router.get(
+  "/category/:slug",
+  auth([UserRole.CUSTOMER], { providerMode: true }),
+  ProductControllers.getCategoryProducts,
+);
+
 
 router.get(
   "/new-arrival",
   auth([UserRole.CUSTOMER], { providerMode: true }),
   ProductControllers.getNewArrivalProductsFromDB,
+);
+router.get(
+  "/top-brand/:id",
+  auth([UserRole.CUSTOMER], { providerMode: true }),
+  ProductControllers.getTopBrandsProducts,
 );
 
 router.get(
@@ -54,6 +69,7 @@ router.get(
   auth([UserRole.CUSTOMER], { providerMode: true }),
   ProductControllers.getRelatedProductsByProductSlug,
 );
+
 router.get(
   "/recently-viewed/:ids",
   auth([UserRole.CUSTOMER], { providerMode: true }),

@@ -7,7 +7,10 @@ import {
   IUpdateCategoryPayload,
 } from "./category.interface";
 import { calculatePagination } from "../../helpers/paginationHelper";
-import { generateSlug } from "../../utils/function";
+import {
+  generateSlug,
+  getCategoriesWithHierarchyStr,
+} from "../../utils/function";
 import AppError from "../../Errors/AppError";
 import httpStatus from "../../shared/http-status";
 
@@ -199,13 +202,15 @@ const getCategoriesFromDB = async (
   const whereConditions: Prisma.CategoryWhereInput = {
     AND: andConditions,
     isVisible: true,
+    // parentId:null
   };
 
-  const data = await prisma.category.findMany({
+  const categories = await prisma.category.findMany({
     where: whereConditions,
     select: {
       id: true,
       name: true,
+      slug:true,
       parentId: true,
       _count: true,
     },
@@ -213,6 +218,7 @@ const getCategoriesFromDB = async (
     take: limit,
   });
 
+  const data = categories;
   const totalResult = await prisma.category.count({
     where: whereConditions,
   });
@@ -230,13 +236,14 @@ const getCategoriesFromDB = async (
 };
 
 const getPopularCategoriesFromDB = async () => {
-  return await prisma.$queryRaw`SELECT name,id FROM "categories" ORDER BY RANDOM() LIMIT 6`;
+  return await prisma.$queryRaw`SELECT name,id FROM "categories" ORDER BY RANDOM() LIMIT 12`;
 };
 
 const getFeaturedCategoriesFromDB = async () => {
   return await prisma.category.findMany({
     where: {
       isFeatured: true,
+      isVisible: true,
     },
     include: {
       _count: {
@@ -285,6 +292,7 @@ const getAllVisibleCategoriesFromDB = async () => {
   const categories = await prisma.category.findMany({
     where: {
       parentId: null, // Fetch only root categories
+      isVisible:true
     },
     include: {
       children: {
@@ -303,14 +311,7 @@ const getAllVisibleCategoriesFromDB = async () => {
     },
   });
 
-  const data = categories.map((category) => {
-    const hierarchyStr = category.slug;
-    const item = {
-      ...category,
-      hierarchyStr,
-    };
-    if (!category.parentId) return item;
-  });
+  const data = getCategoriesWithHierarchyStr(categories);
 
   return data;
 };
@@ -322,7 +323,6 @@ const getSearchKeywordCategoriesFromDB = async (keyword: string) => {
         contains: keyword,
         mode: "insensitive",
       },
-      isVisible: true,
     },
   });
   return categories;

@@ -659,7 +659,11 @@ const getMeFromDB = async (authUser: IAuthUser) => {
       phoneNumber: customer.phoneNumber,
       gender: customer.gender,
       addresses: customer.addresses,
+      role:user.role,
       status: user.status,
+      passwordLastChangedAt:user.passwordLastChangedAt,
+      createdAt:user.createdAt,
+      updatedAt:user.updatedAt,
     };
   } else {
     const administrator = user.administrator!;

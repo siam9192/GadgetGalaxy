@@ -15,7 +15,7 @@ function auth(
 ) {
   return catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const token = req.headers.authorization?.replace("Bearer ", "");
-    console.log(token);
+
     // checking if the token is missing
     if (!token) {
       if (authConfig?.providerMode === true) {

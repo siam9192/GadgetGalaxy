@@ -1,28 +1,28 @@
 export interface IResponse<T> {
   data: T;
-  meta: IMeta;
-  error?: IError;
+  meta: TMeta;
+  error?: TError;
   success: boolean;
   message: string;
 }
 
-export interface IError {
+export type TError = {
   data: {
     message: string;
     stack: string;
     success: boolean;
   };
   status: number;
-}
+};
 
-export interface IMeta {
+export type TMeta = {
   limit: number;
   page: number;
   totalResult: number;
   total: number;
-}
+};
 
-export interface IParam {
+export type TParma = {
   name: string;
   value: string | number | null | undefined;
-}
+};

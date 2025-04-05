@@ -1,4 +1,5 @@
 "use client";
+import { urlSearch } from "@/utils/helpers";
 import { useRouter, useSearchParams } from "next/navigation";
 import React from "react";
 import { BsFillGrid3X3GapFill } from "react-icons/bs";
@@ -9,8 +10,10 @@ const ProductViewTypeButton = () => {
   const searchParams = useSearchParams();
   const viewType = searchParams.get("viewType");
   const onChange = (type: "grid" | "list") => {
-    router.push(`?viewType=${type}`);
+    router.push(`${urlSearch(searchParams,[{name:'viewType',value:type}])}`);
   };
+
+  
   return (
     <div className="flex items-center gap-2">
       <button

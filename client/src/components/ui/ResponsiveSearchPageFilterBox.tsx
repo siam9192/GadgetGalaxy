@@ -1,10 +1,19 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { CiFilter } from "react-icons/ci";
 import SearchPageFilterBox from "./SearchPageFilterBox";
+import { useSearchParams } from "next/navigation";
 
 const ResponsiveSearchPageFilterBox = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const searchParams = useSearchParams();
+  useEffect(() => {
+    setIsOpen(false);
+  }, [searchParams])
+
+  useEffect(()=>{
+    document.body.style.overflow = isOpen ? 'hidden':''
+  },[isOpen])
   return (
     <>
       <button onClick={() => setIsOpen(true)} className="text-3xl p-2">

@@ -177,6 +177,17 @@ const getRecommendedProducts = catchAsync(
   },
 );
 
+const getTopBrandsProducts = catchAsync(
+  async (req: Request, res: Response) => {
+    const result = await ProductServices.getTopBrandProductsFromDB(req.user,req.params.id);
+    sendSuccessResponse(res, {
+      statusCode: httpStatus.OK,
+      message: "Top brand products retrieved successfully",
+      data: result,
+    });
+  },
+);
+
 const getProductsForManage = catchAsync(async (req: Request, res: Response) => {
   const filterData = Pick(req.query, [
     "searchTerm",
@@ -209,6 +220,13 @@ const getStockOutProducts = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const createMany =  catchAsync(async (req: Request, res: Response) => {
+  sendSuccessResponse(res, {
+    statusCode: httpStatus.OK,
+    message: "successfully",
+    data:await Promise.all(req.body.map(b=> ProductServices.createProductIntoDB(b)))
+  });
+});
 const ProductControllers = {
   createProduct,
   updateProduct,
@@ -220,11 +238,13 @@ const ProductControllers = {
   getRelatedProductsByProductSlug,
   getRecentlyViewedProducts,
   getFeaturedProducts,
+  getTopBrandsProducts,
   getNewArrivalProductsFromDB,
   getRecommendedProducts,
   getProductBySlugForCustomerView,
   getProductsForManage,
   getStockOutProducts,
+  createMany,
 };
 
 export default ProductControllers;

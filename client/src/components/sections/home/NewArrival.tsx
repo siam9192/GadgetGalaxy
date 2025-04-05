@@ -1,9 +1,12 @@
 import ProductCard from "@/components/cards/ProductCard";
+import ProductTestCard from "@/components/cards/ProductTestCard";
 import Container from "@/components/container/Container";
+import { getNewArrivalProducts } from "@/services/product.service";
 import React from "react";
 import { FaChevronRight } from "react-icons/fa";
 
-const NewArrival = () => {
+const NewArrival = async () => {
+  const products = await getNewArrivalProducts();
   return (
     <section className="lg:py-10 py-6">
       <Container className="">
@@ -19,11 +22,7 @@ const NewArrival = () => {
           </button>
         </div>
         <div className=" mt-5 grid lg:grid-cols-6 md:grid-cols-3 grid-cols-2 gap-2">
-          {Array.from({
-            length: 12,
-          }).map((_, index) => (
-            <ProductCard key={index} />
-          ))}
+          {products?.map((_, index) => <ProductTestCard product={_} key={index} />)}
         </div>
       </Container>
     </section>

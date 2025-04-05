@@ -31,6 +31,17 @@ const getCategories = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+
+const getChildCategories = catchAsync(async (req: Request, res: Response) => {
+  const result = await CategoryServices.getChildCategoriesBySlugFromDB(req.params.slug);
+
+  sendSuccessResponse(res, {
+    statusCode: httpStatus.CREATED,
+    message: "Sub Categories retrieved successfully",
+    data: result,
+  });
+});
+
 const getPopularCategories = catchAsync(async (req: Request, res: Response) => {
   const result = await CategoryServices.getPopularCategoriesFromDB();
 
@@ -110,6 +121,7 @@ const CategoryControllers = {
   updateCategory,
   getAllVisibleCategories,
   getSearchKeywordCategories,
+  getChildCategories,
 };
 
 export default CategoryControllers;

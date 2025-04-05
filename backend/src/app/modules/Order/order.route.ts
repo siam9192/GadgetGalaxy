@@ -42,11 +42,18 @@ router.get(
 );
 
 router.patch(
+  "/cancel/:id",
+  auth([UserRole.CUSTOMER]),
+  OrderControllers.cancelOrderIntoDB,
+);
+router.patch(
   "/update-status",
   auth([UserRole.SUPER_ADMIN, UserRole.ADMIN]),
   validateRequest(OrderValidations.UpdateOrderStatusByStaffValidation),
   OrderControllers.updateOrderStatus,
 );
+
+router.get("/recent",  auth([UserRole.SUPER_ADMIN, UserRole.ADMIN,UserRole.CUSTOMER]),OrderControllers.getRecentOrders)
 const OrderRouter = router;
 
 export default OrderRouter;

@@ -27,6 +27,8 @@ router.get(
   ProductReviewControllers.getMyNotReviewedProducts,
 );
 
+router.get("/product/:id", ProductReviewControllers.getProductReviews);
+
 router.get(
   "/my",
   auth([UserRole.CUSTOMER]),

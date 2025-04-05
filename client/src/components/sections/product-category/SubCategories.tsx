@@ -1,10 +1,16 @@
 "use client";
 import CategoryCard from "@/components/cards/CategoryCard";
+import { useGetSubCategoriesQuery } from "@/redux/features/category/category.api";
+import { useParams } from "next/navigation";
 import React, { useState } from "react";
 import { FaChevronDown } from "react-icons/fa";
 
 const SubCategories = () => {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
+  const {slug} =useParams()
+  const {data} = useGetSubCategoriesQuery(slug as string)
+  const categories =  data?.data||[]
+  if(!categories.length) return null
   return (
     <div className=" md:my-5 my-2 p-5 bg-white">
       <div className="flex items-center justify-between">
@@ -22,8 +28,8 @@ const SubCategories = () => {
         className={`${isOpen ? "h-[30vh] overflow-y-auto " : "h-0 overflow-hidden"}  transition-all duration-500 no-scrollbar`}
       >
         <div className=" mt-5 grid lg:grid-cols-6 md:grid-cols-4 grid-cols-2 gap-5 ">
-          {Array.from({ length: 6 }).map((_, index) => (
-            <CategoryCard key={index} />
+          {categories.map((_, index) => (
+            <CategoryCard category={_} key={index} />
           ))}
         </div>
       </div>

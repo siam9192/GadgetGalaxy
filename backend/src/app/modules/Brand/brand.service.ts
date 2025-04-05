@@ -236,6 +236,40 @@ const getFeaturedBrandsFromDB = async (
   };
 };
 
+const getTopBrandsFromDB = async (paginationOptions: IPaginationOptions) => {
+  const { skip, limit, page } = calculatePagination(paginationOptions);
+
+  const data = await prisma.brand.findMany({
+    where: {
+      isFeatured: true,
+    },
+    skip,
+    take: limit,
+    include: {
+      _count: {
+        select: {
+          products: true,
+        },
+      },
+    },
+  });
+
+  const totalResult = await prisma.brand.count({
+    where: {
+      isTop: true,
+    },
+  });
+  const meta = {
+    limit,
+    page,
+    totalResult,
+  };
+  return {
+    data,
+    meta,
+  };
+};
+
 const updateBrandIntoDB = async (
   authUser: IAuthUser,
   id: string | number,
@@ -332,6 +366,7 @@ const getCategoryRelatedBrandsFromDB = async (slug: string) => {
       },
     },
   });
+  
   return brands;
 };
 
@@ -353,6 +388,7 @@ const BrandServices = {
   getBrandsForManageFromDB,
   getPopularBrandsFromDB,
   getFeaturedBrandsFromDB,
+  getTopBrandsFromDB,
   getSearchRelatedBrandsFromDB,
   getCategoryRelatedBrandsFromDB,
   getSearchKeywordBrandsFromDB,

@@ -10,6 +10,7 @@ const getActivityLogs = catchAsync(async (req: Request, res: Response) => {
   const filter = Pick(req.query, ["staffId", "startDate", "endDate"]);
   const paginationOptions = Pick(req.query, paginationOptionKeys);
   const result = await ActivityLogServices.getActivityLogsFromDB(
+    req.user,
     filter,
     paginationOptions,
   );

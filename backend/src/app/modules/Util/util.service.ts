@@ -1,7 +1,11 @@
+import { ProductStatus, UserRole } from "@prisma/client";
 import prisma from "../../shared/prisma";
 import { productSelect } from "../../utils/constant";
+import { IAuthUser } from "../Auth/auth.interface";
 
 const getSearchKeywordResultsFromDB = async (keyword: string) => {
+
+  if(!keyword) return []
   const categories = await prisma.category.findMany({
     where: {
       name: {
@@ -35,14 +39,62 @@ const getSearchKeywordResultsFromDB = async (keyword: string) => {
       type: "product",
       name: product.name,
       imageUr: product.images[0],
-      price: variant.price || product.price,
-      offerPrice: variant.offerPrice || product.offerPrice,
+      price: variant?.price || product.price,
+      offerPrice: variant?.offerPrice || product.offerPrice,
     };
   });
+
+  
+  
+const data: any[] = [];
+const tempData = [...productsData, ...categoriesData];
+
+for (const item of tempData) {
+  const randomIndex = Math.floor(Math.random() * (data.length + 1));
+  data.splice(randomIndex, 0, item); // insert at random position
+}
+  
+  return data
+
+};
+
+const getMyUtilCountsFromDB = async (authUser: IAuthUser) => {
+  const data: Record<string, number> = {};
+  if (authUser.role === UserRole.CUSTOMER) {
+    const totalCartItems = await prisma.cartItem.count({
+      where: {
+        customerId: authUser.customerId,
+        product: {
+          status: ProductStatus.ACTIVE,
+        },
+      },
+    });
+
+    const totalWishListItems = await prisma.wishListItem.count({
+      where: {
+        customerId: authUser.customerId,
+        product: {
+          status: ProductStatus.ACTIVE,
+        },
+      },
+    });
+    data.totalCartItems = totalCartItems;
+    data.totalWishListItems = totalWishListItems;
+  }
+  const totalNewNotifications = await prisma.notification.count({
+    where: {
+      userId: authUser.id,
+    },
+  });
+  return {
+    ...data,
+    totalNewNotifications,
+  };
 };
 
 const UtilServices = {
   getSearchKeywordResultsFromDB,
+  getMyUtilCountsFromDB
 };
 
 export default UtilServices;

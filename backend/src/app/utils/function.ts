@@ -125,3 +125,22 @@ export function getOrderStatusMessage(status: OrderStatus): {
 }
 
 export const isNumber = (num: string) => isNaN(parseInt(num));
+
+export function getCategoriesWithHierarchyStr(
+  categories: (Category & { children: Category[] })[],
+) {
+  const convert = (
+    c: Category & { children: Category[]; hierarchyStr: string },
+    ph = "",
+  ) => {
+    const hierarchyStr = [ph, c.hierarchyStr || c.slug].join("/");
+    c.hierarchyStr = hierarchyStr;
+    if (c.children && c.children.length) {
+      c.children = c.children.map((_) => {
+        return convert(_, hierarchyStr);
+      });
+    }
+    return c;
+  };
+  return categories.map((_) => convert(_));
+}

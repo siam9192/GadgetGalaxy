@@ -60,12 +60,12 @@ const getMyReviews = catchAsync(async (req: Request, res: Response) => {
 const getProductReviews = catchAsync(async (req: Request, res: Response) => {
   const paginationOptions = Pick(req.params, paginationOptionKeys);
   const result = await ProductReviewServices.getProductReviewsFromDB(
-    req.params.productId,
+    req.params.id,
     paginationOptions as any,
   );
   sendSuccessResponse(res, {
     statusCode: httpStatus.OK,
-    message: "Product review response created successfully",
+    message: "Product review retrieved successfully",
     data: result,
   });
 });

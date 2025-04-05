@@ -203,7 +203,7 @@ const initOrderIntoDB = async (
 
     // **Initialize Payment AFTER successful order creation**
     const { paymentId, paymentUrl } = await PaymentServices.initPayment({
-      method: payload.paymentMethod,
+      method: PaymentMethod.SSLCOMMERZ,
       amount: grossAmount,
       customer: {
         name: payload.shippingInfo.fullName,
@@ -217,6 +217,37 @@ const initOrderIntoDB = async (
       where: { id: createdOrder.id },
       data: { paymentId },
     });
+
+    const productsId = cartItems.map((_) => _.productId);
+
+    for (const pId of productsId) {
+      const product = await prisma.product.findUnique({
+        where: {
+          id: pId,
+        },
+        select: {
+          id: true,
+          availableQuantity: true,
+          variants: true,
+        },
+      });
+      if (!product) throw new Error();
+
+      if (product.variants.length) {
+        const availableQuantity = product.variants.reduce(
+          (p, c) => p + c.availableQuantity,
+          0,
+        );
+        await prisma.product.update({
+          where: {
+            id: pId,
+          },
+          data: {
+            availableQuantity,
+          },
+        });
+      }
+    }
 
     return { paymentUrl };
   });
@@ -414,6 +445,38 @@ const PlaceOrderIntoDB = async (
       where: { id: createdOrder.id },
       data: { paymentId },
     });
+
+    const productsId = cartItems.map((_) => _.productId);
+
+    for (const pId of productsId) {
+      const product = await prisma.product.findUnique({
+        where: {
+          id: pId,
+        },
+        select: {
+          id: true,
+          availableQuantity: true,
+          variants: true,
+        },
+      });
+      if (!product) throw new Error();
+
+      if (product.variants.length) {
+        const availableQuantity = product.variants.reduce(
+          (p, c) => p + c.availableQuantity,
+          0,
+        );
+        await prisma.product.update({
+          where: {
+            id: pId,
+          },
+          data: {
+            availableQuantity,
+          },
+        });
+      }
+    }
+
     const deletableCartItemsId = createdOrder.deletableCartItemsId;
     // If deletable cart items exist then delete cart items from db
     if (deletableCartItemsId) {
@@ -540,6 +603,36 @@ const manageUnsuccessfulOrdersIntoDB = async (
       },
     },
   });
+  const productsId = reserves.map((_) => _.productId!);
+
+  for (const pId of productsId) {
+    const product = await prisma.product.findUnique({
+      where: {
+        id: pId,
+      },
+      select: {
+        id: true,
+        availableQuantity: true,
+        variants: true,
+      },
+    });
+    if (!product) throw new Error();
+
+    if (product.variants.length) {
+      const availableQuantity = product.variants.reduce(
+        (p, c) => p + c.availableQuantity,
+        0,
+      );
+      await prisma.product.update({
+        where: {
+          id: pId,
+        },
+        data: {
+          availableQuantity,
+        },
+      });
+    }
+  }
 
   if (payment && payment.status === PaymentStatus.SUCCESS) {
     await tx.paymentRefundRequest.create({
@@ -665,41 +758,6 @@ const cancelMyOrderIntoDB = async (
         title: `You have canceled your order ID:${id}`,
         message:
           "Your order has been successfully canceled. If this was a mistake or you need assistance, please contact our support team.",
-        type: "ORDER_STATUS",
-      },
-    });
-  });
-};
-
-const cancelOrderIntoDB = async (id: string | number) => {
-  id = Number(id);
-  const order = await prisma.order.findUnique({
-    where: {
-      id,
-    },
-    select: {
-      id: true,
-      status: true,
-      itemReserve: true,
-      customer: true,
-    },
-  });
-  if (!order) throw new AppError(httpStatus.NOT_FOUND, "Order not found");
-  if (order.status !== OrderStatus.PLACED) {
-    throw new AppError(
-      httpStatus.NOT_ACCEPTABLE,
-      "Sorry order can not be possible ",
-    );
-  }
-  await prisma.$transaction(async (tx) => {
-    await manageUnsuccessfulOrdersIntoDB(OrderStatus.CANCELED, id, tx);
-
-    await tx.notification.create({
-      data: {
-        userId: order.customer.userId,
-        title: "Your order has been canceled successfully",
-        message:
-          "We regret to inform you that your order has been canceled. If you have any questions, please contact our support team.",
         type: "ORDER_STATUS",
       },
     });
@@ -882,7 +940,7 @@ const getMyOrdersFromDB = async (
     AND: andConditions,
   };
 
-  const data = await prisma.order.findMany({
+  const orders = await prisma.order.findMany({
     where: whereConditions,
     skip,
     take: limit,
@@ -904,6 +962,14 @@ const getMyOrdersFromDB = async (
     orderBy: {
       [orderBy]: sortOrder,
     },
+  });
+
+  const data = orders.map((order) => {
+    const { gatewayGatewayData, ...otherPData } = order.payment as any;
+    return {
+      ...order,
+      payment: otherPData,
+    };
   });
 
   const totalResult = await prisma.order.count({
@@ -1146,8 +1212,8 @@ const OrderServices = {
   getMyOrderByIdFromDB,
   getNotReviewedOrderItemsFromDB,
   cancelMyOrderIntoDB,
-  cancelOrderIntoDB,
   updateOrderStatusIntoDB,
+  getRecentOrdersFromDB,
 };
 
 export default OrderServices;

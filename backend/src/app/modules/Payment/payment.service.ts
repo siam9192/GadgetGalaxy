@@ -43,7 +43,7 @@ const initPayment = async (payload: IInitPaymentPayload) => {
       data: {
         transactionId,
         amount: payload.amount,
-        method: PaymentMethod.COD,
+        method: payload.method,
       },
     });
 
@@ -274,6 +274,7 @@ const checkPayment = async (query: ICheckPaymentQuery) => {
             tx,
           );
           url = config.payment.success_url;
+          break;
         case "CANCELED":
           await tx.payment.update({
             where: {
@@ -289,6 +290,7 @@ const checkPayment = async (query: ICheckPaymentQuery) => {
             payment.order!.id,
             tx,
           );
+          break;
         case "FAILED":
           await tx.payment.update({
             where: {
@@ -305,6 +307,7 @@ const checkPayment = async (query: ICheckPaymentQuery) => {
             tx,
           );
           config.payment.cancel_url;
+          break;
       }
     });
     return {

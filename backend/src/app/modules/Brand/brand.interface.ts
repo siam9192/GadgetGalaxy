@@ -18,4 +18,5 @@ export interface IUpdateBrandPayload {
   origin?: string;
   isPopular?: boolean;
   isFeatured?: boolean;
+  isTop?: boolean;
 }

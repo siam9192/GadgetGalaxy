@@ -1,9 +1,14 @@
 import ProductCard from "@/components/cards/ProductCard";
+import ProductLoadingCard from "@/components/cards/ProductLoadingCard";
+import ProductTestCard from "@/components/cards/ProductTestCard";
 import Container from "@/components/container/Container";
+import { getFeaturedProducts } from "@/services/product.service";
 import React from "react";
 import { FaChevronRight } from "react-icons/fa";
 
-const FeaturedProducts = () => {
+const FeaturedProducts = async () => {
+  const products = await getFeaturedProducts();
+
   return (
     <section className="md:py-10 py-6">
       <Container className="">
@@ -19,10 +24,8 @@ const FeaturedProducts = () => {
           </button>
         </div>
         <div className=" mt-5 grid lg:grid-cols-6 md:grid-cols-3 grid-cols-2 gap-2">
-          {Array.from({
-            length: 12,
-          }).map((_, index) => (
-            <ProductCard key={index} />
+          {products.map((_, index) => (
+            <ProductTestCard product={_} key={index} />
           ))}
         </div>
       </Container>

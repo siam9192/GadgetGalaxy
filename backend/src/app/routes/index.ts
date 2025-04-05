@@ -8,7 +8,6 @@ import PaymentRouter from "../modules/Payment/payment.route";
 import CartItemRouter from "../modules/CartItem/cart-item.route";
 import ShippingChargeRouter from "../modules/ShippingCharge/shipping-charge.route";
 import NotificationRouter from "../modules/Notification/notification.route";
-import ActivityLogRouter from "../modules/AdministratorActivityLog/administratorActivityLog.route";
 import DiscountRouter from "../modules/Discount/discount.route";
 import BrandRouter from "../modules/Brand/brand.route";
 import ProfileRouter from "../modules/Profile/profile.route";
@@ -16,6 +15,7 @@ import ProductReviewRouter from "../modules/ProductReview/product-review.route";
 import AdministratorActivityLogRouter from "../modules/AdministratorActivityLog/administratorActivityLog.route";
 import OverviewRouter from "../modules/Overview/overview.route";
 import WishListItemRouter from "../modules/WishListItem/wishListItem.route";
+import UtilRouter from "../modules/Util/util.route";
 
 type TModuleRoutes = { path: string; router: IRouter }[];
 const router = Router();
@@ -84,6 +84,10 @@ const moduleRoutes: TModuleRoutes = [
     path: "/overview",
     router: OverviewRouter,
   },
+  {
+  path:"/utils",
+  router:UtilRouter
+  }
 ];
 
 const routes = moduleRoutes.map((route) =>

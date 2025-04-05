@@ -1,26 +1,29 @@
 import ListProductCard from "@/components/cards/ListProductCard";
 import ProductCard from "@/components/cards/ProductCard";
+import ProductTestCard from "@/components/cards/ProductTestCard";
+import { TCardProduct } from "@/types/product.type";
 import { ECardViewType, TCardViewType } from "@/types/util.type";
 import React from "react";
 interface IProps {
   searchParams: Record<string, string>;
+  products: TCardProduct[];
 }
-const ShowSearchProducts = ({ searchParams }: IProps) => {
+const ShowSearchProducts = ({ searchParams, products }: IProps) => {
   let cardViewType: TCardViewType = "grid";
   if (searchParams) cardViewType = searchParams.viewType as TCardViewType;
 
   return (
-    <section>
+    <section className="min-h-[60vh]">
       {cardViewType === ECardViewType.LIST ? (
         <div className="grid  grid-cols-1 md:gap-3 gap-2">
-          {Array.from({ length: 12 }).map((_, index) => (
-            <ListProductCard key={index} />
+          {products.map((product, index) => (
+            <ListProductCard product={product} key={index} />
           ))}
         </div>
       ) : (
         <div className="grid lg:grid-cols-4 md:grid-cols-3 grid-cols-2 md:gap-3 gap-2">
-          {Array.from({ length: 12 }).map((_, index) => (
-            <ProductCard index={index} key={index} />
+          {products.map((product, index) => (
+            <ProductTestCard product={product} key={index} />
           ))}
         </div>
       )}

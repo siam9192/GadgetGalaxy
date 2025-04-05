@@ -1,9 +1,16 @@
+import { TCardProduct } from "@/types/product.type";
+import { getProductPricing } from "@/utils/helpers";
 import React from "react";
 import { GoCheck } from "react-icons/go";
 import { IoIosStar, IoIosStarHalf } from "react-icons/io";
 import { IoCartOutline } from "react-icons/io5";
 import { LuHeart, LuSearch } from "react-icons/lu";
-const ListProductCard = () => {
+import { TbCurrencyTaka } from "react-icons/tb";
+interface IProps {
+  product: TCardProduct;
+}
+const ListProductCard = ({ product }: IProps) => {
+  const pricing = getProductPricing(product);
   return (
     <div
       className={`md:p-3 p-2 bg-white shadow-xl relative  overflow-hidden hover:cursor-pointer product-card grid md:grid-cols-6 grid-cols-1  gap-5 h-fit`}
@@ -15,14 +22,12 @@ const ListProductCard = () => {
           className="md:size-52"
         />
         <div className="absolute left-1 top-1 bg-info text-white md:px-4 px-3 py-1 rounded-full md:text-sm text-[0.7rem] font-unique">
-          40%
+          {product.discountPercentage}%
         </div>
       </div>
       <div className="md:col-span-4">
         <div className="mt-2 space-y-2">
-          <h2 className="font-secondary md:text-lg text-[0.9rem]">
-            Samsung Galaxy S20 Ultra-128GB Black
-          </h2>
+          <h2 className="font-secondary md:text-lg text-[0.9rem]">{product.name}</h2>
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <div className=" text-info flex items-center gap-1">
@@ -44,9 +49,25 @@ const ListProductCard = () => {
               </div>
               <p className="text-gray-400 text-sm">(03)</p>
             </div>
-            <h2 className="font-primary font-semibold md:text-lg text-[1rem] text-primary">
-              $320.00 <del className="text-black md:text-[1rem] text-sm">$360</del>
-            </h2>
+            {pricing.offerPrice ? (
+              <h2 className="font-primary font-semibold md:text-lg text-[1rem] text-primary">
+                <span className="inline text-2xl">
+                  <TbCurrencyTaka className="inline" />
+                </span>
+                {pricing.offerPrice}{" "}
+                <del className="text-black md:text-[1rem] text-sm">
+                  {" "}
+                  <span className="inline text-2xl">
+                    <TbCurrencyTaka className="inline" />
+                  </span>
+                  {pricing.offerPrice}
+                </del>
+              </h2>
+            ) : (
+              <h2 className="font-primary font-semibold md:text-lg text-[1rem] text-primary">
+                ${pricing.price}
+              </h2>
+            )}
           </div>
           <div className="font-secondary flex items-center gap-2 md:text-sm text-[0.6rem]">
             <p className="text-green-600 font-medium">
@@ -60,11 +81,7 @@ const ListProductCard = () => {
           <div></div>
         </div>
         <div className="mt-2">
-          <p className="text-gray-700 text-sm   opacity-80">
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Enim quisquam nesciunt animi
-            nam, aliquam repellat beatae modi laboriosam. Inventore perferendis doloribus quasi
-            libero ipsum sed deleniti
-          </p>
+          <p className="text-gray-700 text-sm   opacity-80">{product.description}</p>
         </div>
         <div className="mt-3 flex items-center justify-end gap-3 ">
           <button className="text-xl bg-primary p-2 rounded-full  text-white">

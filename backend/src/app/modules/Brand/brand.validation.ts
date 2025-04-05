@@ -6,6 +6,7 @@ const CreateBrandValidation = z.object({
   logoUrl: z.string(),
   origin: z.string().optional(),
   isPopular: z.boolean().optional(),
+  isTop: z.boolean().optional(),
   isFeatured: z.boolean().optional(),
 });
 
