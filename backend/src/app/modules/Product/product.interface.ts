@@ -73,6 +73,12 @@ export interface IFilterCategoryProductQuery {
   brand?: string;
 }
 
+export interface IFilterBrandProductQuery {
+  minPrice?: string;
+  maxPrice?: string;
+  category?: string;
+}
+
 export interface IUpdateProductStockPayload {
   productId: number;
   variantId: number;

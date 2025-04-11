@@ -18,11 +18,12 @@ export const baseApi = createApi({
 
   endpoints: (builder) => ({}),
   tagTypes: [
-    "my-blogs",
-    "blog-comments",
-    "blog-comments-replies",
-    "users",
-    "following-authors",
-    "categories",
+    "cart-items",
+    "wishlist-items",
+    "utils-count",
+    "my-orders",
+    "my-not-reviewed",
+    "my-product-reviews",
+    "product-reviews",
   ],
 });

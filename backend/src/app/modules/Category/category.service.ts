@@ -350,12 +350,34 @@ const getChildCategoriesByIdFromDB = async (id: string) => {
   return categories;
 };
 
+const getBrandRelatedCategoriesFormDB =  async (name:string)=>{
+  const groupCategories =  await prisma.productCategory.groupBy({
+    where:{
+      product:{
+        brand:{
+          name
+        }
+      }
+    },
+   by:'categoryId'
+  })
+  const data = prisma.category.findMany({
+    where:{
+    id:{
+      in:groupCategories.map(_=>_.categoryId)
+    }
+    }
+  })
+  return data
+}
+
 const CategoryServices = {
   createCategoryIntoDB,
   getCategoriesFromDB,
   getPopularCategoriesFromDB,
   getFeaturedCategoriesFromDB,
   getSearchRelatedCategoriesFromDB,
+  getBrandRelatedCategoriesFormDB,
   getSearchKeywordCategoriesFromDB,
   updateCategoryIntoDB,
   deleteCategoryByIdFromDB,

@@ -18,6 +18,7 @@ export interface IProduct {
   rating: number;
   status: TProductStatus;
   isFeatured: boolean;
+  isWishListed: boolean;
   viewsCount: number;
   createdAt: string;
   updatedAt: string;
@@ -36,6 +37,7 @@ export type TCardProduct = Pick<
   | "availableQuantity"
   | "rating"
   | "variants"
+  | "isWishListed"
 >;
 
 export type TProductCategory = {
@@ -58,7 +60,7 @@ export type TProductSpecification = {
 };
 
 export type TVariant = {
-  id: string;
+  id: number;
   productId: number;
   sku: string;
   colorName: string;
@@ -67,7 +69,7 @@ export type TVariant = {
   price: number;
   offerPrice?: number;
   discountPercentage: string;
-  availableQuantity: string;
+  availableQuantity: number;
   isHighlighted: boolean;
   createdAt: string;
   updatedAt: string;

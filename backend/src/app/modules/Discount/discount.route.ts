@@ -9,6 +9,7 @@ const router = Router();
 
 router.post(
   "/",
+  auth([UserRole.SUPER_ADMIN,UserRole.ADMIN]),
   validateRequest(DiscountValidations.CreateDiscountValidation),
   DiscountControllers.createDiscount,
 );

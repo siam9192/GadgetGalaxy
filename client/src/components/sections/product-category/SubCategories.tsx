@@ -7,10 +7,10 @@ import { FaChevronDown } from "react-icons/fa";
 
 const SubCategories = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const {slug} =useParams()
-  const {data} = useGetSubCategoriesQuery(slug as string)
-  const categories =  data?.data||[]
-  if(!categories.length) return null
+  const { slug } = useParams();
+  const { data } = useGetSubCategoriesQuery(slug as string);
+  const categories = data?.data || [];
+  if (!categories.length) return null;
   return (
     <div className=" md:my-5 my-2 p-5 bg-white">
       <div className="flex items-center justify-between">

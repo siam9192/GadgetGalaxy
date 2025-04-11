@@ -2,6 +2,7 @@
 import Container from "@/components/container/Container";
 import { getPopularCategories } from "@/services/category.service";
 import { ICategory } from "@/types/category.type";
+import { useRouter } from "next/navigation";
 import React, { useState, useEffect, useRef } from "react";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
@@ -90,6 +91,8 @@ const PopularCategories = () => {
     }
   }
 
+  const router = useRouter();
+
   return (
     <Container className="bg-white mt-5 p-5 md:p-10 shadow relative ">
       <div
@@ -105,11 +108,12 @@ const PopularCategories = () => {
               key={index}
               className="flex flex-col items-center p-3   rounded-md flex-shrink-0  hover:border-primary hover:border-2 hover:cursor-pointer"
               style={{ width: `${containerWidth! / showLength}px` }}
+              onClick={() => router.push(`/product-category/${category.slug}`)}
             >
               <img
                 src={
                   category.imageUrl ||
-                  "https://icons.veryicon.com/png/o/miscellaneous/fangshan-design_icon/category-18.png"
+                  "https://cdn-icons-png.freepik.com/256/11244/11244162.png?semt=ais_hybrid"
                 }
                 alt={category.name}
                 className="w-24 h-24 md:w-32 md:h-32 object-cover rounded-md"

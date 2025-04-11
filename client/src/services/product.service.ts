@@ -1,7 +1,7 @@
 "use server";
 
 import axiosInstance from "@/axios-instance";
-import { IProduct, TCardProduct } from "@/types/product.type";
+import { IProduct, TCardProduct, TVariant } from "@/types/product.type";
 import { IResponse } from "@/types/response.type";
 import { IParam } from "@/types/util.type";
 import { getParamsToString } from "@/utils/helpers";
@@ -62,9 +62,7 @@ export async function getSearchProducts(params: IParam[]) {
   }
 }
 
-
-
-export async function getCategoryProducts(slug:string,params: IParam[]) {
+export async function getCategoryProducts(slug: string, params: IParam[]) {
   try {
     const res = await axiosInstance.get(`/products/category/${slug}${getParamsToString(params)}`);
     const resData: IResponse<TCardProduct[]> = res.data;
@@ -78,8 +76,21 @@ export async function getCategoryProducts(slug:string,params: IParam[]) {
   }
 }
 
+export async function getBrandProducts(name: string, params: IParam[]) {
+  try {
+    const res = await axiosInstance.get(`/products/brand/${name}${getParamsToString(params)}`);
+    const resData: IResponse<TCardProduct[]> = res.data;
+    if (resData.success) {
+      return resData;
+    } else {
+      throw new Error();
+    }
+  } catch (error) {
+    return null;
+  }
+}
 
-export async function getProductDetails(slug:string) {
+export async function getProductDetails(slug: string) {
   try {
     const res = await axiosInstance.get(`/products/details/${slug}`);
     const resData: IResponse<IProduct> = res.data;
@@ -93,12 +104,38 @@ export async function getProductDetails(slug:string) {
   }
 }
 
-
-
-export async function getRelatedProducts(slug:string) {
+export async function getRelatedProducts(slug: string) {
   try {
     const res = await axiosInstance.get(`/products/related/${slug}`);
     const resData: IResponse<TCardProduct[]> = res.data;
+    if (resData.success) {
+      return resData;
+    } else {
+      throw new Error();
+    }
+  } catch (error) {
+    return null;
+  }
+}
+
+export async function getRecentViewedProducts(ids: string) {
+  try {
+    const res = await axiosInstance.get(`/products/recently-viewed/${ids}`);
+    const resData: IResponse<TCardProduct[]> = res.data;
+    if (resData.success) {
+      return resData;
+    } else {
+      throw new Error();
+    }
+  } catch (error) {
+    return null;
+  }
+}
+
+export async function getProductVariants(id: number) {
+  try {
+    const res = await axiosInstance.get(`/products/${id}/variants`);
+    const resData: IResponse<TVariant[]> = res.data;
     if (resData.success) {
       return resData;
     } else {

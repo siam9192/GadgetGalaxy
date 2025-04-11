@@ -3,11 +3,10 @@ import Link from "next/link";
 import React from "react";
 
 type TProps = {
-  category:ICategory
-}
+  category: ICategory;
+};
 
-const CategoryCard = ({category}:TProps) => {
-
+const CategoryCard = ({ category }: TProps) => {
   return (
     <Link href={`/product-category/${category.slug}`} className="h-full">
       <div className="md:p-5 p-2 bg-blue-50 rounded-md border-2 border-blue-700/15">
@@ -15,10 +14,10 @@ const CategoryCard = ({category}:TProps) => {
           <img src="https://gadgetz.com.bd/wp-content/uploads/2024/04/10000mAh.png" alt="" />
         </div>
         <h6 className="uppercase text-[0.7rem] text-center mt-3 font-medium  opacity-60">
-         {category.name}
+          {category.name}
         </h6>
         <p className="text-sm text-center mt-2 font-medium">
-          Products <span className="text-info">({category._count?.products||0})</span>
+          Products <span className="text-info">({category._count?.products || 0})</span>
         </p>
       </div>
     </Link>

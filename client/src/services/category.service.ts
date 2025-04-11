@@ -48,8 +48,6 @@ export async function getSearchRelatedCategories(params: IParam[]) {
   }
 }
 
-
-
 export async function getCategories(params: IParam[]) {
   try {
     const res = await axiosInstance.get(`/categories${getParamsToString(params)}`);

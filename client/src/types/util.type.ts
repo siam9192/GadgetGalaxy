@@ -1,3 +1,5 @@
+import { ICartItem } from "./cartItem.type";
+
 export enum ECardViewType {
   GRID = "grid",
   LIST = "list",
@@ -15,12 +17,25 @@ export interface IParam {
   value: string | number | null;
 }
 
-
 export type TSearchKeywordData = {
-  type: "product"|"category",
-  name: string,
-  imageUrl: string,
-  price?: number,
-  stock?: number,
-  hierarchySte?:string,
-}
+  type: "product" | "category";
+  name: string;
+  imageUrl: string;
+  price?: number;
+  stock?: number;
+  hierarchySte?: string;
+};
+
+export type TMyUtilsCount = {
+  cartItem: number;
+  wishListItem: number;
+  newNotification: number;
+};
+
+export type TCheckoutData = {
+  subtotal: number;
+  grandTotal: number;
+  discountTotal: number;
+  items: ICartItem[];
+  discountCode: string | null;
+};

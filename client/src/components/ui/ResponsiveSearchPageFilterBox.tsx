@@ -9,11 +9,11 @@ const ResponsiveSearchPageFilterBox = () => {
   const searchParams = useSearchParams();
   useEffect(() => {
     setIsOpen(false);
-  }, [searchParams])
+  }, [searchParams]);
 
-  useEffect(()=>{
-    document.body.style.overflow = isOpen ? 'hidden':''
-  },[isOpen])
+  useEffect(() => {
+    document.body.style.overflow = isOpen ? "hidden" : "";
+  }, [isOpen]);
   return (
     <>
       <button onClick={() => setIsOpen(true)} className="text-3xl p-2">

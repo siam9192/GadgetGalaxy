@@ -8,26 +8,20 @@ import { LuMoveLeft } from "react-icons/lu";
 import { PageProps } from "../../../../../.next/types/app/layout";
 import { getProductDetails } from "@/services/product.service";
 import AddAsRecentView from "@/components/sections/product/AddAsRecentView";
+import NavigateTab from "@/components/ui/NavigateTab";
 
-const page = async({params,searchParams}:PageProps) => {
-    const {slug} = await params
-    const data =  await getProductDetails(slug)
-    const product =  data?.data
-    if(!product) throw new Error()
-     
+const page = async ({ params, searchParams }: PageProps) => {
+  const { slug } = await params;
+  const data = await getProductDetails(slug);
+  const product = data?.data;
+  if (!product) throw new Error();
+
   return (
     <div className="min-h-screen md:py-5 py-2">
-      <div className="p-5 bg-white">
-        <div className="flex items-center gap-2">
-          <button className="text-2xl p-2 bg-gray-50">
-            <LuMoveLeft />
-          </button>
-          <p className="  opacity-60 font-medium">Home/Products/Product-1</p>
-        </div>
-      </div>
+      <NavigateTab />
       <div className="mt-5 grid lg:grid-cols-2  grid-cols-1 gap-5">
-        <ProductImageGallery  images={product.images}/>
-        <ProductBasicInfo product = {product} searchParams={await searchParams}/>
+        <ProductImageGallery images={product.images} />
+        <ProductBasicInfo product={product} />
       </div>
       <div className="mt-5  grid lg:grid-cols-6  grid-cols-1 gap-10 ">
         <div className="lg:col-span-4">
@@ -37,8 +31,8 @@ const page = async({params,searchParams}:PageProps) => {
           <RecentlyViewedProducts />
         </div>
       </div>
-      <RelatedProducts slug={slug}/>
-      <AddAsRecentView id={product.id}/>
+      <RelatedProducts slug={slug} />
+      <AddAsRecentView id={product.id} />
     </div>
   );
 };

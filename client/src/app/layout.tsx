@@ -12,8 +12,9 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  
   return (
-    <html lang="en" className="bg-[rgba(247,245,245,0.93)]">
+    <html lang="en" className="bg-[rgba(247,245,245,0.93)] ">
       <body>
         <Provider>{children}</Provider>
       </body>

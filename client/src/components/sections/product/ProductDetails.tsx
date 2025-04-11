@@ -7,10 +7,10 @@ import { IProduct } from "@/types/product.type";
 import React, { useEffect, useState } from "react";
 
 interface IProps {
-  product:IProduct
+  product: IProduct;
 }
 
-const ProductDetails = ({product}:IProps) => {
+const ProductDetails = ({ product }: IProps) => {
   const [active, setActive] = useState(0);
   const tabs = [
     {
@@ -55,10 +55,10 @@ const ProductDetails = ({product}:IProps) => {
         ))}
       </div>
       <div className="mt-5 space-y-8">
-        <ProductSpecification specifications={product.specifications}/>
-        <ProductDescription  description={product.description}/>
-        <ProductWarranty  warranty={product.warrantyInfo}/>
-        <ProductReviews />
+        <ProductSpecification specifications={product.specifications} />
+        <ProductDescription description={product.description} />
+        <ProductWarranty warranty={product.warrantyInfo} />
+        <ProductReviews productName={product.name} productId={product.id} />
       </div>
     </div>
   );

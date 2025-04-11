@@ -1,30 +1,18 @@
-import React from "react";
+"use client";
+import { checkoutContext } from "@/app/(common-layout)/checkout/page";
+import { orderInit } from "@/services/order.service";
+import { getShippingCharges } from "@/services/shippingCharge.service";
+import { setCheckoutData } from "@/services/util.service";
+import { IShippingCharge } from "@/types/shippingCharge.type";
+import { TCheckoutData } from "@/types/util.type";
+import { getCartItemPrice } from "@/utils/helpers";
+import { useRouter } from "next/navigation";
+import React, { useContext, useEffect, useState } from "react";
+import { FaBangladeshiTakaSign } from "react-icons/fa6";
 
 const CheckoutDetails = () => {
-  const orderItems: { name: string; price: number; quantity: number }[] = [
-    { name: "Wireless Mouse", price: 25.99, quantity: 2 },
-    { name: "Mechanical Keyboard", price: 89.99, quantity: 1 },
-    { name: "USB-C Hub", price: 39.99, quantity: 1 },
-    { name: "Noise-Canceling Headphones", price: 129.99, quantity: 1 },
-    { name: "Smartphone Stand", price: 15.99, quantity: 3 },
-  ];
-
-  const shippingCharges = [
-    {
-      title: "Inside Dhaka Home Delivery-DMP Only(24-48Hr):",
-      amount: 300,
-    },
-    {
-      title: "Outside Dhaka Home Delivery (24-96Hrs):",
-      amount: 500,
-    },
-    {
-      title:
-        "Express Delivery -Advaance Payment Required Order Day Express Delivery -Advance payment required (Only DMP):",
-      amount: 1000,
-    },
-  ];
-
+  const contextValue = useContext(checkoutContext);
+  const values = contextValue?.values;
   const paymentMethods = [
     {
       name: "Cash on delivery",
@@ -40,13 +28,36 @@ const CheckoutDetails = () => {
     },
   ];
 
+  const [shippingCharges, setShippingCharges] = useState<IShippingCharge[]>([]);
+  const [isShippingChargeLoading, setShippingChargeLoading] = useState(false);
+  const [data, setData] = useState<TCheckoutData | null>();
+
+  useEffect(() => {
+    setShippingChargeLoading(true);
+    const data: TCheckoutData = JSON.parse(localStorage.getItem("checkout-data")!);
+    setData(data);
+    getShippingCharges().then((res) => {
+      if (res?.success) {
+        setShippingCharges(res.data);
+      }
+      setShippingChargeLoading(false);
+    });
+  }, []);
+
+  const [selectedPaymentMethod] = useState<"COD" | "SSLCOMMERZ" | null>(null);
+  const selectedShippingCharge =
+    shippingCharges.find((_) => _.id === parseInt(contextValue!.values.shippingChargeId)) ||
+    shippingCharges[0];
+
+  const [removeCartItemsAfterPurchase, setRemoveCartItemsAfterPurchase] = useState(true);
+
   return (
     <div className="p-5 bg-white">
       <h1 className="uppercase text-2xl font-medium text-center">Your order</h1>
       <div className="mt-3">
         <div className="relative overflow-x-auto">
           <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-            <thead className="text-xs text-gray-700 uppercase bg-gray-100 dark:bg-gray-700 dark:text-gray-400">
+            <thead className="text-xs text-gray-700 uppercase bg-gray-100 ">
               <tr>
                 <th scope="col" className="px-6 py-3 ">
                   Product name
@@ -60,44 +71,38 @@ const CheckoutDetails = () => {
               </tr>
             </thead>
             <tbody>
-              <tr className="bg-white dark:bg-gray-800">
-                <th
-                  scope="row"
-                  className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-                >
-                  Apple MacBook Pro 17"
-                </th>
-                <td className="px-6 py-4">1</td>
-                <td className="px-6 py-4">$2999</td>
-              </tr>
-              <tr className="bg-white dark:bg-gray-800">
-                <th
-                  scope="row"
-                  className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-                >
-                  Microsoft Surface Pro
-                </th>
-                <td className="px-6 py-4">1</td>
-                <td className="px-6 py-4">$1999</td>
-              </tr>
-              <tr className="bg-white dark:bg-gray-800">
-                <th
-                  scope="row"
-                  className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-                >
-                  Magic Mouse 2
-                </th>
-                <td className="px-6 py-4">1</td>
-                <td className="px-6 py-4">$99</td>
-              </tr>
+              {data?.items.map((_) => (
+                <tr key={_.id} className="bg-white ">
+                  <th
+                    scope="row"
+                    className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap "
+                  >
+                    {_.product.name}
+                  </th>
+                  <td className="px-6 py-4 text-black">{_.quantity}</td>
+                  <td className="px-6 py-4 text-primary font-medium">
+                    {" "}
+                    <span className="text-black">
+                      <FaBangladeshiTakaSign className=" inline" />
+                    </span>{" "}
+                    {getCartItemPrice(_).toFixed(2)}
+                  </td>
+                </tr>
+              ))}
             </tbody>
             <tfoot>
-              <tr className="font-semibold text-gray-900 dark:text-white">
+              <tr className="font-semibold text-gray-900 ">
                 <th scope="row" className="px-6 py-3 t">
                   SubTotal
                 </th>
-                <td className="px-6 py-3">3</td>
-                <td className="px-6 py-3">21,000</td>
+                <td className="px-6 py-3">{data?.items.reduce((p, c) => p + c.quantity, 0)}</td>
+                <td className="px-6 py-3">
+                  {" "}
+                  <span className="text-black">
+                    <FaBangladeshiTakaSign className=" inline" />
+                  </span>{" "}
+                  {data?.grandTotal.toFixed(2)}
+                </td>
               </tr>
             </tfoot>
           </table>
@@ -111,7 +116,13 @@ const CheckoutDetails = () => {
                 key={index}
                 className="flex flex-col  flex-wrap gap-2  px-2 py-3 rounded-md bg-primary text-white"
               >
-                <input type="radio" name="shippingCharge" className="size-5 accent-info" />
+                <input
+                  value={item.id}
+                  type="radio"
+                  defaultChecked={index === 0}
+                  name="shippingChargeId"
+                  className="size-5 accent-info"
+                />
                 <label htmlFor="" className="text-wrap">
                   {item.title}
                 </label>
@@ -119,27 +130,58 @@ const CheckoutDetails = () => {
             ))}
           </div>
         </div>
-        <p className="mt-2 flex justify-between items-center font-medium text-xl">
-          <span>Total</span>
-          <span className="text-primary">2000 BDT</span>
-        </p>
-
+        {data && !isShippingChargeLoading && (
+          <div className="space-y-2">
+            <p className="mt-2 flex justify-between items-center font-medium md:text-xl">
+              <span>Subtotal</span>
+              <span className="text-primary">{data.subtotal.toFixed(2)} BDT</span>
+            </p>
+            <p className="mt-2 flex justify-between items-center font-medium md:text-xl">
+              <span>Discount</span>
+              <span className="text-primary">{data.discountTotal.toFixed(2)} BDT</span>
+            </p>
+            <p className="mt-2 flex justify-between items-center font-medium md:text-xl">
+              <span>Shipping Charge</span>
+              <span className="text-primary">
+                {(selectedShippingCharge?.cost || 0).toFixed(2)} BDT
+              </span>
+            </p>
+            <p className="mt-2 flex justify-between items-center font-medium md:text-xl">
+              <span>Total</span>
+              <span className="text-primary">
+                {(data!.grandTotal + (selectedShippingCharge?.cost || 0)).toFixed(2)} BDT
+              </span>
+            </p>
+          </div>
+        )}
         <div className="mt-3 space-y-2 ">
-          {paymentMethods.map((method) => (
-            <div className="flex items-center gap-2">
+          {paymentMethods.map((method, idx) => (
+            <div key={idx} className="flex items-center gap-2">
               <input
                 type="radio"
                 value={method.value}
                 name="paymentMethod"
                 className="size-5 accent-info"
               />
-              <label htmlFor="" className="text-lg font-medium text-gray-700">
+              <label htmlFor="" className="md:text-lg font-medium text-gray-700">
                 {method.name}
               </label>
             </div>
           ))}
         </div>
 
+        <div className="mt-5">
+          <div className="flex items-center flex-wrap gap-2">
+            <input
+              defaultChecked
+              onChange={(e) => setRemoveCartItemsAfterPurchase(e.target.checked)}
+              id="removeItem"
+              type="checkbox"
+              className="size-4 "
+            />
+            <label htmlFor="removeItem">Remove items from cart after purchase </label>
+          </div>
+        </div>
         <div className="mt-3 py-2 border-t border-gray-800/15">
           <p className="text-gray-800 text-sm">
             Your personal data will be used to process your order, support your experience
@@ -148,7 +190,13 @@ const CheckoutDetails = () => {
         </div>
 
         <div className="mt-3">
-          <button className="py-4 bg-primary text-white uppercase w-full">Checkout</button>
+          <button
+            disabled={!contextValue?.isValid}
+            type="submit"
+            className="py-4 bg-primary disabled:bg-gray-100 disabled:text-gray-600 text-white uppercase w-full"
+          >
+            {values?.paymentMethod === "COD" ? "PLACE ORDER" : "CHECKOUT"}
+          </button>
         </div>
       </div>
     </div>

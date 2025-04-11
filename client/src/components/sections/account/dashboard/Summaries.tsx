@@ -1,31 +1,32 @@
 import { SummaryCard } from "@/components/cards/SummaryCard";
+import { getMyOverviewData } from "@/services/overview.service";
 import React from "react";
 import { BsTruck } from "react-icons/bs";
-import { FaCommentDots } from "react-icons/fa";
 import { GoBell } from "react-icons/go";
 import { MdOutlineSpeakerNotes, MdOutlineSpeakerNotesOff } from "react-icons/md";
 
-const Summaries = () => {
+const Summaries = async () => {
+  const resData = (await getMyOverviewData())?.data;
   const data = [
     {
       title: "Orders",
       icon: <BsTruck />,
-      value: 5,
+      value: resData?.ordersTotal || 0,
     },
     {
       title: "Reviews",
       icon: <MdOutlineSpeakerNotes />,
-      value: 5,
+      value: resData?.reviewsTotal || 0,
     },
     {
       title: "Yet to Review",
       icon: <MdOutlineSpeakerNotesOff />,
-      value: 5,
+      value: resData?.notReviewedTotal || 0,
     },
     {
       title: "Unread",
       icon: <GoBell />,
-      value: 5,
+      value: resData?.unreadNotificationsTotal || 0,
     },
   ];
   return (

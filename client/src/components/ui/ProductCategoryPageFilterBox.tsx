@@ -12,34 +12,33 @@ type TPriceRange = {
 };
 
 const ProductCategoryPageFilterBox = () => {
-   const [priceRange, setPriceRange] = useState<TPriceRange>({ min: null, max: null });
-  const {slug} = useParams()
+  const [priceRange, setPriceRange] = useState<TPriceRange>({ min: null, max: null });
+  const { slug } = useParams();
 
   const { data: brandData } = useGetCategoryRelatedBrandsQuery(slug as string);
   const [selectedBrand, setSelectedBrand] = useState<number | null>(null);
   const brands = brandData?.data || [];
   const router = useRouter();
-    const pathname = usePathname();
-    const searchParams =  useSearchParams()
-    const handelFilter = () => {
-      const params = [
-     
-        {
-          name: "brand",
-          value: brands.find((b) => b.id === selectedBrand)?.name||'',
-        },
-        {
-          name: "minPrice",
-          value: priceRange.min,
-        },
-        {
-          name: "maxPrice",
-          value: priceRange.max,
-        },
-      ];
-  
-      router.push(urlSearch(searchParams, params));
-    };
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const handelFilter = () => {
+    const params = [
+      {
+        name: "brand",
+        value: brands.find((b) => b.id === selectedBrand)?.name || "",
+      },
+      {
+        name: "minPrice",
+        value: priceRange.min,
+      },
+      {
+        name: "maxPrice",
+        value: priceRange.max,
+      },
+    ];
+
+    router.push(urlSearch(searchParams, params));
+  };
 
   return (
     <div className="lg:h-fit h-full  w-full bg-blue-100 p-5">
@@ -47,7 +46,7 @@ const ProductCategoryPageFilterBox = () => {
         <div className="bg-white p-4">
           <h6 className="uppercase">Filter By Price</h6>
           <div className="mt-5">
-          <RangeSlider onChange={(value) => setPriceRange(value)} />
+            <RangeSlider onChange={(value) => setPriceRange(value)} />
           </div>
         </div>
         <div className="bg-white p-4">
@@ -76,7 +75,9 @@ const ProductCategoryPageFilterBox = () => {
         </div>
       </div>
       <div className="mt-5">
-        <button onClick={handelFilter} className="w-full py-3 bg-primary text-white ">Filter</button>
+        <button onClick={handelFilter} className="w-full py-3 bg-primary text-white ">
+          Filter
+        </button>
       </div>
     </div>
   );

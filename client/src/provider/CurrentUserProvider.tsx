@@ -15,6 +15,7 @@ type TContextValue = {
   isLoading: boolean;
   error: any;
   user: TMe | null;
+  isUserExist: boolean;
   setIsLoading: (bol: boolean) => void;
   setError: (err: any) => void;
   setUser: Dispatch<SetStateAction<TMe | null>>;
@@ -30,6 +31,7 @@ function CurrentUserProvider({ children }: { children: ReactNode }) {
   const handelUser = async () => {
     setIsLoading(true);
     const user = await getCurrentUser();
+
     setUser(user);
     setIsLoading(false);
   };
@@ -46,6 +48,7 @@ function CurrentUserProvider({ children }: { children: ReactNode }) {
     isLoading,
     error,
     user,
+    isUserExist: user ? true : false,
     setIsLoading,
     setError,
     setUser,

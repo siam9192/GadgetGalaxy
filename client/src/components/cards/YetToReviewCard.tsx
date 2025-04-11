@@ -2,8 +2,11 @@
 import React, { useEffect, useState } from "react";
 import { FaBangladeshiTakaSign } from "react-icons/fa6";
 import PostProductReview from "../ui/PostProductReview";
-
-const YetToReviewCard = () => {
+import { IMyNotReviewedItem } from "@/types/product-review.type";
+interface IProps {
+  item: IMyNotReviewedItem;
+}
+const YetToReviewCard = ({ item }: IProps) => {
   const [isClient, setIsClient] = useState(false);
 
   // Use effect for ssr = false for this component
@@ -18,7 +21,7 @@ const YetToReviewCard = () => {
   if (!isClient) return null;
 
   return (
-    <div className="md:p-5 p-3 bg-white  ">
+    <div className="md:p-5 p-3 bg-white  h-fit ">
       <div className="flex  md:gap-5 gap-3">
         <img
           src="https://adminapi.applegadgetsbd.com/storage/media/large/iPhone-14-Pro-Deep-Purple-7300.jpg"
@@ -27,7 +30,7 @@ const YetToReviewCard = () => {
         />
         <div>
           <div className="mt-2">
-            <h1 className="md:text-xl font-medium ">I Phone 15 pro max</h1>
+            <h1 className="md:text-xl font-medium ">{item.productName}</h1>
           </div>
 
           <p className="font-medium text-sm text-gray-700  rounded-full">128GB|Black|UK</p>
@@ -35,7 +38,7 @@ const YetToReviewCard = () => {
             <span className="text-xl  font-medium">
               <FaBangladeshiTakaSign />
             </span>
-            <span className="text-xl ">4756</span>
+            <span className="text-xl ">{item.price}</span>
           </h1>
           <p className="text-sm text-primary">
             Delivered at {new Date("2024-03-23").toDateString()}
@@ -44,7 +47,7 @@ const YetToReviewCard = () => {
       </div>
 
       <div className="mt-1 text-end ">
-        <PostProductReview />
+        <PostProductReview id={item.id} />
       </div>
     </div>
   );

@@ -6,7 +6,7 @@ import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
 const FeaturedCategories = () => {
   return (
-    <section className="md:py-10 py-6">
+    <section className="md:py-10 py-6 overflow-hidden">
       <Container>
         <div className="p-5 bg-white shadow font-medium flex items-center justify-between font-primary">
           <h1 className="md:text-2xl text-xl font-semibold uppercase">Popular Categories</h1>

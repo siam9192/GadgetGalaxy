@@ -657,6 +657,7 @@ const getMeFromDB = async (authUser: IAuthUser) => {
       fullName: customer?.fullName,
       profilePhoto: customer.profilePhoto,
       phoneNumber: customer.phoneNumber,
+      dateOfBirth:customer.dateOfBirth,
       gender: customer.gender,
       addresses: customer.addresses,
       role:user.role,

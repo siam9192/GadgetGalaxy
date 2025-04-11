@@ -1,6 +1,8 @@
 "use client";
+import { logout } from "@/services/auth.service";
 import { usePathname, useRouter } from "next/navigation";
 import React from "react";
+import { CiLogout } from "react-icons/ci";
 import { FaCommentDots } from "react-icons/fa";
 import { IoSettingsOutline } from "react-icons/io5";
 import { LiaTruckMovingSolid } from "react-icons/lia";
@@ -35,11 +37,16 @@ const routes = [
     path: "/account/setting",
   },
 ];
+
 const AccountSidebar = () => {
   const pathname = usePathname();
   const router = useRouter();
+  const handelLogout = async () => {
+    await logout();
+    router.replace("/");
+  };
   return (
-    <div className="h-full bg-white py-5 space-y-5">
+    <div className="h-fit bg-white py-5 space-y-5">
       {routes.map((route, index) => (
         <button
           key={index}
@@ -52,6 +59,15 @@ const AccountSidebar = () => {
           <span className="text-xl  ">{route.name}</span>
         </button>
       ))}
+      <button
+        onClick={() => handelLogout}
+        className={`w-full flex items-center gap-4 px-3 py-2  relative `}
+      >
+        <span className="text-3xl">
+          <CiLogout />
+        </span>
+        <span className="text-xl text-red-500 ">Logout</span>
+      </button>
     </div>
   );
 };

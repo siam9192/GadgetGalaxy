@@ -1,12 +1,14 @@
 import {
   DiscountStatus,
   OrderStatus,
+  PaymentMethod,
   PaymentStatus,
   Prisma,
   ProductStatus,
   UserStatus,
 } from "@prisma/client";
 import prisma from "../../shared/prisma";
+import { IAuthUser } from "../Auth/auth.interface";
 
 const getAllOverviewDataFromDB = async () => {
   const userWhereConditions: Prisma.UserWhereInput = {
@@ -265,6 +267,63 @@ const getPaymentsOverviewFromDB = async () => {
   };
 };
 
+const getMyOverviewDataFromDB = async (authUser:IAuthUser)=>{
+ const ordersTotal = await prisma.order.count({
+  where:{
+    customerId:authUser.customerId!,
+    OR:[
+      {
+        payment:{
+          method:PaymentMethod.COD
+        }
+      },
+      {
+        payment:{
+          method:{
+            not:PaymentMethod.COD
+          },
+          
+        },
+        paymentStatus:'PAID'
+      }
+    ],
+    status:{
+      notIn:[OrderStatus.PENDING,OrderStatus.CANCELED]
+    }
+  }
+ })
+ const notReviewedTotal =  await prisma.orderItem.count({
+  where:{
+    order:{
+      customerId:authUser.customerId,
+      status:OrderStatus.DELIVERED
+    },
+    
+    isReviewed:false
+  }
+ })
+
+ const unreadNotificationsTotal =  await prisma.notification.count({
+  where:{
+    userId:authUser.id,
+    isRead:false
+  }
+ })
+
+ const reviewsTotal = await prisma.productReview.count({
+  where:{
+    customerId:authUser.customerId
+  }
+ })
+
+ return {
+  ordersTotal,
+  notReviewedTotal,
+  reviewsTotal,
+  unreadNotificationsTotal
+ }
+}
+
 const OverviewServices = {
   getAllOverviewDataFromDB,
   getUsersOverviewFromDB,
@@ -272,6 +331,7 @@ const OverviewServices = {
   getDiscountOverviewFromDB,
   getProductsOverviewFromDB,
   getPaymentsOverviewFromDB,
+  getMyOverviewDataFromDB
 };
 
 export default OverviewServices;

@@ -284,7 +284,7 @@ const checkPayment = async (query: ICheckPaymentQuery) => {
               status: PaymentStatus.CANCELED,
             },
           });
-          config.payment.cancel_url;
+         url =  config.payment.cancel_url;
           await OrderServices.manageUnsuccessfulOrdersIntoDB(
             "FAILED",
             payment.order!.id,
@@ -310,6 +310,7 @@ const checkPayment = async (query: ICheckPaymentQuery) => {
           break;
       }
     });
+   
     return {
       url,
     };

@@ -1,7 +1,7 @@
 import { TProductSpecification } from "@/types/product.type";
 import React from "react";
 
-const ProductSpecification = ({specifications}:{specifications:TProductSpecification[]}) => {
+const ProductSpecification = ({ specifications }: { specifications: TProductSpecification[] }) => {
   // const specifications: { name: string; value: string }[] = [
   //   { name: "Processor", value: "Intel Core i7" },
   //   { name: "RAM", value: "16GB DDR4" },

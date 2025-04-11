@@ -99,7 +99,9 @@ const getMyCartItemsFromDB = async (authUser: IAuthUser) => {
           images: true,
         },
       },
-      variant: true,
+      variant: {
+        include:{attributes:true}
+      },
     },
   });
   const result = items.map((item) => ({

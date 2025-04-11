@@ -18,23 +18,15 @@ function FormCheckbox({ name, label, value, defaultChecked }: IProps) {
       name={name}
       defaultValue={defaultChecked ? value : ""}
       render={({ field }) => (
-        <div className="w-fit flex flex-row-reverse items-center gap-2">
-          <label htmlFor={name} className="font-medium">
-            {label}
-          </label>
+        <div className="flex items-center gap-2 px-4 py-4 border-2 rounded-md border-gray-500/15">
           <input
-            type="checkbox"
-            className="w-5 h-5 accent-primary_color"
-            {...field}
-            value={value}
-            checked={field.value === value}
-            onChange={(e) => {
-              field.onChange(e.target.checked ? value : "");
-            }}
+            type="radio"
+            name={name}
+            value={field.value || value}
+            className="size-5 accent-info"
+            defaultChecked={defaultChecked}
           />
-          {errors[name] && (
-            <span className="text-red-500 text-sm">{errors[name].message as string}</span>
-          )}
+          <label htmlFor="gender-male">{label}</label>
         </div>
       )}
     />

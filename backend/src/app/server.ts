@@ -1,5 +1,6 @@
 import app from "./app";
 import RunningServices from "./modules/Running/running.service";
+import prisma from "./shared/prisma";
 
 
 const port = 5000;
@@ -8,11 +9,9 @@ async function main() {
     app.listen(port, () => {
       console.log("GadgetGalaxy Server is Running on Port:", port);
     });
+ 
   RunningServices.Running();
  
-
-
-
   } catch (error) {
     console.log(error);
   }

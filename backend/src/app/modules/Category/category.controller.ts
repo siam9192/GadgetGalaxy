@@ -65,6 +65,19 @@ const getSearchRelatedCategories = catchAsync(
   },
 );
 
+const getBrandRelatedCategories = catchAsync(
+  async (req: Request, res: Response) => {
+
+    const result =
+      await CategoryServices.getBrandRelatedCategoriesFormDB(req.params.brandName);
+    sendSuccessResponse(res, {
+      statusCode: httpStatus.OK,
+      message: "Related Categories retrieved successfully",
+      data: result,
+    });
+  },
+);
+
 const getFeaturedCategories = catchAsync(
   async (req: Request, res: Response) => {
     const result = await CategoryServices.getFeaturedCategoriesFromDB();
@@ -118,6 +131,7 @@ const CategoryControllers = {
   getPopularCategories,
   getFeaturedCategories,
   getSearchRelatedCategories,
+  getBrandRelatedCategories,
   updateCategory,
   getAllVisibleCategories,
   getSearchKeywordCategories,

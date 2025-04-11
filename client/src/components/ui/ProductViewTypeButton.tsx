@@ -10,10 +10,9 @@ const ProductViewTypeButton = () => {
   const searchParams = useSearchParams();
   const viewType = searchParams.get("viewType");
   const onChange = (type: "grid" | "list") => {
-    router.push(`${urlSearch(searchParams,[{name:'viewType',value:type}])}`);
+    router.push(`${urlSearch(searchParams, [{ name: "viewType", value: type }])}`);
   };
 
-  
   return (
     <div className="flex items-center gap-2">
       <button

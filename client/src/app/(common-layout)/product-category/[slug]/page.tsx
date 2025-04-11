@@ -9,38 +9,34 @@ import ProductCategoryPageFilterBox from "@/components/ui/ProductCategoryPageFil
 import { getCategoryProducts } from "@/services/product.service";
 import { IParam } from "@/types/util.type";
 
-const page = async ({ searchParams,params }: PageProps) => {
-  const slug = (await params).slug
-  const paramsC = Object.entries( await searchParams).map(([name,value])=>({
+const page = async ({ searchParams, params }: PageProps) => {
+  const slug = (await params).slug;
+  const paramsC = Object.entries(await searchParams).map(([name, value]) => ({
     name,
-    value
-  })) as IParam[]
+    value,
+  })) as IParam[];
 
-  const data = await getCategoryProducts(slug,paramsC)
+  const data = await getCategoryProducts(slug, paramsC);
   const meta = data?.meta;
-  const products = data?.data||[]
+  const products = data?.data || [];
   return (
     <div>
-    <Container className="mt-3">
-      <SubCategories />
-      <ProductCategoryPageHeader />
-      <div className="lg:grid grid-cols-7 gap-5 min-h-screen ">
-        <div className="col-span-2 lg:block hidden">
-          <ProductCategoryPageFilterBox />
+      <Container className="mt-3">
+        <SubCategories />
+        <ProductCategoryPageHeader />
+        <div className="lg:grid grid-cols-7 gap-5 min-h-screen ">
+          <div className="col-span-2 lg:block hidden">
+            <ProductCategoryPageFilterBox />
+          </div>
+          <div className="col-span-5  ">
+            <div className="bg-blue-100 md:p-5 p-2">
+              <ShowSearchProducts products={products} searchParams={await searchParams} />
+              {meta && <ProductsPagination meta={meta} />}
+            </div>
+          </div>
         </div>
-        <div className="col-span-5  ">
-        <div className="bg-blue-100 md:p-5 p-2">
-      <ShowSearchProducts products={products}  searchParams={await searchParams} />
-     {
-      meta &&  <ProductsPagination meta={meta}/>
-     }
+      </Container>
     </div>
-        </div>
-      </div>
-    </Container>
-  </div>
-
-    
   );
 };
 

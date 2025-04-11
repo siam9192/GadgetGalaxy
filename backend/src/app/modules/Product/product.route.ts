@@ -52,6 +52,12 @@ router.get(
   ProductControllers.getCategoryProducts,
 );
 
+router.get(
+  "/brand/:brandName",
+  auth([UserRole.CUSTOMER], { providerMode: true }),
+  ProductControllers.getBrandProducts,
+);
+
 
 router.get(
   "/new-arrival",
@@ -99,6 +105,9 @@ router.get(
   auth([UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.MODERATOR]),
   ProductControllers.getProductsForManage,
 );
+
+
+router.get("/:id/variants",ProductControllers.getProductVariants)
 
 const ProductRouter = router;
 

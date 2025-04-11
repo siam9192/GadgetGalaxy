@@ -35,7 +35,7 @@ export const login = async (payload: ISigninPayload) => {
         maxAge: 30 * 24 * 60 * 60,
       });
       (await cookies()).set("refreshToken", resData.data.refreshToken, {
-        maxAge: 30 * 24 * 60 * 60,
+        maxAge: 60 * 24 * 60 * 60,
       });
     }
     return resData as IResponse<null>;
@@ -54,6 +54,23 @@ export const googleCallBack = async (accessToken: string) => {
     return data as IResponse<null>;
   } catch (error: any) {
     return error?.response as IResponse<null>;
+  }
+};
+
+export const forgetPassword = async (emailAddress: string) => {
+  try {
+    const { data: resData } = await axiosInstance.post(`/auth/forget-password/${emailAddress}`);
+    return resData as IResponse<null>;
+  } catch (error: any) {
+    return error?.response?.data as IResponse<null>;
+  }
+};
+export const resetPassword = async (payload: any) => {
+  try {
+    const { data: resData } = await axiosInstance.post(`/auth/reset-password/`, payload);
+    return resData as IResponse<null>;
+  } catch (error: any) {
+    return error?.response?.data as IResponse<null>;
   }
 };
 
@@ -79,6 +96,7 @@ export const changePassword = async (payload: { oldPassword: string; newPassword
 export const getCurrentUser = async () => {
   try {
     const { data } = await axiosInstance.get("/auth/me");
+
     return data.data as TMe;
   } catch (error) {
     return null;

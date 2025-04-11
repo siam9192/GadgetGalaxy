@@ -1,4 +1,6 @@
 "use client";
+import { useCurrentUser } from "@/provider/CurrentUserProvider";
+import { EAuthProvider } from "@/types/user.type";
 import { usePathname, useRouter } from "next/navigation";
 import React from "react";
 import { CiLock } from "react-icons/ci";
@@ -25,20 +27,29 @@ const routes = [
 const SettingSidebar = () => {
   const router = useRouter();
   const pathname = usePathname();
+  const { user } = useCurrentUser();
+
+  const provider = user?.authProvider;
+
   return (
     <div className="py-8 rounded-md bg-white">
-      {routes.map((route, index) => (
-        <button
-          key={index}
-          onClick={() => router.push(route.path)}
-          className={`w-full flex items-center gap-4 px-3  py-4  relative ${pathname === route.path ? "border-r-6 border-primary rounded-r-lg bg-primary/15 text-primary" : ""}  hover:text-primary`}
-        >
-          <span className="text-3xl">
-            <route.icon />
-          </span>
-          <span className="text-xl  ">{route.name}</span>
-        </button>
-      ))}
+      {routes.map((route, index) => {
+        if (route.name === "Password" && provider !== EAuthProvider.EMAIL_PASSWORD) {
+          return null;
+        }
+        return (
+          <button
+            key={index}
+            onClick={() => router.push(route.path)}
+            className={`w-full flex items-center gap-4 px-3  py-4  relative ${pathname === route.path ? "border-r-6 border-primary rounded-r-lg bg-primary/15 text-primary" : ""}  hover:text-primary`}
+          >
+            <span className="text-3xl">
+              <route.icon />
+            </span>
+            <span className="text-xl  ">{route.name}</span>
+          </button>
+        );
+      })}
     </div>
   );
 };

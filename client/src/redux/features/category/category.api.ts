@@ -15,8 +15,17 @@ const categoryApi = baseApi.injectEndpoints({
         return response;
       },
     }),
+    getBrandRelatedCategories: builder.query({
+      query: (name: string) => ({
+        url: `/categories/brand-related/${name}`,
+        method: "GET",
+      }),
+      transformResponse: (response: IResponse<ICategory[]>) => {
+        return response;
+      },
+    }),
     getSubCategories: builder.query({
-      query: (slug:string) => ({
+      query: (slug: string) => ({
         url: `/categories/${slug}/subcategories`,
         method: "GET",
       }),
@@ -25,7 +34,10 @@ const categoryApi = baseApi.injectEndpoints({
       },
     }),
   }),
-  
 });
 
-export const { useGetSearchRelatedCategoriesQuery,useGetSubCategoriesQuery } = categoryApi;
+export const {
+  useGetSearchRelatedCategoriesQuery,
+  useGetSubCategoriesQuery,
+  useGetBrandRelatedCategoriesQuery,
+} = categoryApi;

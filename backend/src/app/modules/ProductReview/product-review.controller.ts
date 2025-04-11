@@ -39,13 +39,13 @@ const getMyNotReviewedProducts = catchAsync(
     sendSuccessResponse(res, {
       statusCode: httpStatus.OK,
       message: "Product review response created successfully",
-      data: result,
+      ...result
     });
   },
 );
 
 const getMyReviews = catchAsync(async (req: Request, res: Response) => {
-  const paginationOptions = Pick(req.params, paginationOptionKeys);
+  const paginationOptions = Pick(req.query, paginationOptionKeys);
   const result = await ProductReviewServices.getMyReviewsFromDB(
     req.user,
     paginationOptions as any,
@@ -53,12 +53,12 @@ const getMyReviews = catchAsync(async (req: Request, res: Response) => {
   sendSuccessResponse(res, {
     statusCode: httpStatus.OK,
     message: "Reviews response created successfully",
-    data: result,
+    ...result,
   });
 });
 
 const getProductReviews = catchAsync(async (req: Request, res: Response) => {
-  const paginationOptions = Pick(req.params, paginationOptionKeys);
+  const paginationOptions = Pick(req.query, paginationOptionKeys);
   const result = await ProductReviewServices.getProductReviewsFromDB(
     req.params.id,
     paginationOptions as any,
@@ -66,7 +66,7 @@ const getProductReviews = catchAsync(async (req: Request, res: Response) => {
   sendSuccessResponse(res, {
     statusCode: httpStatus.OK,
     message: "Product review retrieved successfully",
-    data: result,
+    ...result,
   });
 });
 

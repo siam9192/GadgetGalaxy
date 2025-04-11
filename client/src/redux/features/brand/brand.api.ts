@@ -15,15 +15,15 @@ const brandApi = baseApi.injectEndpoints({
       },
     }),
     getCategoryRelatedBrands: builder.query({
-        query: (slug:string) => ({
-          url: `/brands/category-related/${slug}`,
-          method: "GET",
-        }),
-        transformResponse: (response: IResponse<IBrand[]>) => {
-          return response;
-        },
+      query: (slug: string) => ({
+        url: `/brands/category-related/${slug}`,
+        method: "GET",
       }),
+      transformResponse: (response: IResponse<IBrand[]>) => {
+        return response;
+      },
+    }),
   }),
 });
 
-export const { useGetSearchRelatedBrandsQuery,useGetCategoryRelatedBrandsQuery } = brandApi;
+export const { useGetSearchRelatedBrandsQuery, useGetCategoryRelatedBrandsQuery } = brandApi;

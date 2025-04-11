@@ -7,10 +7,12 @@ export type TMe = {
   profilePhoto: string;
   phoneNumber: string;
   gender: TGender;
-  addresses: TCustomerAddress;
+  dateOfBirth?: string;
+  addresses: TCustomerAddress[];
   role: TUserRole;
   status: TUserStatus;
   lastLoginAt: string;
+  passwordLastChangeAt: string;
   createdAt: string;
   updatedAt: string;
 };

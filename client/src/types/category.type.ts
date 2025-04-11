@@ -12,9 +12,9 @@ export interface ICategory {
   status: ECategory;
   createdAt: string;
   updatedAt: string;
-  _count?:{
-    products:number
-  }
+  _count?: {
+    products: number;
+  };
 }
 
 export enum ECategory {

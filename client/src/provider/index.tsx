@@ -7,7 +7,7 @@ import * as ReactRedux from "react-redux";
 import { Toaster } from "sonner";
 import CurrentUserProvider from "./CurrentUserProvider";
 import { store } from "@/redux/store";
-
+import { ToastContainer, toast } from "react-toastify";
 type TProvider = {
   children: React.ReactNode;
 };
@@ -21,6 +21,7 @@ export default function Provider({ children }: TProvider) {
         <GoogleOAuthProvider clientId={clientId}>
           {children}
           <Toaster />
+          <ToastContainer />
         </GoogleOAuthProvider>
       </CurrentUserProvider>
     </ReactRedux.Provider>

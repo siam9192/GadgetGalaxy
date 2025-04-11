@@ -22,8 +22,8 @@ export interface ICustomer {
   fullName: string;
   profilePhoto?: string;
   phoneNumber?: string;
-  gender: string;
-  dateOfBirth: string;
+  gender?: string;
+  dateOfBirth?: string;
   addresses?: TCustomerAddress[];
   createdAt: string;
   updatedAt: string;

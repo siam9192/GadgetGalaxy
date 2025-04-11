@@ -5,10 +5,18 @@ import RatingInput from "../ui/RatingInput";
 import { FaPlus } from "react-icons/fa";
 import { MdOutlineReplay } from "react-icons/md";
 import { AiOutlineDelete } from "react-icons/ai";
+import { uploadImageToImgBB } from "@/utils/helpers";
+import { useCreateProductReviewMutation } from "@/redux/features/product-review/product-review.api";
 
-const PostProductReviewForm = () => {
+interface IProps {
+  id: string;
+  onSuccess: () => void | any;
+  productName: string;
+}
+
+const PostProductReviewForm = ({ id, productName, onSuccess }: IProps) => {
   const [rating, setRating] = useState(1);
-  const handelSubmit = () => {};
+
   const [images, setImages] = useState<File[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const replaceInputRef = useRef<HTMLInputElement>(null);
@@ -27,16 +35,56 @@ const PostProductReviewForm = () => {
     setImages(images.filter((_, idx) => index !== idx));
   };
 
-  const replaceImage = (index: number) => {
-    const ref = inputRef.current;
-    if (!ref) return;
-    return;
+  const [comment, setComment] = useState("");
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const [createReview, { isLoading }] = useCreateProductReviewMutation();
+  const handelSubmit = async () => {
+    setErrors({});
+    setErrorMessage("");
+
+    try {
+      const errors: Record<string, string> = {};
+      console.log(comment);
+
+      if (comment.trim().length < 1) {
+        errors.comment = "Comment is required";
+      }
+
+      if (Object.values(errors).length) {
+        return setErrors(errors);
+      }
+
+      const imagesUrl = [];
+      if (images.length) {
+        for (const image of images) {
+          const url = await uploadImageToImgBB(image);
+          imagesUrl.push(url);
+        }
+      }
+      const payload = {
+        orderItemId: id,
+        imagesUrl,
+        comment,
+        rating,
+      };
+      const res = await createReview(payload);
+      if (!res.data?.success) {
+        throw new Error((res.error as any).data.message);
+      }
+
+      onSuccess && onSuccess();
+    } catch (error: any) {
+      setErrorMessage(error.message);
+    }
   };
+
   return (
     <Form onSubmit={handelSubmit} className="md:p-5 p-2 w-full text-start">
       <h1 className=" md:text-xl text-lg ">
         Write a review for{" "}
-        <span className="text-primary font-medium md:text-2xl text-xl  ">IPhone 15 pro max</span>
+        <span className="text-primary font-medium md:text-2xl text-xl  ">{productName}</span>
       </h1>
       <div
         className="flex
@@ -51,15 +99,17 @@ const PostProductReviewForm = () => {
         <textarea
           name=""
           id=""
+          onChange={(e) => setComment(e.target.value)}
           placeholder="Write your review"
           className="mt-3 w-full h-60 resize-none bg-gray-50 border-2 border-gray-700/20 rounded-md p-2 outline-primary"
         ></textarea>
+        {errors["comment"] && <p className="mt-1 text-red-500">{errors.comment}</p>}
       </div>
       <div className="mt-7 select-none">
         <div className="size-fit flex items-center gap-2">
           <h6 className="text-xl font-medium">Images:</h6>
           <div className="size-8  bg-primary text-sm flex justify-center items-center text-white  rounded-full ">
-            20
+            {images.length}
           </div>
         </div>
         <div className="mt-3 flex items-center gap-3 ">
@@ -106,9 +156,16 @@ const PostProductReviewForm = () => {
         className="hidden"
       />
       <div className="mt-5 text-end">
-        <button className="md:px-8 px-6 font-medium md:py-4 py-3 disabled:bg-gray-400 bg-primary hover:bg-secondary hover:text-black hover:rounded-lg duration-75 text-white">
+        <button
+          onClick={handelSubmit}
+          disabled={isLoading}
+          className="md:px-8 px-6 font-medium md:py-4 py-3 disabled:bg-gray-400 bg-primary hover:bg-secondary hover:text-black hover:rounded-lg duration-75 text-white"
+        >
           Submit
         </button>
+      </div>
+      <div className="mt-2">
+        {errorMessage && <p className="text-red-600 mt-2">{errorMessage}</p>}
       </div>
     </Form>
   );

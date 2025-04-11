@@ -1,13 +1,13 @@
-import { IMeta } from "@/types/response.type";
+import { TMeta } from "@/types/response.type";
 import React, { useEffect, useState } from "react";
 import { FcNext, FcPrevious } from "react-icons/fc";
 
-type TProps = IMeta & { delta?: number; onPageChange: (page: number) => void | any };
+type TProps = TMeta & { delta?: number; onPageChange: (page: number) => void | any };
 
 function Pagination({ totalResult: total, limit, page, delta = 2, onPageChange }: TProps) {
   const [pages, setPages] = useState<(number | string)[]>([]);
 
-  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [currentPage, setCurrentPage] = useState<number>(page || 1);
 
   const totalPages = Math.ceil(total / limit);
 

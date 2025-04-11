@@ -1,27 +1,47 @@
 "use client";
 import CartCard from "@/components/cards/CartCard";
-import CartTableCard from "@/components/cards/CartTableCard";
-import React, { createContext, useState } from "react";
+import EmptyCartMessage from "@/components/ui/EmptyCartMessage";
+import { useGetMyCartItemsQuery } from "@/redux/features/cart/cart.api";
+import { updateItem, updateItems } from "@/redux/features/cart/cart.slice";
+import { useAppDispatch, useAppSelector } from "@/redux/hook";
+import React, { createContext, useEffect, useState } from "react";
 
 interface IContextProps {
   isSelectAll: boolean;
-  selectedItems: string[];
-  setSelectedItems: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
 export const CartContext = createContext<IContextProps | null>(null);
 
 const CartItems = () => {
   const [isSelectAll, setIsSelectAll] = useState(true);
-  const [selectedItems, setSelectedItems] = useState<string[]>([]);
+  const dispatch = useAppDispatch();
   const total = 12;
-
-  const contextValue = {
+  const contextValue: IContextProps = {
     isSelectAll,
-    selectedItems,
-    setSelectedItems,
   };
+  const { data, isLoading } = useGetMyCartItemsQuery(undefined);
+  const items = data?.data || [];
 
+  useEffect(() => {
+    dispatch(updateItems(items));
+  }, [items]);
+
+  useEffect(() => {
+    if (items) {
+      items.forEach((_) => {
+        dispatch(updateItem({ id: _.id, isSelected: isSelectAll }));
+      });
+    }
+  }, [isSelectAll, items]);
+
+  if (isLoading)
+    return (
+      <div className="p-5 h-60">
+        <p>Loading...</p>
+      </div>
+    );
+
+  if (!items.length) return <EmptyCartMessage />;
   return (
     <div className="relative w-full overflow-x-auto  p-5 bg-white">
       <div className="flex items-center gap-2 md:px-5 px-3 font-medium mb-2">
@@ -37,8 +57,8 @@ const CartItems = () => {
       </div>
       <CartContext.Provider value={contextValue}>
         <div>
-          {Array.from({ length: total }).map((_, index) => (
-            <CartCard isLast={index + 1 === total} key={index} />
+          {items.map((_, index) => (
+            <CartCard item={_} isLast={index + 1 === total} key={index} />
           ))}
         </div>
       </CartContext.Provider>

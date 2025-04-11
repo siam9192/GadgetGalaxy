@@ -1,5 +1,10 @@
+import envConfig from "@/config/envConfig";
+import { ICartItem } from "@/types/cartItem.type";
 import { IProduct, TCardProduct } from "@/types/product.type";
 import { IParam, TPricing } from "@/types/util.type";
+import axios from "axios";
+import { ECDH } from "crypto";
+import { removeRequestMeta } from "next/dist/server/request-meta";
 
 export function getProductPricing(product: TCardProduct | IProduct) {
   // Extract the variants of the product
@@ -34,7 +39,7 @@ export function getParamsToString(params: IParam[]) {
   });
 
   const str = urlSearchParams.toString();
-  return "?" +( str ? str : "");
+  return "?" + (str ? str : "");
 }
 
 export function urlSearch(searchParams: URLSearchParams, params: IParam[]): string {
@@ -53,3 +58,44 @@ export function urlSearch(searchParams: URLSearchParams, params: IParam[]): stri
   const queryString = urlSearchParams.toString();
   return queryString ? `?${queryString}` : "";
 }
+export function getCartItemPrice(item: ICartItem) {
+  const { product } = item;
+  const price =
+    product.variant?.offerPrice ?? product.variant?.price ?? product.offerPrice ?? product.price;
+
+  return price;
+}
+
+export const getFormValues = (target: HTMLFormElement, names: string[]) => {
+  const obj: Record<string, string> = {};
+
+  names.forEach((name) => {
+    const input = target[name];
+    if (input) {
+      obj[name] = input.value;
+    }
+  });
+  return obj;
+};
+
+export function capitalizeFirstWord(str: string) {
+  return str.toLowerCase().replace(/\b\w/, (c) => c.toUpperCase());
+}
+
+export const uploadImageToImgBB = async (file: File) => {
+  const response = await axios.post(
+    `${envConfig.img_bb_uploadUrl}?key=${envConfig.img_bb_key}` as string,
+    { image: file },
+    {
+      headers: { "Content-Type": "multipart/form-data" },
+    },
+  );
+
+  const url = response.data.data.display_url;
+  if (!url) throw new Error();
+  return url;
+};
+
+export const isValidEmail = (email: string) => {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+};

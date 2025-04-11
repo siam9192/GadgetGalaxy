@@ -101,7 +101,9 @@ const getMyNotReviewedProductsFromDB = async (
     order: {
       customer: {
         userId: authUser.id,
+
       },
+      status:OrderStatus.DELIVERED
     },
     isReviewed: false,
   };
@@ -117,14 +119,14 @@ const getMyNotReviewedProductsFromDB = async (
     },
   });
 
-  const total = await prisma.orderItem.count({
+  const totalResult = await prisma.orderItem.count({
     where: whereConditions,
   });
 
   return {
     data: data,
     meta: {
-      total,
+      totalResult,
       skip,
       limit,
       page,
@@ -143,24 +145,56 @@ const getProductReviewsFromDB = async (
 
   const whereConditions: Prisma.ProductReviewWhereInput = {
     id: productId,
+    status:ProductReviewStatus.VISIBLE
   };
 
-  const data = await prisma.productReview.findMany({
+  const reviews = await prisma.productReview.findMany({
     where: whereConditions,
     take: limit,
     skip,
     orderBy: {
       [orderBy]: sortOrder,
     },
+    include:{
+      customer:{
+        select:{
+          fullName:true,
+           profilePhoto:true
+        }
+      }
+    }
   });
 
-  const total = await prisma.productReview.count({
+  const totalResult = await prisma.productReview.count({
     where: whereConditions,
   });
 
+  const total = await prisma.productReview.count({
+    where:{
+      productId,
+      status:ProductReviewStatus.VISIBLE
+    },
+  });
+ 
+
+  const data = reviews.map((review)=>{
+    return {
+      id:review.id,
+    comment:review.comment,
+    imagesUrl:review.imagesUrl,
+    reviewer:{
+      name:review.customer.fullName,
+      profilePhoto:review.customer.profilePhoto
+    },
+    rating: review.rating,
+    createdAt: review.createdAt,
+    updatedAt: review.updatedAt,
+    }
+  })
   return {
     data,
     meta: {
+      totalResult,
       total,
       skip,
       limit,
@@ -193,7 +227,9 @@ const getMyReviewsFromDB = async (
             },
           },
         },
+        
       },
+      orderItem:true
     },
     take: limit,
     skip,
@@ -202,24 +238,28 @@ const getMyReviewsFromDB = async (
     },
   });
 
-  const total = await prisma.productReview.count({
+  const totalResult = await prisma.productReview.count({
     where: whereConditions,
   });
 
-  const filteredData = data.map((item) => ({
-    id: item.id,
-    comment: item.comment,
-    rating: item.rating,
-    response: item.response,
-    product: item.product,
-    createdAt: item.createdAt,
-    updatedAt: item.updatedAt,
-  }));
+  const filteredData = data.map((item) => {
+
+    return {
+      id: item.id,
+      comment: item.comment,
+      imagesUrl:item.imagesUrl,
+      rating: item.rating,
+      response: item.response,
+      item:item.orderItem,
+      createdAt: item.createdAt,
+      updatedAt: item.updatedAt,
+    }
+  });
 
   return {
     data: filteredData,
     meta: {
-      total,
+      totalResult,
       skip,
       limit,
       page,

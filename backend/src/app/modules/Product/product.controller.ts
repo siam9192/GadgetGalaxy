@@ -95,6 +95,23 @@ const getCategoryProducts = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+
+const getBrandProducts = catchAsync(async (req: Request, res: Response) => {
+  const filterQuery = Pick(req.query, ["category", "minPrice", "maxPrice"]);
+  const paginationOptions = Pick(req.query, paginationOptionKeys);
+  const result = await ProductServices.getBrandProductsFromDB(
+    req.params.brandName,
+    filterQuery,
+    paginationOptions as any,
+    req.user,
+  );
+  sendSuccessResponse(res, {
+    statusCode: httpStatus.OK,
+    message: "Products retrieved successfully",
+    ...result,
+  });
+});
+
 const getRecentlyViewedProducts = catchAsync(
   async (req: Request, res: Response) => {
     const result = await ProductServices.getRecentlyViewedProductsFromDB(
@@ -154,7 +171,7 @@ const getFeaturedProducts = catchAsync(async (req: Request, res: Response) => {
 const getNewArrivalProductsFromDB = catchAsync(
   async (req: Request, res: Response) => {
     const paginationOptions = Pick(req.query, paginationOptionKeys);
-    const result = await ProductServices.getFeaturedProductsFromDB(
+    const result = await ProductServices.getNewArrivalProductsFromDB(
       paginationOptions as IPaginationOptions,
       req.user,
     );
@@ -227,6 +244,16 @@ const createMany =  catchAsync(async (req: Request, res: Response) => {
     data:await Promise.all(req.body.map(b=> ProductServices.createProductIntoDB(b)))
   });
 });
+
+const getProductVariants = catchAsync(async (req: Request, res: Response) => {
+  const result =
+    await ProductServices.getProductVariantsFromDB(req.params.id);
+  sendSuccessResponse(res, {
+    statusCode: httpStatus.OK,
+    message: " retrieved successfully",
+    data:result
+  });
+});
 const ProductControllers = {
   createProduct,
   updateProduct,
@@ -235,6 +262,7 @@ const ProductControllers = {
   softDeleteProduct,
   getSearchProducts,
   getCategoryProducts,
+  getBrandProducts,
   getRelatedProductsByProductSlug,
   getRecentlyViewedProducts,
   getFeaturedProducts,
@@ -245,6 +273,7 @@ const ProductControllers = {
   getProductsForManage,
   getStockOutProducts,
   createMany,
+  getProductVariants
 };
 
 export default ProductControllers;

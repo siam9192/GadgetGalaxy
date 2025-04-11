@@ -65,8 +65,6 @@ const Header = () => {
                 <p className="size-7  bg-info rounded-full text-white flex justify-center items-center">
                   2
                 </p>
-                <span className="font-medium">My Cart</span>
-                <span className="text-info text-xl font-bold">$100</span>
               </div>
             </div>
           </div>

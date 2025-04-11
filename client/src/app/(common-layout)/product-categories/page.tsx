@@ -2,12 +2,11 @@ import CategoryCard from "@/components/cards/CategoryCard";
 import { getCategories } from "@/services/category.service";
 import React from "react";
 
-const page = async() => {
-  const data =  await getCategories([{name:"limit",value:100}])
-  const categories =  data?.data||[]
-  const meta = data?.meta
+const page = async () => {
+  const data = await getCategories([{ name: "limit", value: 100 }]);
+  const categories = data?.data || [];
+  const meta = data?.meta;
 
-  
   return (
     <div className="bg-white shadow-xl md:p-10 p-5 md:my-5 my-2">
       <div>

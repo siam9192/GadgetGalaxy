@@ -78,8 +78,8 @@ const getMyUtilCountsFromDB = async (authUser: IAuthUser) => {
         },
       },
     });
-    data.totalCartItems = totalCartItems;
-    data.totalWishListItems = totalWishListItems;
+    data.cartItem = totalCartItems;
+    data.wishListItem = totalWishListItems;
   }
   const totalNewNotifications = await prisma.notification.count({
     where: {
@@ -88,7 +88,7 @@ const getMyUtilCountsFromDB = async (authUser: IAuthUser) => {
   });
   return {
     ...data,
-    totalNewNotifications,
+   newNotification:totalNewNotifications,
   };
 };
 

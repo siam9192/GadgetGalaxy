@@ -21,6 +21,7 @@ const InitOrderValidation = z.object({
   cartItemsId: z.array(z.string()).min(1),
   shippingInfo,
   removeCartItemsAfterPurchase: z.boolean(),
+  notes:z.string().optional()
 });
 
 const PlaceOrderValidation = z.object({
@@ -29,6 +30,7 @@ const PlaceOrderValidation = z.object({
   cartItemsId: z.array(z.string()).min(1),
   shippingInfo,
   removeCartItemsAfterPurchase: z.boolean(),
+  notes:z.string().optional()
 });
 
 const UpdateOrderStatusByStaffValidation = z.object({

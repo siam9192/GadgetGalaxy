@@ -10,28 +10,26 @@ import { useRouter } from "next/navigation";
 const ResponsiveSearchBox = () => {
   const [isOpen, setIsOpen] = useState(false);
 
-    
-   const [keyword,setKeyword] = useState('');
- 
-   const {data,isLoading,isFetching} = useGetSearchKeywordResultsQuery(keyword)
- 
-   const results =  data?.data||[]
-  const router = useRouter()
+  const [keyword, setKeyword] = useState("");
+
+  const { data, isLoading, isFetching } = useGetSearchKeywordResultsQuery(keyword);
+
+  const results = data?.data || [];
+  const router = useRouter();
 
   useEffect(() => {
     document.body.style.overflow = isOpen ? "hidden" : "";
-   if(!isOpen){
-    setKeyword('')
-   }
+    if (!isOpen) {
+      setKeyword("");
+    }
   }, [isOpen]);
 
+  const handelKeywordSearch = (e: KeyboardEvent<HTMLInputElement>) => {
+    setIsOpen(true);
+    if (e.key.toLowerCase() !== "enter") return;
+    router.push(`/search?searchTerm=${keyword}`);
+  };
 
-    const handelKeywordSearch = (e:KeyboardEvent<HTMLInputElement>)=>{
-      setIsOpen(true)
-      if(e.key.toLowerCase() !== 'enter' ) return
-     router.push(`/search?searchTerm=${keyword}`)
-    }
-  
   return (
     <>
       <button
@@ -45,62 +43,61 @@ const ResponsiveSearchBox = () => {
           <input
             type="text"
             placeholder="Enter search keyword.."
-            onChange={(e)=>setKeyword(e.target.value)}
+            onChange={(e) => setKeyword(e.target.value)}
             onKeyDown={handelKeywordSearch}
             className="w-full  bg-gray-100 px-2  py-3"
           />
 
           <div className="h-screen overflow-y-auto pb-5">
-   {
-    isLoading || isFetching ?
-
-    <p>Loading...</p>:
-    results.map((item, index) => {
-      if (item.type === "product") {
-        return (
-          <div key={index} className="p-2 hover:bg-gray-100 ">
-            <p className="text-primary font-medium text-sm mb-1">Product</p>
-            <div className="flex items-center gap-2">
-              <img
-                src={
-                  "https://adminapi.applegadgetsbd.com/storage/media/large/iPhone-14-Pro-Deep-Purple-7300.jpg"
+            {isLoading || isFetching ? (
+              <p>Loading...</p>
+            ) : (
+              results.map((item, index) => {
+                if (item.type === "product") {
+                  return (
+                    <div key={index} className="p-2 hover:bg-gray-100 ">
+                      <p className="text-primary font-medium text-sm mb-1">Product</p>
+                      <div className="flex items-center gap-2">
+                        <img
+                          src={
+                            "https://adminapi.applegadgetsbd.com/storage/media/large/iPhone-14-Pro-Deep-Purple-7300.jpg"
+                          }
+                          alt=""
+                          className="size-16"
+                        />
+                        <div>
+                          <h5 className="text-lg ">{item.name}</h5>
+                          <h3 className="text-primary font-semibold flex items-center ">
+                            <span className="text-xl">
+                              <TbCurrencyTaka />
+                            </span>
+                            <span>{item.price}</span>
+                          </h3>
+                          <ProductRating rating={4} />
+                        </div>
+                      </div>
+                    </div>
+                  );
+                } else {
+                  return (
+                    <div key={index} className="p-3 hover:bg-gray-100">
+                      <p className="text-info font-medium text-sm mb-1">Category</p>
+                      <div className=" flex gap-2 ">
+                        <img
+                          src={"https://gadgetz.com.bd/wp-content/uploads/2024/04/10000mAh.png"}
+                          alt=""
+                          className="size-16"
+                        />
+                        <div>
+                          <h5 className="text-lg">{item.name}</h5>
+                          <h6 className="text-gray-800 text-sm">{item.hierarchySte}</h6>
+                        </div>
+                      </div>
+                    </div>
+                  );
                 }
-                alt=""
-                className="size-16"
-              />
-              <div>
-                <h5 className="text-lg ">{item.name}</h5>
-                <h3 className="text-primary font-semibold flex items-center ">
-                  <span className="text-xl">
-                    <TbCurrencyTaka />
-                  </span>
-                  <span>{item.price}</span>
-                </h3>
-                <ProductRating rating={4} />
-              </div>
-            </div>
-          </div>
-        );
-      } else {
-        return (
-          <div key={index} className="p-3 hover:bg-gray-100">
-            <p className="text-info font-medium text-sm mb-1">Category</p>
-            <div className=" flex gap-2 ">
-              <img
-                src={"https://gadgetz.com.bd/wp-content/uploads/2024/04/10000mAh.png"}
-                alt=""
-                className="size-16"
-              />
-              <div>
-                <h5 className="text-lg">{item.name}</h5>
-                <h6 className="text-gray-800 text-sm">{item.hierarchySte}</h6>
-              </div>
-            </div>
-          </div>
-        );
-      }
-    })
-   }
+              })
+            )}
           </div>
           <button
             onClick={() => setIsOpen(false)}

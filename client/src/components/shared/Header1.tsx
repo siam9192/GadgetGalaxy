@@ -1,17 +1,15 @@
 import React from "react";
 import Container from "../container/Container";
-import { BsCart2, BsSearch } from "react-icons/bs";
-import { LuSearch, LuShoppingBag, LuUserRound } from "react-icons/lu";
-import { IoMenu } from "react-icons/io5";
+import { LuUserRound } from "react-icons/lu";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { AiOutlineUser } from "react-icons/ai";
-import { GoHeart } from "react-icons/go";
-import { RiMenuFill } from "react-icons/ri";
+
 import BrowseCategories from "../ui/BrowseCategories";
 import SearchBox from "../ui/SearchBox";
 import ResponsiveSearchBox from "../ui/ResponsiveSearchBox";
 import ResponsiveSidebar from "../ui/ResponsiveSidebar";
+import HeaderUtils from "../ui/HeaderUtils";
+import HeaderAuthNavigation from "../ui/HeaderAuthNavigation";
 
 const navLinks = [
   {
@@ -60,30 +58,9 @@ const Header1 = () => {
               <SearchBox />
             </div>
             <div className="col-span-2 bg-white px-2 py-3 flex items-center justify-end lg:gap-4 gap-3 font-primary">
-              <Link href={"/login"}>
-                <button className="flex items-center gap-1">
-                  <span className="text-3xl">
-                    <AiOutlineUser />
-                  </span>
-                </button>
-              </Link>
+              <HeaderAuthNavigation />
               <ResponsiveSearchBox />
-              <Link href="/wishlist">
-                <button className="text-3xl text-black relative md:block hidden">
-                  <GoHeart />
-                  <div className="size-5 bg-info text-[0.7rem] text-white flex justify-center flex-col items-center text-center rounded-full absolute -top-3 -right-2">
-                    <span>5</span>
-                  </div>
-                </button>
-              </Link>
-              <Link href="/cart">
-                <button className="text-3xl text-black relative md:block hidden">
-                  <BsCart2 />
-                  <div className="size-5 bg-info text-[0.7rem] text-white flex justify-center flex-col items-center text-center rounded-full absolute -top-3 -right-2">
-                    <span>5</span>
-                  </div>
-                </button>
-              </Link>
+              <HeaderUtils />
               <ResponsiveSidebar />
             </div>
           </div>

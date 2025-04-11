@@ -27,7 +27,7 @@ const placeOrder = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getMyOrders = catchAsync(async (req: Request, res: Response) => {
-  const paginationOptions = Pick(req.params, paginationOptionKeys);
+  const paginationOptions = Pick(req.query, paginationOptionKeys)
   const filter = Pick(req.query, ["status", "startDate", "endDate"]);
 
   const result = await OrderServices.getMyOrdersFromDB(
