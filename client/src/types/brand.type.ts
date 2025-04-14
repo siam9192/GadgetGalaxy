@@ -1,6 +1,6 @@
 interface IBrand {
   id: number;
-  name: number;
+  name: string;
   description: string;
   logoUrl: string;
   origin: string;

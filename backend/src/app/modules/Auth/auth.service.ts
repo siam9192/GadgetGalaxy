@@ -686,6 +686,7 @@ const AuthServices = {
   register,
   verifyRegistrationUsingOTP,
   resendOtp,
+  googleCallback,
   login,
   logout,
   changePassword,

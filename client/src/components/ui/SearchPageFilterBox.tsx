@@ -81,7 +81,7 @@ const SearchPageFilterBox = () => {
                       _.logoUrl ||
                       "https://gadgetz.com.bd/wp-content/uploads/2022/01/Havit-logo.png"
                     }
-                    alt=""
+                    alt={_.name}
                     className="w-1/5"
                   />
                   <p className="text-lg text-gray-800 opacity-60">{_.name}</p>

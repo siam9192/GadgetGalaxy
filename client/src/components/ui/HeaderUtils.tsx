@@ -4,6 +4,7 @@ import Link from "next/link";
 import React from "react";
 import { BsCart2 } from "react-icons/bs";
 import { GoHeart } from "react-icons/go";
+import NotificationBar from "./NotificationBar";
 
 const HeaderUtils = () => {
   const { data } = useGetMyCountQuery(undefined);
@@ -31,6 +32,7 @@ const HeaderUtils = () => {
           ) : null}
         </button>
       </Link>
+      <NotificationBar />
     </>
   );
 };

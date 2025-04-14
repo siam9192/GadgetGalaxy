@@ -91,6 +91,16 @@ const resetPassword = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const googleCallback = catchAsync(async (req: Request, res: Response) => {
+  const result = await AuthServices.googleCallback(req.body);
+  sendSuccessResponse(res, {
+    statusCode: httpStatus.OK,
+    message: "successful",
+    data: result,
+  });
+});
+
+
 const getMe = catchAsync(async (req: Request, res: Response) => {
   const result = await AuthServices.getMeFromDB(req.user);
   sendSuccessResponse(res, {
@@ -110,6 +120,7 @@ const AuthControllers = {
   resetPassword,
   getAccessTokenUsingRefreshToken,
   getMe,
+  googleCallback
 };
 
 export default AuthControllers;

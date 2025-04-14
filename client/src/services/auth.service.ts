@@ -10,7 +10,7 @@ import { cookies } from "next/headers";
 interface ISignupPayload {
   email: string;
   password: string;
-  name: any;
+  fullName: string;
 }
 
 interface ISigninPayload {
@@ -20,8 +20,26 @@ interface ISigninPayload {
 
 export const signup = async (payload: ISignupPayload) => {
   try {
-    const { data: resData } = await axiosInstance.post("/auth/signup", payload);
-    return resData as IResponse<null>;
+    const { data: resData } = await axiosInstance.post("/auth/register", payload);
+    return resData as IResponse<{ email: string; token: string }>;
+  } catch (error: any) {
+    return error?.response?.data as IResponse<null>;
+  }
+};
+
+export const verifySignupRequest = async (payload: any) => {
+  try {
+    const { data: resData } = await axiosInstance.post("/auth/register/verify", payload);
+    return resData as IResponse<{ email: string; token: string }>;
+  } catch (error: any) {
+    return error?.response?.data as IResponse<null>;
+  }
+};
+
+export const resendOtp = async (token: string) => {
+  try {
+    const { data: resData } = await axiosInstance.post(`/auth/resend-otp/${token}`);
+    return resData as IResponse<{ email: string; token: string }>;
   } catch (error: any) {
     return error?.response?.data as IResponse<null>;
   }
@@ -40,20 +58,24 @@ export const login = async (payload: ISigninPayload) => {
     }
     return resData as IResponse<null>;
   } catch (error: any) {
-    return error?.response?.data;
+    return error?.response?.data as IResponse<null>;
   }
 };
 
 export const googleCallBack = async (accessToken: string) => {
   try {
-    const { data } = await axiosInstance.post("/auth/google-callback", {
-      accessToken,
-    });
-    (await cookies()).set("accessToken", data?.data?.accessToken);
-    (await cookies()).set("refreshToken", data?.data?.refreshToken);
-    return data as IResponse<null>;
+    const { data: resData } = await axiosInstance.post("/auth/google-callback", { accessToken });
+    if (resData.success) {
+      (await cookies()).set("accessToken", resData.data.accessToken, {
+        maxAge: 30 * 24 * 60 * 60,
+      });
+      (await cookies()).set("refreshToken", resData.data.refreshToken, {
+        maxAge: 60 * 24 * 60 * 60,
+      });
+    }
+    return resData as IResponse<null>;
   } catch (error: any) {
-    return error?.response as IResponse<null>;
+    return error?.response?.data as IResponse<null>;
   }
 };
 

@@ -9,7 +9,6 @@ import ShopByBrands from "@/components/sections/home/ShopByBrands";
 import TopBrandProducts from "@/components/sections/home/TopBrandProducts";
 
 export default function Home() {
-
   return (
     <div>
       <Hero />

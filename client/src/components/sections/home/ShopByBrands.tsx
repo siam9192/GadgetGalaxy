@@ -40,12 +40,14 @@ const ShopByBrands = async () => {
         </div>
         <div className="p-5 bg-white lg:grid-cols-none grid grid-cols-1    lg:flex items-center flex-wrap md:justify-center lg:gap-7 md:gap-5 gap-3">
           {brands.map((brand, index) => (
-            <div key={index} className="p-5 border-2 border-blue-100 rounded-md lg:size-52 ">
-              <img
-                src={"https://adminapi.applegadgetsbd.com/storage/media/thumb/Oneplus-9091.png"}
-              />
-              <h1 className="text-center text-xl  font-primary">{brand.name}</h1>
-            </div>
+            <Link key={index} href={`product-brand/${brand.name}`}>
+              <div className="p-5 border-2 border-blue-100 rounded-md lg:size-52 ">
+                <img
+                  src={"https://adminapi.applegadgetsbd.com/storage/media/thumb/Oneplus-9091.png"}
+                />
+                <h1 className="text-center text-xl  font-primary">{brand.name}</h1>
+              </div>
+            </Link>
           ))}
         </div>
       </Container>

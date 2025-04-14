@@ -31,6 +31,7 @@ router.post(
 
 router.post("/logout", auth(allRoles), AuthControllers.login);
 
+router.post("/google-callback", AuthControllers.googleCallback);
 router.patch(
   "/change-password",
   auth(allRoles),

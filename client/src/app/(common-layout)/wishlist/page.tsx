@@ -14,6 +14,7 @@ const page = () => {
         <p>Loading...</p>
       </div>
     );
+
   return (
     <div className="md:py-8 py-6 min-h-screen">
       <div className="p-5 bg-white flex justify-between items-center">

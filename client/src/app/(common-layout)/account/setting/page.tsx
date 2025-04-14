@@ -8,13 +8,12 @@ import { useCurrentUser } from "@/provider/CurrentUserProvider";
 import { updateProfile } from "@/services/profile.service";
 import { EGender } from "@/types/user.type";
 import { defaultImagesUrl } from "@/utils/constant";
-import { capitalizeFirstWord, uploadImageToImgBB } from "@/utils/helpers";
-import ProfileValidations from "@/validations/profile.validation";
-import { zodResolver } from "@hookform/resolvers/zod";
-import React, { ChangeEvent, useEffect, useRef, useState } from "react";
+import { capitalizeFirstWord, getFormValues, uploadImageToImgBB } from "@/utils/helpers";
+import React, { ChangeEvent, FormEvent, useEffect, useRef, useState } from "react";
 import { IoCameraOutline } from "react-icons/io5";
 import { MdOutlineModeEditOutline } from "react-icons/md";
 import { TfiTrash } from "react-icons/tfi";
+import { toast } from "sonner";
 
 const page = () => {
   const { user, isLoading, refetch } = useCurrentUser();
@@ -24,6 +23,8 @@ const page = () => {
   const imageInputRef = useRef<HTMLInputElement>(null);
   const [isUpdating, setIsUpdating] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
   useEffect(() => {
     if (!user) return;
     setAddresses(user.addresses || []);
@@ -58,30 +59,77 @@ const page = () => {
   };
 
   const isDefaultExist = addresses.find((_) => _.isDefault === true);
-  const handelSubmit = async (values: any) => {
+  const handelSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setErrors({});
+    const target = e.target as HTMLFormElement;
+    let values = getFormValues(target, ["fullName", "phoneNumber", "dateOfBirth", "gender"]);
+
+    const errors: Record<string, string> = {};
+
+    // Basic validation
+    if (!values.fullName || values.fullName.trim().length < 3) {
+      errors.fullName = "Full name must be at least 3 characters long.";
+    }
+
+    const phoneRegex = /^[0-9]{10,15}$/;
+    if (values.phoneNumber && !phoneRegex.test(values.phoneNumber)) {
+      errors.phoneNumber = "Please enter a valid phone number.";
+    }
+
+    if (values.dateOfBirth && !values.dateOfBirth) {
+      const dob = new Date(values.dateOfBirth);
+      const now = new Date();
+      if (isNaN(dob.getTime()) || dob >= now) {
+        errors.dateOfBirth = "Please enter a valid date of birth.";
+      }
+    }
+
+    if (Object.values(errors).length) {
+      target[Object.keys(errors)[0]].focus();
+      return setErrors(errors);
+    }
     console.log(values);
+
     setIsUpdating(true);
+
     try {
+      values = Object.entries(values).reduce(
+        (acc, [key, value]) => {
+          if (value) {
+            acc[key as string] = value;
+          }
+          return acc;
+        },
+        {} as Record<string, string>,
+      );
+
       const payload: any = {
         ...values,
-        profilePhoto,
         addresses,
       };
+
       if (newProfilePhoto) {
         const url = await uploadImageToImgBB(newProfilePhoto);
         payload.profilePhoto = url;
+      } else if (user?.profilePhoto) {
+        payload.profilePhoto = user.profilePhoto;
       }
 
       const res = await updateProfile(payload);
+
       if (!res?.success) {
         throw new Error(res?.message || "Something went wrong!");
       }
+      toast.success("Profile updated successfully!");
+      refetch();
     } catch (error: any) {
       setErrorMessage(error.message);
     } finally {
       setIsUpdating(false);
     }
   };
+
   return (
     <div className="bg-white md:p-10 p-5">
       {/* Profile Photo */}
@@ -122,79 +170,96 @@ const page = () => {
       </div>
 
       <div className="mt-5">
-        <Form
-          onSubmit={handelSubmit}
-          resolver={zodResolver(ProfileValidations.UpdateProfileValidation)}
-          defaultValues={user as any}
-        >
+        <form onSubmit={handelSubmit}>
           <div className="space-y-3">
-            <FormInput
-              name="fullName"
-              label="Full Name"
-              className="w-full mt-1 px-2 focus:bg-blue-50 py-3 placeholder:font-normal rounded-lg border-2 border-gray-600/10   font-medium outline-primary"
-            />
+            <div>
+              <label className="   block text-start 0font-medium text-[1rem]" htmlFor="fullName">
+                Full Name*
+              </label>
+
+              <input
+                className={
+                  "w-full mt-1 px-2 py-3 placeholder:font-normal rounded-lg border-2 border-gray-600/10   font-medium outline-primary"
+                }
+                type="text"
+                name="fullName"
+                defaultValue={user?.fullName}
+              />
+              {errors.fullName && <p className="mt-1 text-red-500 text-sm">{errors.fullName}</p>}
+            </div>
             <div className="grid grid-cols-2 gap-3">
-              <FormInput
-                className="w-full mt-1 px-2 focus:bg-blue-50 py-3 placeholder:font-normal rounded-lg border-2 border-gray-600/10   font-medium outline-primary"
-                name="email"
-                label="Email"
-                readonly
-              />
-              <FormInput
-                className="w-full mt-1 px-2 focus:bg-blue-50 py-3 placeholder:font-normal rounded-lg border-2 border-gray-600/10   font-medium outline-primary"
-                name="phoneNumber"
-                label="Mobile Number"
-              />
-              <FormInput
-                type="date"
-                className="w-full mt-1 px-2 focus:bg-blue-50 py-3 placeholder:font-normal rounded-lg border-2 border-gray-600/10   font-medium outline-primary"
-                name="dateOfBirth"
-                label="Date of Birth"
-              />
+              <div>
+                <label className="  block text-start 0font-medium text-[1rem]" htmlFor="fullName">
+                  Email*
+                </label>
+
+                <input
+                  className={
+                    "w-full mt-1 px-2 py-3 placeholder:font-normal rounded-lg border-2 border-gray-600/10   font-medium outline-primary"
+                  }
+                  readOnly
+                  type="text"
+                  name="email"
+                  defaultValue={user?.email}
+                />
+              </div>
+              <div>
+                <label className="  block text-start 0font-medium text-[1rem]" htmlFor="fullName">
+                  Phone Number
+                </label>
+
+                <input
+                  className={
+                    "w-full mt-1 px-2 py-3 placeholder:font-normal rounded-lg border-2 border-gray-600/10   font-medium outline-primary"
+                  }
+                  type="text"
+                  name="phoneNumber"
+                  defaultValue={user?.phoneNumber}
+                />
+                {errors.phoneNumber && (
+                  <p className="mt-1 text-red-500 text-sm">{errors.phoneNumber}</p>
+                )}
+              </div>
+              <div>
+                <label className="block text-start 0font-medium text-[1rem]" htmlFor="fullName">
+                  Date of Birth
+                </label>
+
+                <input
+                  className={
+                    "w-full mt-1 px-2 py-3 placeholder:font-normal rounded-lg border-2 border-gray-600/10   font-medium outline-primary"
+                  }
+                  type="date"
+                  name="dateOfBirth"
+                  defaultValue={
+                    user?.dateOfBirth ? new Date(user?.dateOfBirth).toLocaleString() : ""
+                  }
+                />
+                {errors.dateOfBirth && (
+                  <p className="mt-1 text-red-500 text-sm">{errors.dateOfBirth}</p>
+                )}
+              </div>
             </div>
 
             <div>
               <label htmlFor="" className=" ">
                 Gender
               </label>
-              <div className="mt-1 flex items-center gap-4 ">
-                {/* <div className="flex items-center gap-2 px-4 py-4 border-2 rounded-md border-gray-500/15">
-                  <input
-                    type="radio"
-                    name="gender"
-                    id="gender-male"
-                    value={EGender.MALE}
-                    className="size-5 accent-info"
-                  />
-                  <label htmlFor="gender-male">Male</label>
-                </div>
-                <div className="flex items-center gap-2 px-4 py-4 border-2 rounded-md border-gray-500/15">
-                  <input
-                    type="radio"
-                    name="gender"
-                    id="gender-female"
-                    value={EGender.FEMALE}
-                    className="size-5 accent-info"
-                  />
-                  <label htmlFor="gender-male">Female</label>
-                </div>
-                <div className="flex items-center gap-2 px-4 py-4 border-2 rounded-md border-gray-500/15">
-                  <input
-                    type="radio"
-                    name="gender"
-                    id="gender-other"
-                    value={EGender.OTHER}
-                    className="size-5 accent-info"
-                  />
-                  <label htmlFor="gender-other">Other</label>
-                </div> */}
+              <div className="mt-1 flex  flex-wrap items-center gap-4 ">
                 {Object.values(EGender).map((gender) => (
-                  <FormCheckbox
+                  <div
                     key={gender}
-                    name="gender"
-                    value={gender}
-                    label={capitalizeFirstWord(gender)}
-                  />
+                    className="flex items-center gap-2 px-4 py-4 border-2 rounded-md border-gray-500/15"
+                  >
+                    <input
+                      type="radio"
+                      name="gender"
+                      value={gender}
+                      className="size-5 accent-info"
+                      defaultChecked={user?.gender === gender}
+                    />
+                    <label htmlFor="gender-male">{capitalizeFirstWord(gender)}</label>
+                  </div>
                 ))}
               </div>
             </div>
@@ -280,7 +345,7 @@ const page = () => {
             </button>
           </div>
           {errorMessage && <p className="text-info mt-3 font-medium">{errorMessage}</p>}
-        </Form>
+        </form>
       </div>
     </div>
   );

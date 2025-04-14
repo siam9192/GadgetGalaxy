@@ -5,6 +5,7 @@ import { LuMoveLeft } from "react-icons/lu";
 
 const NavigateTab = () => {
   const router = useRouter();
+
   return (
     <div className="p-5 bg-white">
       <div className="flex items-center gap-2">

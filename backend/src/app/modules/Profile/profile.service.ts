@@ -30,6 +30,10 @@ const updateMyProfileIntoDB = async (authUser: IAuthUser, payload: any) => {
     result = await prisma.$transaction(async (txClient) => {
       const { addresses, ...othersData } = data;
 
+      if(othersData.dateOfBirth){
+        othersData.dateOfBirth = new Date(othersData.dateOfBirth)
+      }
+
       await txClient.customer.update({
         where: {
           id: authUser.customerId,

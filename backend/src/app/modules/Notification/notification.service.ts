@@ -126,7 +126,7 @@ const getNotificationsFromDB = async (
   };
 };
 
-const getMyNotificationsFromDB = async (
+const  getMyNotificationsFromDB = async (
   authUser: IAuthUser,
   paginationOptions: IPaginationOptions,
 ) => {
@@ -144,7 +144,7 @@ const getMyNotificationsFromDB = async (
     },
   });
 
-  const total = await prisma.notification.count({
+  const totalResult = await prisma.notification.count({
     where: {
       userId: authUser.id,
     },
@@ -152,7 +152,7 @@ const getMyNotificationsFromDB = async (
   const meta = {
     limit,
     page,
-    total,
+    totalResult,
   };
   return {
     data,

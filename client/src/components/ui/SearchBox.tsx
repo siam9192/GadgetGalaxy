@@ -4,6 +4,7 @@ import ProductRating from "./ProductRating";
 import { TbCurrencyTaka } from "react-icons/tb";
 import { useGetSearchKeywordResultsQuery } from "@/redux/features/utils/utils.api";
 import { useRouter } from "next/navigation";
+import { defaultImagesUrl } from "@/utils/constant";
 
 const SearchBox = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -72,13 +73,7 @@ const SearchBox = () => {
                     <div key={index} className="p-2 hover:bg-gray-100">
                       <p className="text-primary font-medium text-sm mb-1">Product</p>
                       <div className="flex items-center gap-2">
-                        <img
-                          src={
-                            "https://adminapi.applegadgetsbd.com/storage/media/large/iPhone-14-Pro-Deep-Purple-7300.jpg"
-                          }
-                          alt=""
-                          className="size-12"
-                        />
+                        <img src={item.imageUrl} alt="" className="size-12" />
                         <div>
                           <h5 className=" text-lg ">{item.name}</h5>
                           <ProductRating rating={6} />
@@ -98,7 +93,7 @@ const SearchBox = () => {
                       <p className="text-info font-medium text-sm mb-1">Category</p>
                       <div className=" flex gap-2 ">
                         <img
-                          src={"https://gadgetz.com.bd/wp-content/uploads/2024/04/10000mAh.png"}
+                          src={item.imageUrl || defaultImagesUrl.category}
                           alt=""
                           className="size-12"
                         />

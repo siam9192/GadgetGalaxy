@@ -2,6 +2,7 @@
 import Container from "@/components/container/Container";
 import { getPopularCategories } from "@/services/category.service";
 import { ICategory } from "@/types/category.type";
+import { defaultImagesUrl } from "@/utils/constant";
 import { useRouter } from "next/navigation";
 import React, { useState, useEffect, useRef } from "react";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
@@ -111,10 +112,7 @@ const PopularCategories = () => {
               onClick={() => router.push(`/product-category/${category.slug}`)}
             >
               <img
-                src={
-                  category.imageUrl ||
-                  "https://cdn-icons-png.freepik.com/256/11244/11244162.png?semt=ais_hybrid"
-                }
+                src={category.imageUrl || defaultImagesUrl.category}
                 alt={category.name}
                 className="w-24 h-24 md:w-32 md:h-32 object-cover rounded-md"
               />

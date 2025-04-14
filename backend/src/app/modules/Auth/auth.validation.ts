@@ -30,8 +30,13 @@ const ResetPasswordValidation = z.object({
   newPassword: z.string().nonempty().min(6),
 });
 
+const GoogleCallBackValidation = z.object({
+  access: z.string().nonempty(),
+});
+
 const AuthValidations = {
   SignUpValidationSchema,
+  GoogleCallBackValidation,
   VerifyAccountOtpValidationSchema,
   ResendOtpValidationSchema,
   LoginValidationSchema,

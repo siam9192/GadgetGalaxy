@@ -10,13 +10,18 @@ import { Bounce, toast } from "react-toastify";
 import { login } from "@/services/auth.service";
 import { useRouter, useSearchParams } from "next/navigation";
 import ForgetPasswordPopup from "../ui/ForgetPasswordPopup";
+import { useCurrentUser } from "@/provider/CurrentUserProvider";
 
 const LoginForm = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { refetch } = useCurrentUser();
+
   const handelOnSubmit = async (values: any) => {
     setIsLoading(true);
+    setErrorMessage("");
     try {
       const res = await login(values);
       if (!res.success) {
@@ -24,7 +29,7 @@ const LoginForm = () => {
       }
       toast.success("Login successful!", {
         position: "top-right",
-        autoClose: 5000,
+        autoClose: 1000,
         hideProgressBar: false,
         closeOnClick: false,
         pauseOnHover: true,
@@ -35,6 +40,7 @@ const LoginForm = () => {
       });
 
       const redirect = searchParams.get("redirect");
+      refetch();
       if (redirect) {
         router.replace(redirect);
       } else {
@@ -43,7 +49,7 @@ const LoginForm = () => {
     } catch (error: any) {
       toast.error(`${error.message || "Something went wrong!"}`, {
         position: "top-right",
-        autoClose: 5000,
+        autoClose: 1000,
         hideProgressBar: false,
         closeOnClick: false,
         pauseOnHover: true,
@@ -52,6 +58,7 @@ const LoginForm = () => {
         theme: "dark",
         transition: Bounce,
       });
+      setErrorMessage(error.message || "Something went wrong!");
     } finally {
       setIsLoading(false);
     }
@@ -71,7 +78,7 @@ const LoginForm = () => {
       <div className="flex justify-end mt-2">
         <ForgetPasswordPopup>
           <button type="button" className="font-medium text-info">
-            Forget password
+            Forget password?
           </button>
         </ForgetPasswordPopup>
       </div>
@@ -89,6 +96,7 @@ const LoginForm = () => {
       >
         Sign Up
       </button>
+      {errorMessage && <p className="text-info mt-2">{errorMessage}</p>}
       <div className="relative mt-5">
         <p className=" after:w-1/3 md:after:translate-x-14 after:translate-x-5 after:left-0  after:top-1/2 after:pr-4  after:absolute after:h-[2px] after:bg-gray-500/30 before:w-1/3  md:before:-translate-x-14 before:-translate-x-5 before:right-0  before:top-1/2   before:absolute before:h-[2px] before:bg-gray-500/30 text-center">
           Or

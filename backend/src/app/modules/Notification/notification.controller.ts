@@ -35,12 +35,12 @@ const getMyNotifications = catchAsync(async (req: Request, res: Response) => {
   const paginationOptions = Pick(req.query, paginationOptionKeys);
   const result = await NotificationServices.getMyNotificationsFromDB(
     req.user,
-    paginationOptionKeys as IPaginationOptions,
+    paginationOptions as IPaginationOptions,
   );
   sendSuccessResponse(res, {
     statusCode: httpStatus.OK,
     message: "Notifications retrieved successfully",
-    data: result,
+    ...result,
   });
 });
 

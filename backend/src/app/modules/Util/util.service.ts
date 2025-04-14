@@ -3,6 +3,8 @@ import prisma from "../../shared/prisma";
 import { productSelect } from "../../utils/constant";
 import { IAuthUser } from "../Auth/auth.interface";
 
+
+
 const getSearchKeywordResultsFromDB = async (keyword: string) => {
 
   if(!keyword) return []
@@ -33,12 +35,14 @@ const getSearchKeywordResultsFromDB = async (keyword: string) => {
     select: productSelect,
   });
 
+  
+
   const productsData = products.map((product) => {
     const variant = product.variants[0];
     return {
       type: "product",
       name: product.name,
-      imageUr: product.images[0],
+      imageUrl: product.images[0].url,
       price: variant?.price || product.price,
       offerPrice: variant?.offerPrice || product.offerPrice,
     };
@@ -57,6 +61,8 @@ for (const item of tempData) {
   return data
 
 };
+
+
 
 const getMyUtilCountsFromDB = async (authUser: IAuthUser) => {
   const data: Record<string, number> = {};
@@ -84,6 +90,7 @@ const getMyUtilCountsFromDB = async (authUser: IAuthUser) => {
   const totalNewNotifications = await prisma.notification.count({
     where: {
       userId: authUser.id,
+      isRead:false
     },
   });
   return {

@@ -21,9 +21,14 @@ const navLinks = [
     href: "/search",
   },
   {
-    name: "Blogs",
-    href: "/",
+    name: "categories",
+    href: "/product-categories",
   },
+  {
+    name: "Brands",
+    href: "/product-brands",
+  },
+
   {
     name: "About Us",
     href: "/about-us",

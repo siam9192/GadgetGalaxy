@@ -1,19 +1,19 @@
-import { getCurrentUser } from '@/services/auth.service';
-import { NextRequest, NextResponse } from 'next/server';
+import { getCurrentUser } from "@/services/auth.service";
+import { NextRequest, NextResponse } from "next/server";
 
 const roleBaseRoutes: Record<string, RegExp[]> = {
-  CUSTOMER: [/^\/account/, /^\/cart/,/^\/wishlist/,/^\/checkout/],
+  CUSTOMER: [/^\/account/, /^\/cart/, /^\/wishlist/, /^\/checkout/],
 };
 
-const authRoutes = ['/login', '/signup'];
+const authRoutes = ["/login", "/signup"];
 
-export default async function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const user = await getCurrentUser();
 
+  const user = await getCurrentUser();
   // If user is logged in and tries to access auth pages, redirect to home
   if (user && authRoutes.includes(pathname)) {
-    return NextResponse.redirect(new URL('/', request.url));
+    return NextResponse.redirect(new URL("/", request.url));
   }
 
   // If user is not logged in
@@ -22,9 +22,7 @@ export default async function middleware(request: NextRequest) {
       return NextResponse.next(); // Allow access to login/register
     } else {
       // Redirect to login with redirect back
-      return NextResponse.redirect(
-        new URL(`/login?redirect=${pathname}`, request.url)
-      );
+      return NextResponse.redirect(new URL(`/login?redirect=${pathname}`, request.url));
     }
   }
 
@@ -35,9 +33,16 @@ export default async function middleware(request: NextRequest) {
   }
 
   // Deny access by redirecting to home
-  return NextResponse.redirect(new URL('/', request.url));
+  return NextResponse.redirect(new URL("/", request.url));
 }
 
 export const config = {
-  matcher: ['/account/:page*', '/signup', '/login', '/cart/:page*','/wishlist/:page*','/checkout/:page*'],
+  matcher: [
+    "/account/:path*",
+    "/signup",
+    "/login",
+    "/cart/:path*",
+    "/wishlist/:path*",
+    "/checkout/:path*",
+  ],
 };

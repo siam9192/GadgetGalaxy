@@ -1,7 +1,13 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
 import "@/styles/util.css";
-const OTPInput = ({ length = 6 }) => {
+const OTPInput = ({
+  length = 6,
+  onChange,
+}: {
+  length?: number;
+  onChange: (value: string) => void;
+}) => {
   const [otp, setOtp] = useState(new Array(length).fill(""));
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -9,6 +15,9 @@ const OTPInput = ({ length = 6 }) => {
     inputRefs.current[0]?.focus();
   }, []);
 
+  useEffect(() => {
+    onChange(otp.join(""));
+  }, [otp]);
   const handleChange = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/\D/g, ""); // Allow only digits
     const newOtp = [...otp];

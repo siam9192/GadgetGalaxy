@@ -8,7 +8,7 @@ import { removeRequestMeta } from "next/dist/server/request-meta";
 
 export function getProductPricing(product: TCardProduct | IProduct) {
   // Extract the variants of the product
-  const variants = product.variants;
+  const variants = product?.variants;
 
   // Initialize the pricing object with the base price from the product
   const pricing: TPricing = {
@@ -25,7 +25,7 @@ export function getProductPricing(product: TCardProduct | IProduct) {
     pricing.offerPrice = highlighted.offerPrice;
   } else {
     // If no variants, keep the offerPrice from the product (no changes)
-    product.offerPrice = product.offerPrice;
+    pricing.offerPrice = product.offerPrice;
   }
 
   // Return the pricing object with the updated values
@@ -98,4 +98,26 @@ export const uploadImageToImgBB = async (file: File) => {
 
 export const isValidEmail = (email: string) => {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+};
+
+export const getTimeAgo = (date: string): string => {
+  const currentDate = new Date().getTime();
+  const targetDate = new Date(date).getTime();
+  const difference = currentDate - targetDate; // Time difference in milliseconds
+
+  const minutes = 60 * 1000;
+  const hours = 60 * minutes;
+  const days = 24 * hours;
+
+  if (difference >= days) {
+    return `${Math.floor(difference / days)} days ago`;
+  }
+  if (difference >= hours) {
+    return `${Math.floor(difference / hours)} hours ago`;
+  }
+  if (difference >= minutes) {
+    return `${Math.floor(difference / minutes)} minutes ago`;
+  }
+
+  return `just now`;
 };

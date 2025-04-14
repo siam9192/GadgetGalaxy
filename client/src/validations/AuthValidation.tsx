@@ -9,6 +9,22 @@ const LoginValidationSchema = z.object({
     .min(1, { message: "Password cannot be empty" }),
 });
 
+const SignupValidation = z
+  .object({
+    fullName: z.string({ required_error: "Full name is required" }).min(3).max(30),
+    email: z
+      .string({ required_error: "Email is required" })
+      .email({ message: "Please enter a valid email address" }),
+    password: z
+      .string({ required_error: "Password is required" })
+      .min(1, { message: "Password cannot be empty" }),
+    confirmPassword: z.string().min(1, { message: "Please confirm your password" }),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    path: ["confirmPassword"],
+    message: "Passwords do not match",
+  });
+
 export const ChangePasswordValidation = z
   .object({
     oldPassword: z.string().min(1, { message: "Old password is required" }),
@@ -43,6 +59,7 @@ const AuthValidations = {
   LoginValidationSchema,
   ChangePasswordValidation,
   ResetPasswordValidation,
+  SignupValidation,
 };
 
 export default AuthValidations;

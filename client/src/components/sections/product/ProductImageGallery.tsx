@@ -8,11 +8,8 @@ type TProps = {
   images: TProductImage[];
 };
 
-const ProductImageGallery = ({ images: a }: TProps) => {
-  const images = Array.from({ length: 5 }).map(
-    (_) =>
-      "https://adminapi.applegadgetsbd.com/storage/media/large/iPhone-14-Pro-Deep-Purple-7300.jpg",
-  );
+const ProductImageGallery = ({ images }: TProps) => {
+  const imagesUrl = images.map((_) => _.url);
   const [activeIndex, setActiveIndex] = useState(0);
   const [prevActiveIndex, setPrevActiveIndex] = useState(0);
 
@@ -24,7 +21,7 @@ const ProductImageGallery = ({ images: a }: TProps) => {
   return (
     <div className="bg-white p-5 flex flex-col">
       <div className=" grow overflow-hidden">
-        {images.map((imgUrl, index) => {
+        {imagesUrl.map((imgUrl, index) => {
           if (activeIndex !== index) return null;
           return (
             <div key={index}>
@@ -38,7 +35,7 @@ const ProductImageGallery = ({ images: a }: TProps) => {
         })}
       </div>
       <div className="grid lg:grid-cols-6 md:grid-cols-5  grid-cols-4 gap-2 ">
-        {images.map((image, index) => (
+        {imagesUrl.map((image, index) => (
           <div
             key={index}
             onClick={() => handelChangeActiveIndex(index)}
@@ -47,7 +44,7 @@ const ProductImageGallery = ({ images: a }: TProps) => {
             <img src={image} alt="" />
           </div>
         ))}
-        <ImageGalleryPopup images={a} />
+        <ImageGalleryPopup images={images} />
       </div>
     </div>
   );

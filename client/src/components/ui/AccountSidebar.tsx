@@ -1,4 +1,5 @@
 "use client";
+import { useCurrentUser } from "@/provider/CurrentUserProvider";
 import { logout } from "@/services/auth.service";
 import { usePathname, useRouter } from "next/navigation";
 import React from "react";
@@ -41,9 +42,13 @@ const routes = [
 const AccountSidebar = () => {
   const pathname = usePathname();
   const router = useRouter();
+  const { refetch } = useCurrentUser();
   const handelLogout = async () => {
-    await logout();
-    router.replace("/");
+    const st = await logout();
+    if (st) {
+      refetch();
+      router.replace("/");
+    }
   };
   return (
     <div className="h-fit bg-white py-5 space-y-5">
@@ -60,7 +65,7 @@ const AccountSidebar = () => {
         </button>
       ))}
       <button
-        onClick={() => handelLogout}
+        onClick={() => handelLogout()}
         className={`w-full flex items-center gap-4 px-3 py-2  relative `}
       >
         <span className="text-3xl">
