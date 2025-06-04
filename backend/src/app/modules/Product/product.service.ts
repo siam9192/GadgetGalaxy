@@ -111,6 +111,7 @@ const createProductIntoDB = async (payload: ICreateProductPayload) => {
       for (let i = 0; i < variants.length; i++) {
         const { attributes, ...variant } = variants[i];
         // Insert variant fist after insert variant attributes
+
         const createdVariant = await txClient.variant.create({
           data: {
             productId: createdProductData.id,
@@ -126,6 +127,8 @@ const createProductIntoDB = async (payload: ICreateProductPayload) => {
                 : false,
           },
         });
+
+
         await txClient.variantAttribute.createMany({
           data: attributes.map((_) => ({
             variantId: createdVariant.id,
@@ -494,7 +497,9 @@ const getSearchProductsFromDB = async (
 ) => {
   const { page, limit, skip, orderBy, sortOrder } =
     calculatePagination(paginationOptions);
-  const andConditions: Prisma.ProductWhereInput[] = [];
+  const andConditions: Prisma.ProductWhereInput[] = [{
+    status:ProductStatus.ACTIVE
+  }];
   const { searchTerm, minPrice, maxPrice, category, brand } = filterQuery;
 
   if (searchTerm) {
@@ -1085,6 +1090,7 @@ const getProductBySlugForCustomerViewFromDB = async (
   const product = await prisma.product.findUnique({
     where: {
       slug,
+      status:ProductStatus.ACTIVE
     },
     include: {
       categories: true,
@@ -1116,7 +1122,7 @@ const getProductBySlugForCustomerViewFromDB = async (
   }
 
   // Increment product views count1
-  await prisma.product.update({
+  prisma.product.update({
     where: {
       id: product.id,
     },
@@ -1127,6 +1133,7 @@ const getProductBySlugForCustomerViewFromDB = async (
     },
   });
 
+  console.dir(product,{depth:null})
   return { ...product, isWishListed };
 };
 

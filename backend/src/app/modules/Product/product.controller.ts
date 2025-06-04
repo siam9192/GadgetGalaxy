@@ -241,9 +241,9 @@ const createMany =  catchAsync(async (req: Request, res: Response) => {
   sendSuccessResponse(res, {
     statusCode: httpStatus.OK,
     message: "successfully",
-    data:await Promise.all(req.body.map(b=> ProductServices.createProductIntoDB(b)))
+    data:await Promise.all(req.body.map((b:any)=> ProductServices.createProductIntoDB(b)))
   });
-});
+}); 
 
 const getProductVariants = catchAsync(async (req: Request, res: Response) => {
   const result =

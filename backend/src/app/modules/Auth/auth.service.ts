@@ -466,8 +466,27 @@ const getAccessTokenUsingRefreshToken = async (req: Request, res: Response) => {
     ) as JwtPayload & IAuthUser;
 
     if (!decode) throw new Error();
+    const tokenPayload: IAuthUser = {
+      id: decode.id,
+      role: decode.role,
+    };
+  
+    // Insert profile id base on user role
+    if (decode.role === UserRole.CUSTOMER) {
+      tokenPayload.customerId = decode.customerId;
+    } else {
+      tokenPayload.administratorId =decode.administratorId;
+    }
+  
+
+    // Generating access token
+  const accessToken = jwtHelpers.generateToken(
+    tokenPayload,
+    config.jwt.access_token_secret as string,
+    config.jwt.access_token_expire_time as string,
+  );
     return {
-      refreshToken,
+     accessToken,
     };
   } catch (error) {
     throw new AppError(httpStatus.BAD_REQUEST, "BAD😒 request!");

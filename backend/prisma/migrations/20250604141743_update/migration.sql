@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "variant_attributes" ALTER COLUMN "name" SET DATA TYPE VARCHAR(40),
+ALTER COLUMN "value" SET DATA TYPE VARCHAR(40);
