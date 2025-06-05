@@ -1,5 +1,4 @@
 "use client";
-import MyOrderCard from "@/components/cards/MyOrderCard";
 import YetToReviewCard from "@/components/cards/YetToReviewCard";
 import Pagination from "@/components/pagination/Pagination";
 import Select from "@/components/select/Select";

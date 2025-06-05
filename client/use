@@ -2,6 +2,21 @@
 import AddToCart from "@/components/ui/AddToCart";
 import React, { useState } from "react";
 import { IoIosStar, IoIosStarHalf } from "react-icons/io";
+
+  function groupAttributes (variants:TVariant[]): Record<string, Set<string>>{
+  return colorVariants
+  .reduce((acc, variant) => {
+    for (const { name, value } of variant.attributes) {
+      if (!acc[name]) {
+        acc[name] = new Set<string>();
+      }
+      acc[name].add(value);
+    }
+    return acc;
+  }, {} as Record<string, Set<string>>);
+  }
+
+  
 const variants = [
   {
     id: "ckv123abc456",

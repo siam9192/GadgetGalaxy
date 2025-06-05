@@ -8,6 +8,7 @@ import { Toaster } from "sonner";
 import CurrentUserProvider from "./CurrentUserProvider";
 import { store } from "@/redux/store";
 import { ToastContainer, toast } from "react-toastify";
+
 type TProvider = {
   children: React.ReactNode;
 };

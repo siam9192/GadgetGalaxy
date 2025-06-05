@@ -138,40 +138,11 @@ const ProductVariants = ({ product, onChange }: IProps) => {
 
   const featuredVariant = variants.find((v) => v.isHighlighted) || variants[0];
   const [selectedColorName, setSelectedColorName] = useState(featuredVariant.colorName);
-  const [selectedVariant, setSelectedVariant] = useState(featuredVariant.id);
+  const [selectedVariantId, setSelectedVariantId] = useState(featuredVariant.id);
 
-  function filterAttributes(
-    color: string,
-    selectedAttributeName: string,
-    selectedAttributeValue: string,
-  ) {
-    const filteredVariants = variants.filter(
-      (v) =>
-        v.colorName === color &&
-        v.attributes.some(
-          (attr) => attr.name === selectedAttributeName && attr.value === selectedAttributeValue,
-        ),
-    );
-
-    const attributesMap = new Map();
-
-    filteredVariants.forEach((variant) => {
-      variant.attributes.forEach((attr) => {
-        if (!attributesMap.has(attr.name)) {
-          attributesMap.set(attr.name, new Set());
-        }
-        attributesMap.get(attr.name).add(attr.value);
-      });
-    });
-
-    // Convert map to object with arrays
-    const updatedAttributes = {} as any;
-    attributesMap.forEach((values, key) => {
-      updatedAttributes[key] = Array.from(values);
-    });
-
-    return updatedAttributes;
-  }
+  const [selectedAttributes, setSelectedAttributes] = useState<Record<string, string>>(
+    Object.fromEntries(featuredVariant.attributes.map((_) => [_.name, _.value])),
+  );
 
   const colorVariants = variants.filter((variant) => variant.colorName === selectedColorName);
 
@@ -186,15 +157,11 @@ const ProductVariants = ({ product, onChange }: IProps) => {
     };
   });
 
-  const router = useRouter();
-
   useEffect(() => {
-    // router.push(`?v=${selectedVariant}`)
-    onChange && onChange(variants.find((v) => v.id === selectedVariant)!);
-  }, [selectedVariant]);
-
+    onChange && onChange(variants.find((v) => v.id === selectedVariantId)!);
+  }, [selectedVariantId]);
   useEffect(() => {
-    setSelectedVariant(items[0].id);
+    setSelectedVariantId(items[0].id);
   }, [selectedColorName]);
 
   return (
@@ -223,8 +190,8 @@ const ProductVariants = ({ product, onChange }: IProps) => {
             return (
               <div
                 key={i.id}
-                onClick={() => setSelectedVariant(i.id)}
-                className={`md:p-4 p-3  flex md:flex-row flex-col md:items-center gap-2   text-sm rounded-md ${selectedVariant === i.id ? "bg-secondary text-black" : " bg-gray-50 border-2 border-blue-100 "} hover:cursor-pointer `}
+                onClick={() => setSelectedVariantId(i.id)}
+                className={`md:p-4 p-3  flex md:flex-row flex-col md:items-center gap-2   text-sm rounded-md ${selectedVariantId === i.id ? "bg-secondary text-black" : " bg-gray-50 border-2 border-blue-100 "} hover:cursor-pointer `}
               >
                 <input
                   type="radio"

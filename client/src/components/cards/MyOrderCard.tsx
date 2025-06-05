@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 import { FaBangladeshiTakaSign } from "react-icons/fa6";
 import { toast } from "react-toastify";
 import ConfirmPopup from "../popup/ConfirmPopup";
+import OrderDetailsPopup from "../ui/OrderDetailsPopup";
 
 interface IProps {
   order: IMyOrder;
@@ -73,12 +74,7 @@ const MyOrderCard = ({ order }: IProps) => {
       <div className="flex  gap-5">
         <div className="w-[40%] grid md:grid-cols-4 grid-cols-2 gap-2 h-full">
           {orderItems.slice(0, defaultShowItemTotal - 1).map((_, index) => (
-            <img
-              key={index}
-              src="https://pngimg.com/uploads/headphones/small/headphones_PNG101954.png"
-              alt=""
-              className=" aspect-square"
-            />
+            <img key={index} src={_.imageUrl} alt="" className=" aspect-square" />
           ))}
 
           {orderItems.length - defaultShowItemTotal > 0 ? (
@@ -135,9 +131,7 @@ const MyOrderCard = ({ order }: IProps) => {
         </h1>
       </div>
       <div className="mt-3  flex justify-end items-center gap-2 ">
-        <button className="px-6 py-2  font-medium bg-primary text-white hover:bg-secondary hover:text-black hover:border-none  rounded-md">
-          View Details
-        </button>
+        <OrderDetailsPopup orderId={order.id} />
         {order.status === EOrderStatus.PLACED ? (
           <ConfirmPopup onConfirm={handelCancelOrder} heading="Are you sure you want to cancel it?">
             <button className="px-6 py-2 border-2 border-blue-100 font-medium hover:bg-info hover:text-white hover:border-none  rounded-md">

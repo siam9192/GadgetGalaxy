@@ -3,6 +3,12 @@ import { LayoutProps } from "../../../../.next/types/app/layout";
 import AccountSidebar from "@/components/ui/AccountSidebar";
 import Container from "@/components/container/Container";
 import ResponsiveAccountSidebar from "@/components/ui/ResponsiveAccountSidebar";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Account",
+  description: "Gadget galaxy checkout page!",
+};
 
 const layout = ({ children }: LayoutProps) => {
   return (

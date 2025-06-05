@@ -16,7 +16,15 @@ const orderApi = baseApi.injectEndpoints({
       },
       providesTags: ["my-orders"],
     }),
-
+    getMyOrder: builder.query({
+      query: (id) => ({
+        url: `/orders/my/${id}`,
+        method: "GET",
+      }),
+      transformResponse: (response: IResponse<IMyOrder>) => {
+        return response;
+      },
+    }),
     cancelOrder: builder.mutation({
       query: (id: number) => ({
         url: `/orders/cancel/${id}`,
@@ -30,4 +38,4 @@ const orderApi = baseApi.injectEndpoints({
   }),
 });
 
-export const { useGetMyOrdersQuery, useCancelOrderMutation } = orderApi;
+export const { useGetMyOrdersQuery, useCancelOrderMutation, useGetMyOrderQuery } = orderApi;

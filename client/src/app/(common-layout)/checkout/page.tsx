@@ -1,7 +1,6 @@
 "use client";
 import BillingDetails from "@/components/sections/checkout/BillingDetails";
 import CheckoutDetails from "@/components/sections/checkout/CheckoutDetails";
-import { useCurrentUser } from "@/provider/CurrentUserProvider";
 import { orderInit, placeOrder } from "@/services/order.service";
 import { TCheckoutData } from "@/types/util.type";
 import { getFormValues } from "@/utils/helpers";

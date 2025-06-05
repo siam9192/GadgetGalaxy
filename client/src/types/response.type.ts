@@ -4,6 +4,7 @@ export interface IResponse<T> {
   error?: TError;
   success: boolean;
   message: string;
+  status: number;
 }
 
 export type TError = {

@@ -10,11 +10,18 @@ import { getProductDetails } from "@/services/product.service";
 import AddAsRecentView from "@/components/sections/product/AddAsRecentView";
 import NavigateTab from "@/components/ui/NavigateTab";
 
-const page = async ({ params, searchParams }: PageProps) => {
+const page = async ({ params }: PageProps) => {
   const { slug } = await params;
   const data = await getProductDetails(slug);
+
   const product = data?.data;
-  if (!product) throw new Error();
+  if (!product) {
+    return (
+      <div className="h-[70vh] p-5">
+        <p className="text-xl ">This product may have been deleted,moved or made unavailable</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen md:py-5 py-2">

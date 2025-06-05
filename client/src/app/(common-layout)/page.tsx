@@ -7,6 +7,11 @@ import NewArrival from "@/components/sections/home/NewArrival";
 import OurServices from "@/components/sections/home/OurServices";
 import ShopByBrands from "@/components/sections/home/ShopByBrands";
 import TopBrandProducts from "@/components/sections/home/TopBrandProducts";
+import { Metadata } from "next";
+export const metadata: Metadata = {
+  title: "Home",
+  description: "Make your own dream!",
+};
 
 export default function Home() {
   return (

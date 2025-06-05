@@ -10,9 +10,11 @@ const BillingDetails = () => {
 
   const [isCustomAddress, setIsCustomAddress] = useState(false);
   useEffect(() => {
+    const addresses = user?.addresses;
     if (user && user.addresses) {
       setCustomerAddresses(user.addresses);
     }
+    setIsCustomAddress(addresses?.length ? false : true);
   }, [user]);
 
   const isDefaultAddressExist = customerAddresses.find((_) => _.isDeleted === true);
@@ -36,7 +38,7 @@ const BillingDetails = () => {
           />
         </div>
 
-        {isCustomAddress === true && (
+        {isCustomAddress === true ? (
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <h3 className=" font-medium text-gray-800 text-lg">Delivery Address:</h3>
@@ -88,9 +90,9 @@ const BillingDetails = () => {
               />
             </div>
           </div>
-        )}
+        ) : null}
 
-        {isCustomAddress === false && customerAddresses.length && (
+        {isCustomAddress === false && customerAddresses.length ? (
           <div>
             <div className="flex items-center justify-between">
               <h3 className=" font-medium text-gray-800">My Saved Addresses:</h3>
@@ -142,7 +144,7 @@ const BillingDetails = () => {
               })}
             </div>
           </div>
-        )}
+        ) : null}
         <div>
           <label className="  block text-start 0font-medium text-[1rem]" htmlFor="fullName">
             Email*

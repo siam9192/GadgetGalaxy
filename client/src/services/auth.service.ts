@@ -36,6 +36,16 @@ export const verifySignupRequest = async (payload: any) => {
   }
 };
 
+export const getNewAccessToken = async () => {
+  const refreshToken = (await cookies()).get("refreshToken")?.value;
+  const { data } = await axiosInstance.get("/auth/access-token", {
+    headers: {
+      Authorization: refreshToken,
+    },
+  });
+  return data as IResponse<{ accessToken: string }>;
+};
+
 export const resendOtp = async (token: string) => {
   try {
     const { data: resData } = await axiosInstance.post(`/auth/resend-otp/${token}`);

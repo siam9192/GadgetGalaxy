@@ -17,10 +17,8 @@ const ProductImageGalleryPopup = ({ images }: IProps) => {
   }, [isOpen]);
 
   const [activeIndex, setActiveIndex] = useState(0);
-  const [prevActiveIndex, setPrevActiveIndex] = useState(0);
 
   const handelChangeActiveIndex = (index: number) => {
-    setPrevActiveIndex(activeIndex);
     setActiveIndex(index);
   };
   return (
@@ -38,7 +36,7 @@ const ProductImageGalleryPopup = ({ images }: IProps) => {
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="lg:w-1/2 w-full min-h-60 lg:h-fit  h-full p-5 border-2 bg-black"
+            className="lg:w-1/2 w-full h-[70vh] p-5 border-2 bg-black flex justify-between flex-col"
           >
             <div className="lg:mt-0 mt-10">
               {images.map((img, index) => {
@@ -48,7 +46,7 @@ const ProductImageGalleryPopup = ({ images }: IProps) => {
                     <img
                       src={img.url}
                       alt=""
-                      className={`md:max-w-[60%] mx-auto  previewImageAnimate3`}
+                      className={`md:max-w-[60%] mx-auto  previewImageAnimate3 max-h-72`}
                     />
                   </div>
                 );
@@ -59,7 +57,7 @@ const ProductImageGalleryPopup = ({ images }: IProps) => {
                 <div
                   key={index}
                   onClick={() => handelChangeActiveIndex(index)}
-                  className={` p-2 border-2 border-gray-900/10 hover:border-info hover:cursor-pointer  rounded-md ${activeIndex === index ? "border-info border-2" : ""}`}
+                  className={` p-2 border-2 border-gray-900/10 hover:border-info hover:cursor-pointer   rounded-md ${activeIndex === index ? "border-info border-2" : ""}`}
                 >
                   <img src={image.url} alt="" className="md:size-20 size-10" />
                 </div>

@@ -2,7 +2,6 @@
 import AddToCart from "@/components/ui/AddToCart";
 import ProductRating from "@/components/ui/ProductRating";
 import { IProduct, TVariant } from "@/types/product.type";
-import { SearchParams } from "next/dist/server/request/search-params";
 import React, { useState } from "react";
 import ProductVariants from "./ProductVariants";
 import { FaBangladeshiTakaSign } from "react-icons/fa6";
@@ -37,21 +36,24 @@ const ProductBasicInfo = ({ product }: IProps) => {
           <h1 className="md:text-3xl text-2xl font-primary text-black  ">{product.name}</h1>
         </div>
         <div className="mt-3 space-y-2">
-          <h5 className="md:text-4xl text-3xl text-primary font-semibold font-primary">
-            <span>
-              <FaBangladeshiTakaSign className="inline mb-2" />
-            </span>
-            {pricing.price}
-            {pricing.offerPrice ? (
-              <del className="text-2xl text-gray-700">
-                {" "}
-                <span>
-                  <FaBangladeshiTakaSign className="inline mb-2" />
-                </span>
-                {pricing.offerPrice}
-              </del>
-            ) : null}
-          </h5>
+          <div className="md:text-4xl text-3xl text-primary font-semibold font-primary flex items-center gap-2">
+            <div className="flex items-center">
+              <span>
+                <FaBangladeshiTakaSign className="inline mb-2" />
+              </span>
+              {(pricing.offerPrice || pricing.price).toLocaleString()}
+            </div>
+            <div>
+              {pricing.offerPrice ? (
+                <del className="text-2xl text-gray-700">
+                  <span>
+                    <FaBangladeshiTakaSign className="inline mb-2" />
+                  </span>
+                  {pricing.price.toLocaleString()}
+                </del>
+              ) : null}
+            </div>
+          </div>
 
           <ProductRating rating={product.rating} />
           <p className="text-sm text-gray-800/80">{product.description.slice(0, 200)}</p>

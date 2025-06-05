@@ -1,5 +1,6 @@
 export interface IMyOrder {
   id: number;
+  shippingInfo:IShippingInfo
   items: IOrderItem[];
   totalAmount: number;
   discountAmount: number;
@@ -12,6 +13,17 @@ export interface IMyOrder {
   paymentStatus: TOrderPaymentStatus;
   createdAt: string;
   payment: IPayment;
+
+}
+
+
+interface IShippingInfo {
+  fullName: string;
+  phoneNumber: string;
+  emailAddress: string;
+    district: string;
+    zone: string;
+    line: string;
 }
 
 export interface IOrderItem {

@@ -1,7 +1,13 @@
 import CartItems from "@/components/sections/cart/CartItems";
 import CartApply from "@/components/ui/CartApply";
 import CartSummary from "@/components/ui/CartSummary";
+import { Metadata } from "next";
 import React from "react";
+
+export const metadata: Metadata = {
+  title: "My Cart",
+  description: "Gadget galaxy my cart page!",
+};
 
 const page = () => {
   return (

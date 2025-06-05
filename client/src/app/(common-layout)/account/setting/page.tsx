@@ -1,12 +1,9 @@
 "use client";
-import Form from "@/components/hook-form/Form";
-import FormCheckbox from "@/components/hook-form/FormCheckbox";
-import FormInput from "@/components/hook-form/FormInput";
 import AddAddressPopup from "@/components/ui/AddAddressPopup";
 import EditAddressPopup from "@/components/ui/EditAddressPopup";
 import { useCurrentUser } from "@/provider/CurrentUserProvider";
 import { updateProfile } from "@/services/profile.service";
-import { EGender } from "@/types/user.type";
+import { EGender, TCustomerAddress } from "@/types/user.type";
 import { defaultImagesUrl } from "@/utils/constant";
 import { capitalizeFirstWord, getFormValues, uploadImageToImgBB } from "@/utils/helpers";
 import React, { ChangeEvent, FormEvent, useEffect, useRef, useState } from "react";
@@ -24,7 +21,7 @@ const page = () => {
   const [isUpdating, setIsUpdating] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
-
+  const [deletedAddresses, setDeletedAddresses] = useState<TCustomerAddress[]>([]);
   useEffect(() => {
     if (!user) return;
     setAddresses(user.addresses || []);
@@ -34,7 +31,11 @@ const page = () => {
   if (isLoading) return null;
 
   const removeAddress = (index: number) => {
+    const address = addresses[0];
     setAddresses((p) => p.filter((_, idx) => idx !== index));
+    if (address.id) {
+      setDeletedAddresses((p) => [...p, { ...address, isDeleted: true, isDefault: false }]);
+    }
   };
 
   const handelImageInputOnChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -89,7 +90,6 @@ const page = () => {
       target[Object.keys(errors)[0]].focus();
       return setErrors(errors);
     }
-    console.log(values);
 
     setIsUpdating(true);
 
@@ -104,9 +104,15 @@ const page = () => {
         {} as Record<string, string>,
       );
 
+      const isDefaultExist = addresses.find((_) => _.isDefault);
+      if (!isDefaultExist && addresses.length) {
+        addresses[0].isDefault = true;
+      }
+      const upAddresses = [...addresses, ...deletedAddresses];
+
       const payload: any = {
         ...values,
-        addresses,
+        addresses: upAddresses,
       };
 
       if (newProfilePhoto) {
@@ -122,6 +128,7 @@ const page = () => {
         throw new Error(res?.message || "Something went wrong!");
       }
       toast.success("Profile updated successfully!");
+      setDeletedAddresses([]);
       refetch();
     } catch (error: any) {
       setErrorMessage(error.message);
@@ -290,6 +297,7 @@ const page = () => {
                         }
                         value={address.id}
                         className="size-5 accent-info"
+                        name="default-address"
                         onChange={(e) => e.target.checked && handelSetDefault(index)}
                       />
                       <label htmlFor="" className="text-wrap text-black">
