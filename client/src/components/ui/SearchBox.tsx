@@ -76,13 +76,25 @@ const SearchBox = () => {
                         <img src={item.imageUrl} alt="" className="size-12" />
                         <div>
                           <h5 className=" text-lg ">{item.name}</h5>
-                          <ProductRating rating={6} />
-                          <h3 className="text-primary font-semibold flex items-center ">
-                            <span className="text-xl">
-                              <TbCurrencyTaka />
-                            </span>
-                            <span>{item.price}</span>
-                          </h3>
+                          <ProductRating rating={item.rating||0} />
+                          <div className="text-primary font-semibold flex items-center gap-2 ">
+                       <div className="flex items-center">
+                                 <span className="text-xl">
+                              <TbCurrencyTaka /> 
+                             </span>
+                             <span>{item.offerPrice||item.price}</span>
+                       </div >
+                        {
+                          item.offerPrice ?
+                           <div className="flex items-center text-gray-800">
+                             <span> <TbCurrencyTaka /></span>    <del >  {item.price}</del>
+                           
+                         </div>
+                         :
+                         null
+                        }
+                          
+                          </div>
                         </div>
                       </div>
                     </div>

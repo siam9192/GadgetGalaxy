@@ -1,4 +1,5 @@
 import { ICategory } from "@/types/category.type";
+import { useRouter } from "next/navigation";
 import React, { useRef, useState } from "react";
 import { FaAngleRight } from "react-icons/fa";
 
@@ -15,8 +16,14 @@ const BrowseCategory = ({ isLast, category }: IProps) => {
   const client = ref.current?.getBoundingClientRect();
   const clientTop = client?.top;
   const clientLeft = client?.left;
+  const router = useRouter()
+  const handelBrowse = ()=>{
+   if(! category.children.length ) {
+      router.push(`/product-category/${category.slug}`)
+   }
+  }
   return (
-    <div ref={ref} onMouseEnter={() => setIsActive(true)} onMouseLeave={() => setIsActive(false)}>
+    <div ref={ref} onClick={handelBrowse} onMouseEnter={() => setIsActive(true)} onMouseLeave={() => setIsActive(false)}>
       <button
         className={`flex items-center justify-between font-secondary py-3 w-full ${isLast ? " border-b border-gray-600/10" : null} hover:bg-gray-100 px-3 group`}
       >
@@ -29,7 +36,7 @@ const BrowseCategory = ({ isLast, category }: IProps) => {
           </span>
         ) : null}
       </button>
-      {isActive ? (
+      {isActive && category.children.length ? (
         <div
           className="fixed  w-lg  overflow-y-auto no-scrollbar  bg-white  py-2 transition-opacity duration-100  "
           style={{ top: `${clientTop}px`, left: `${clientLeft! + client?.width!}px` }}

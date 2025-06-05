@@ -22,7 +22,9 @@ export type TSearchKeywordData = {
   name: string;
   imageUrl: string;
   price?: number;
+  offerPrice?:number
   stock?: number;
+  rating?:number
   hierarchySte?: string;
 };
 
