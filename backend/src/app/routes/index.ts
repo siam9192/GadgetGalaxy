@@ -85,9 +85,10 @@ const moduleRoutes: TModuleRoutes = [
     router: OverviewRouter,
   },
   {
-  path:"/utils",
-  router:UtilRouter
-  }
+    path: "/utils",
+    router: UtilRouter,
+  },
+  
 ];
 
 const routes = moduleRoutes.map((route) =>

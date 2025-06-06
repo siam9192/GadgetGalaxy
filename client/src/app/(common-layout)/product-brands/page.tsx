@@ -3,11 +3,12 @@ import Container from "@/components/container/Container";
 import BrandsPagination from "@/components/ui/BrandsPagination";
 import { getBrands } from "@/services/brand.service";
 import React from "react";
-import { PageProps } from "../../../../.next/types/app/layout";
-import { IParam } from "@/types/util.type";
+import { IPageProps, IParam } from "@/types/util.type";
 
-const page = async ({ searchParams }: PageProps) => {
-  const params = Object.entries(await searchParams).map(([name, value]) => ({
+
+
+const page = async ({ searchParams }:IPageProps) => {
+  const params = Object.entries(searchParams).map(([name, value]) => ({
     name,
     value,
   })) as IParam[];

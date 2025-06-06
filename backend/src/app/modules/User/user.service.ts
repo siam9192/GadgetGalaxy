@@ -2,6 +2,7 @@ import {
   AuthProvider,
   OrderStatus,
   Prisma,
+  UserGender,
   UserRole,
   UserStatus,
 } from "@prisma/client";
@@ -405,12 +406,67 @@ const createAdministratorIntoDB = async (
   return result;
 };
 
+const createSupperAdmin = async ()=>{
+  const payload = {
+     fullName:"MR.Super admin",
+      email: "superadmin@gmail.com",
+      password: "123456",
+      profilePhoto: "https://images.unsplash.com/photo-1529665253569-6d01c0eaf7b6?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8cHJvZmlsZXxlbnwwfHwwfHx8MA%3D%3D",
+      phoneNumber: "876872357635",
+      gender: UserGender.MALE,
+      role: UserRole.SUPER_ADMIN
+  }
+const user = await prisma.user.findFirst({
+    where: {
+      email: payload.email,
+    },
+  });
+
+  // Checking user existence
+  if (user) {
+    throw new AppError(
+      httpStatus.NOT_FOUND,
+      "User is already exist using this email",
+    );
+  }
+  const result = await prisma.$transaction(async (txClient) => {
+    const hashedPassword = await bcryptHash(payload.password);
+
+    // Create user
+    const createdUser = await txClient.user.create({
+      data: {
+        email: payload.email,
+        role: payload.role,
+        password: hashedPassword,
+        authProvider: AuthProvider.EMAIL_PASSWORD,
+      },
+    });
+
+    // Create staff
+    const createAdministrator = await txClient.administrator.create({
+      data: {
+        userId: createdUser.id,
+        fullName: payload.fullName,
+        profilePhoto: payload.profilePhoto,
+        gender: payload.gender || null,
+        phoneNumber: payload.phoneNumber || null,
+      },
+    });
+
+  
+
+    return createAdministrator;
+  });
+  return result;
+}
+
 const UserServices = {
   ChangeUserStatusIntoDB,
   getCustomersFromDB,
   getAdministratorsFromDB,
   softDeleteUserByIdIntoDB,
   createAdministratorIntoDB,
+  createSupperAdmin
 };
 
 export default UserServices;

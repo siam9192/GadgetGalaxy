@@ -100,7 +100,7 @@ const getMyCartItemsFromDB = async (authUser: IAuthUser) => {
         },
       },
       variant: {
-        include:{attributes:true}
+        include: { attributes: true },
       },
     },
   });

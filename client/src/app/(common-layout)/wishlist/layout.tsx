@@ -1,8 +1,11 @@
 import React from "react";
-import { LayoutProps } from "../../../../.next/types/app/layout";
+
 import Container from "@/components/container/Container";
 
-const layout = ({ children }: LayoutProps) => {
+interface IProps {
+  children:React.ReactNode
+}
+const layout = ({ children }:IProps) => {
   return (
     <div>
       <Container>{children}</Container>

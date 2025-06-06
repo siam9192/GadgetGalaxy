@@ -3,11 +3,11 @@ import validateRequest from "../../middlewares/validateRequest";
 import AuthValidations from "./auth.validation";
 import AuthControllers from "./auth.controller";
 import auth from "../../middlewares/auth";
-import { UserRole } from "@prisma/client";
 import { allRoles } from "../../utils/constant";
-import { all } from "axios";
 
 const router = Router();
+
+router.post("/forget-password/:email", AuthControllers.forgetPassword);
 
 router.post(
   "/register",
@@ -39,7 +39,6 @@ router.patch(
   AuthControllers.changePassword,
 );
 
-router.post("/forget-password/:email", AuthControllers.forgetPassword);
 router.post(
   "/reset-password",
   validateRequest(AuthValidations.ResetPasswordValidation),

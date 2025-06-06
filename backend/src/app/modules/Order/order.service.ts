@@ -189,26 +189,24 @@ const initOrderIntoDB = async (
     // **Save Shipping Info**
     let { address, addressId, ...otherShippingInfo } = payload.shippingInfo;
 
-    
     if (addressId) {
       const existingAddress = await txClient.customerAddress.findUnique({
         where: { id: addressId },
       });
       if (!existingAddress)
         throw new AppError(httpStatus.NOT_FOUND, "Address not found");
-    
+
       address = {
-        district:existingAddress.district,
-        zone:existingAddress.zone,
-        line:existingAddress.line
+        district: existingAddress.district,
+        zone: existingAddress.zone,
+        line: existingAddress.line,
       };
     }
 
-   const shippingInfo = await txClient.shippingInformation.create({
+    const shippingInfo = await txClient.shippingInformation.create({
       data: { orderId: createdOrder.id, ...otherShippingInfo, ...address },
     });
 
-   
     // **Initialize Payment AFTER successful order creation**
     const { paymentId, paymentUrl } = await PaymentServices.initPayment({
       method: PaymentMethod.SSLCOMMERZ,
@@ -422,29 +420,27 @@ const PlaceOrderIntoDB = async (
       ),
     );
     // **Save Shipping Info**
-      // **Save Shipping Info**
-      let { address, addressId, ...otherShippingInfo } = payload.shippingInfo;
+    // **Save Shipping Info**
+    let { address, addressId, ...otherShippingInfo } = payload.shippingInfo;
 
-    
-      if (addressId) {
-        const existingAddress = await txClient.customerAddress.findUnique({
-          where: { id: addressId },
-        });
-        if (!existingAddress)
-          throw new AppError(httpStatus.NOT_FOUND, "Address not found");
-      
-        address = {
-          district:existingAddress.district,
-          zone:existingAddress.zone,
-          line:existingAddress.line
-        };
-      }
-  
-     const shippingInfo = await txClient.shippingInformation.create({
-        data: { orderId: createdOrder.id, ...otherShippingInfo, ...address },
+    if (addressId) {
+      const existingAddress = await txClient.customerAddress.findUnique({
+        where: { id: addressId },
       });
-  
-   
+      if (!existingAddress)
+        throw new AppError(httpStatus.NOT_FOUND, "Address not found");
+
+      address = {
+        district: existingAddress.district,
+        zone: existingAddress.zone,
+        line: existingAddress.line,
+      };
+    }
+
+    const shippingInfo = await txClient.shippingInformation.create({
+      data: { orderId: createdOrder.id, ...otherShippingInfo, ...address },
+    });
+
     // **Initialize Payment AFTER successful order creation**
     const { paymentId } = await PaymentServices.initPayment({
       method: PaymentMethod.COD,
@@ -955,7 +951,7 @@ const getMyOrdersFromDB = async (
     },
     AND: andConditions,
   };
-console.log(orderBy,sortOrder)
+  console.log(orderBy, sortOrder);
   const orders = await prisma.order.findMany({
     where: whereConditions,
     skip,

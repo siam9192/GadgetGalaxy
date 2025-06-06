@@ -1,4 +1,6 @@
+import { SearchParams } from "next/dist/server/request/search-params";
 import { ICartItem } from "./cartItem.type";
+import { Params } from "next/dist/server/request/params";
 
 export enum ECardViewType {
   GRID = "grid",
@@ -41,3 +43,14 @@ export type TCheckoutData = {
   items: ICartItem[];
   discountCode: string | null;
 };
+
+
+
+export interface ILayoutProps {
+  children:React.ReactNode
+}
+
+export interface IPageProps {
+  searchParams:Promise<SearchParams>,
+  params:Promise<Record<string,string>>
+}

@@ -7,6 +7,7 @@ export interface ICreateCategoryPayload {
   children: {
     name: string;
     isFeatured: boolean;
+    imageUrl?:string
   }[];
 }
 

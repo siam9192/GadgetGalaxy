@@ -5,7 +5,7 @@ export interface IUpdateCustomerProfilePayload {
   profilePhoto?: string;
   phoneNumber?: string;
   gender?: `${UserGender}`;
-  dateOfBirth?: string|Date;
+  dateOfBirth?: string | Date;
   addresses?: {
     id: string;
     district: string;

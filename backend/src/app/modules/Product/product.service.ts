@@ -35,7 +35,9 @@ const createProductIntoDB = async (payload: ICreateProductPayload) => {
   // Validate variant pricing
   if (variants && variants.length) {
     variants.forEach((variant) => {
-      if (variant.offerPrice && variant.offerPrice >= payload.price) {
+   
+      if (variant.offerPrice && (variant.offerPrice >= variant.price)) {
+        
         throw new AppError(
           httpStatus.NOT_ACCEPTABLE,
           "Variant Offer price can not be getter than or equal price",
@@ -127,7 +129,6 @@ const createProductIntoDB = async (payload: ICreateProductPayload) => {
                 : false,
           },
         });
-
 
         await txClient.variantAttribute.createMany({
           data: attributes.map((_) => ({
@@ -465,15 +466,14 @@ const getRecentlyViewedProductsFromDB = async (
       },
       status: ProductStatus.ACTIVE,
     },
-    select:productSelect
+    select: productSelect,
   });
 
   const data = products.map((product) => {
     // Calculate stock
-    product.availableQuantity = product.variants.length ? product.variants.reduce(
-      (p, c) => p + c.availableQuantity,
-      0,
-    ):product.availableQuantity;
+    product.availableQuantity = product.variants.length
+      ? product.variants.reduce((p, c) => p + c.availableQuantity, 0)
+      : product.availableQuantity;
     // Shot description
     product.description = product.description.slice(0, 300);
     product.variants = product.variants.filter(
@@ -497,9 +497,11 @@ const getSearchProductsFromDB = async (
 ) => {
   const { page, limit, skip, orderBy, sortOrder } =
     calculatePagination(paginationOptions);
-  const andConditions: Prisma.ProductWhereInput[] = [{
-    status:ProductStatus.ACTIVE
-  }];
+  const andConditions: Prisma.ProductWhereInput[] = [
+    {
+      status: ProductStatus.ACTIVE,
+    },
+  ];
   const { searchTerm, minPrice, maxPrice, category, brand } = filterQuery;
 
   if (searchTerm) {
@@ -709,10 +711,9 @@ const getSearchProductsFromDB = async (
 
   const data = products.map((product) => {
     // Calculate stock
-    product.availableQuantity = product.variants.length ? product.variants.reduce(
-      (p, c) => p + c.availableQuantity,
-      0,
-    ):product.availableQuantity;
+    product.availableQuantity = product.variants.length
+      ? product.variants.reduce((p, c) => p + c.availableQuantity, 0)
+      : product.availableQuantity;
     // Shot description
     product.description = product.description.slice(0, 300);
     product.variants = product.variants.filter(
@@ -999,7 +1000,6 @@ const getRelatedProductsByProductSlugFromDB = async (
   productSlug: string,
   authUser?: IAuthUser,
 ) => {
-  
   const product = await prisma.product.findUnique({
     where: {
       slug: productSlug,
@@ -1063,10 +1063,9 @@ const getRelatedProductsByProductSlugFromDB = async (
 
   const data = products.map((product) => {
     // Calculate stock
-    product.availableQuantity = product.variants.length ? product.variants.reduce(
-      (p, c) => p + c.availableQuantity,
-      0,
-    ):product.availableQuantity;
+    product.availableQuantity = product.variants.length
+      ? product.variants.reduce((p, c) => p + c.availableQuantity, 0)
+      : product.availableQuantity;
     // Shot description
     product.description = product.description.slice(0, 300);
     product.variants = product.variants.filter(
@@ -1090,7 +1089,7 @@ const getProductBySlugForCustomerViewFromDB = async (
   const product = await prisma.product.findUnique({
     where: {
       slug,
-      status:ProductStatus.ACTIVE
+      status: ProductStatus.ACTIVE,
     },
     include: {
       categories: true,
@@ -1100,7 +1099,7 @@ const getProductBySlugForCustomerViewFromDB = async (
           attributes: true,
         },
       },
-      images:true
+      images: true,
     },
   });
 
@@ -1133,7 +1132,7 @@ const getProductBySlugForCustomerViewFromDB = async (
     },
   });
 
-  console.dir(product,{depth:null})
+  console.dir(product, { depth: null });
   return { ...product, isWishListed };
 };
 
@@ -1174,10 +1173,9 @@ const getFeaturedProductsFromDB = async (
   }
   const data = products.map((product) => {
     // Calculate stock
-    product.availableQuantity = product.variants.length ? product.variants.reduce(
-      (p, c) => p + c.availableQuantity,
-      0,
-    ):product.availableQuantity;
+    product.availableQuantity = product.variants.length
+      ? product.variants.reduce((p, c) => p + c.availableQuantity, 0)
+      : product.availableQuantity;
     // Shot description
     product.description = product.description.slice(0, 300);
     product.variants = product.variants.filter(
@@ -1191,7 +1189,6 @@ const getFeaturedProductsFromDB = async (
     return upd;
   });
 
-  
   const totalResult = await prisma.product.count({
     where: {
       isFeatured: true,
@@ -1244,14 +1241,11 @@ const getNewArrivalProductsFromDB = async (
     );
   }
 
-
-
   const data = products.map((product) => {
     // Calculate stock
-    product.availableQuantity = product.variants.length ? product.variants.reduce(
-      (p, c) => p + c.availableQuantity,
-      0,
-    ):product.availableQuantity;
+    product.availableQuantity = product.variants.length
+      ? product.variants.reduce((p, c) => p + c.availableQuantity, 0)
+      : product.availableQuantity;
     // Shot description
     product.description = product.description.slice(0, 300);
     product.variants = product.variants.filter(
@@ -1542,7 +1536,7 @@ const getCategoryProductsFromDB = async (
         : {
             [orderBy]: sortOrder,
           },
-    select:productSelect,
+    select: productSelect,
     take: limit,
     skip,
   });
@@ -1562,10 +1556,9 @@ const getCategoryProductsFromDB = async (
 
   const data = products.map((product) => {
     // Calculate stock
-    product.availableQuantity = product.variants.length ? product.variants.reduce(
-      (p, c) => p + c.availableQuantity,
-      0,
-    ):product.availableQuantity;
+    product.availableQuantity = product.variants.length
+      ? product.variants.reduce((p, c) => p + c.availableQuantity, 0)
+      : product.availableQuantity;
     // Shot description
     product.description = product.description.slice(0, 300);
     product.variants = product.variants.filter(
@@ -1604,7 +1597,7 @@ const getBrandProductsFromDB = async (
 ) => {
   const brand = await prisma.brand.findUnique({
     where: {
-     name,
+      name,
     },
   });
 
@@ -1613,7 +1606,7 @@ const getBrandProductsFromDB = async (
   const { page, limit, skip, orderBy, sortOrder } =
     calculatePagination(paginationOptions);
   const andConditions: Prisma.ProductWhereInput[] = [];
-  const { minPrice, maxPrice,category } = filterQuery;
+  const { minPrice, maxPrice, category } = filterQuery;
 
   // Add category on category existence
   if (category) {
@@ -1621,7 +1614,7 @@ const getBrandProductsFromDB = async (
       categories: {
         some: {
           category: {
-            slug:category,
+            slug: category,
           },
         },
       },
@@ -1632,7 +1625,7 @@ const getBrandProductsFromDB = async (
   if (brand) {
     andConditions.push({
       brand: {
-        name
+        name,
       },
     });
   }
@@ -1793,7 +1786,7 @@ const getBrandProductsFromDB = async (
         : {
             [orderBy]: sortOrder,
           },
-    select:productSelect,
+    select: productSelect,
     take: limit,
     skip,
   });
@@ -1813,10 +1806,9 @@ const getBrandProductsFromDB = async (
 
   const data = products.map((product) => {
     // Calculate stock
-    product.availableQuantity = product.variants.length ? product.variants.reduce(
-      (p, c) => p + c.availableQuantity,
-      0,
-    ):product.availableQuantity;
+    product.availableQuantity = product.variants.length
+      ? product.variants.reduce((p, c) => p + c.availableQuantity, 0)
+      : product.availableQuantity;
     // Shot description
     product.description = product.description.slice(0, 300);
     product.variants = product.variants.filter(
@@ -1948,18 +1940,20 @@ const updateProductStockIntoDB = async (
   return null;
 };
 
-
-const getTopBrandProductsFromDB = async (authUser:IAuthUser,id:string|number)=>{
-  id = Number(id)
+const getTopBrandProductsFromDB = async (
+  authUser: IAuthUser,
+  id: string | number,
+) => {
+  id = Number(id);
 
   const products = await prisma.product.findMany({
-    where:{
-      brand:{
-        id
-      }
+    where: {
+      brand: {
+        id,
+      },
     },
     select: productSelect,
-    take:20
+    take: 20,
   });
 
   const wishListedProductIds: number[] = [];
@@ -1977,10 +1971,9 @@ const getTopBrandProductsFromDB = async (authUser:IAuthUser,id:string|number)=>{
 
   const data = products.map((product) => {
     // Calculate stock
-    product.availableQuantity = product.variants.length ? product.variants.reduce(
-      (p, c) => p + c.availableQuantity,
-      0,
-    ):product.availableQuantity;
+    product.availableQuantity = product.variants.length
+      ? product.variants.reduce((p, c) => p + c.availableQuantity, 0)
+      : product.availableQuantity;
     // Shot description
     product.description = product.description.slice(0, 300);
     product.variants = product.variants.filter(
@@ -1993,10 +1986,9 @@ const getTopBrandProductsFromDB = async (authUser:IAuthUser,id:string|number)=>{
 
     return upd;
   });
-  
-  return data
-}
 
+  return data;
+};
 
 const getMyNotReviewedProductsFromDB = async (
   authUser: IAuthUser,
@@ -2050,19 +2042,18 @@ const getMyNotReviewedProductsFromDB = async (
   };
 };
 
-
-const getProductVariantsFromDB =  async (id:string|number)=>{
-  id =  Number(id)
+const getProductVariantsFromDB = async (id: string | number) => {
+  id = Number(id);
   const variants = await prisma.variant.findMany({
-    where:{
-      productId:id
+    where: {
+      productId: id,
     },
-    include:{
-      attributes:true
-    }
-  })
-  return variants
-}
+    include: {
+      attributes: true,
+    },
+  });
+  return variants;
+};
 
 const ProductServices = {
   createProductIntoDB,
@@ -2083,7 +2074,6 @@ const ProductServices = {
   getStockOutProductsFromDB,
   getMyNotReviewedProductsFromDB,
   getProductVariantsFromDB,
-
 };
 
 export default ProductServices;

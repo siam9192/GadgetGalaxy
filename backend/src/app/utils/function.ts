@@ -137,10 +137,10 @@ export function getCategoriesWithHierarchyStr(
     c.hierarchyStr = hierarchyStr;
     if (c.children && c.children.length) {
       c.children = c.children.map((_) => {
-        return convert(_, hierarchyStr);
+        return convert(_ as any, hierarchyStr);
       });
     }
     return c;
   };
-  return categories.map((_) => convert(_));
+  return categories.map((_) => convert(_ as any));
 }

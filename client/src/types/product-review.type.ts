@@ -1,3 +1,4 @@
+import { IOrderItem } from "./order.type";
 import { TVariantAttribute } from "./product.type";
 
 export interface IMyNotReviewedItem {
@@ -24,6 +25,7 @@ export interface IProductReview {
     name: string;
     profilePhoto: string;
   };
+  item:IOrderItem
   rating: number;
   createdAt: string;
   updatedAt: string;
@@ -45,7 +47,6 @@ export interface Item {
   productId: number;
   variantId: any;
   productName: string;
-
   colorName: any;
   colorCode: any;
   attributes: TVariantAttribute[];

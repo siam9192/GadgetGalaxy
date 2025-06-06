@@ -267,62 +267,61 @@ const getPaymentsOverviewFromDB = async () => {
   };
 };
 
-const getMyOverviewDataFromDB = async (authUser:IAuthUser)=>{
- const ordersTotal = await prisma.order.count({
-  where:{
-    customerId:authUser.customerId!,
-    OR:[
-      {
-        payment:{
-          method:PaymentMethod.COD
-        }
-      },
-      {
-        payment:{
-          method:{
-            not:PaymentMethod.COD
+const getMyOverviewDataFromDB = async (authUser: IAuthUser) => {
+  const ordersTotal = await prisma.order.count({
+    where: {
+      customerId: authUser.customerId!,
+      OR: [
+        {
+          payment: {
+            method: PaymentMethod.COD,
           },
-          
         },
-        paymentStatus:'PAID'
-      }
-    ],
-    status:{
-      notIn:[OrderStatus.PENDING,OrderStatus.CANCELED]
-    }
-  }
- })
- const notReviewedTotal =  await prisma.orderItem.count({
-  where:{
-    order:{
-      customerId:authUser.customerId,
-      status:OrderStatus.DELIVERED
+        {
+          payment: {
+            method: {
+              not: PaymentMethod.COD,
+            },
+          },
+          paymentStatus: "PAID",
+        },
+      ],
+      status: {
+        notIn: [OrderStatus.PENDING, OrderStatus.CANCELED],
+      },
     },
-    
-    isReviewed:false
-  }
- })
+  });
+  const notReviewedTotal = await prisma.orderItem.count({
+    where: {
+      order: {
+        customerId: authUser.customerId,
+        status: OrderStatus.DELIVERED,
+      },
 
- const unreadNotificationsTotal =  await prisma.notification.count({
-  where:{
-    userId:authUser.id,
-    isRead:false
-  }
- })
+      isReviewed: false,
+    },
+  });
 
- const reviewsTotal = await prisma.productReview.count({
-  where:{
-    customerId:authUser.customerId
-  }
- })
+  const unreadNotificationsTotal = await prisma.notification.count({
+    where: {
+      userId: authUser.id,
+      isRead: false,
+    },
+  });
 
- return {
-  ordersTotal,
-  notReviewedTotal,
-  reviewsTotal,
-  unreadNotificationsTotal
- }
-}
+  const reviewsTotal = await prisma.productReview.count({
+    where: {
+      customerId: authUser.customerId,
+    },
+  });
+
+  return {
+    ordersTotal,
+    notReviewedTotal,
+    reviewsTotal,
+    unreadNotificationsTotal,
+  };
+};
 
 const OverviewServices = {
   getAllOverviewDataFromDB,
@@ -331,7 +330,7 @@ const OverviewServices = {
   getDiscountOverviewFromDB,
   getProductsOverviewFromDB,
   getPaymentsOverviewFromDB,
-  getMyOverviewDataFromDB
+  getMyOverviewDataFromDB,
 };
 
 export default OverviewServices;

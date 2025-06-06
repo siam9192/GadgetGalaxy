@@ -40,11 +40,9 @@ const ChangeCartItemVariant = ({ item, onChange }: IProps) => {
   useEffect(() => {
     if (!variants.length) return;
     const v = colorVariants[0].id;
-    if (!v) return;
-    setSelectedVariantId(v);
   }, [selectedColorName, variants]);
 
-  const [changeVariant, { isLoading: isVariantChanging }] = useChangeCartVariantMutation();
+  const [changeVariant] = useChangeCartVariantMutation();
 
   const handelChangeVariant = async () => {
     try {
@@ -72,13 +70,12 @@ const ChangeCartItemVariant = ({ item, onChange }: IProps) => {
             ))}
           </div>
         </div>
-        <div className="mt-2">
+   {
+    variants.length ?
+         <div className="mt-2">
           <p className="font-medium">Attributes:</p>
-          <div className="mt-3">
+          <div className="mt-3 space-y-2">
             {items.map((i) => {
-              if (!(i.attributes && i.attributes.length)) {
-                return null;
-              }
 
               return (
                 <div
@@ -100,10 +97,14 @@ const ChangeCartItemVariant = ({ item, onChange }: IProps) => {
             })}
           </div>
         </div>
+        :
+        null
+   }
       </div>
       <div className="mt-8 text-end">
         <button
           disabled={selectedVariantId === item.product.variant.id}
+          onClick={handelChangeVariant}
           className="px-6 py-3 bg-primary disabled:bg-gray-200 text-white font-medium rounded-md"
         >
           Save

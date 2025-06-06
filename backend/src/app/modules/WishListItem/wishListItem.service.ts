@@ -12,7 +12,6 @@ const createWishListItemIntoDB = async (
   authUser: IAuthUser,
   payload: ICrateWishListItemPayload,
 ) => {
-  
   const product = await prisma.product.findUnique({
     where: {
       id: payload.productId,

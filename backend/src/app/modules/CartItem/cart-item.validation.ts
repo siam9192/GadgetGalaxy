@@ -13,12 +13,12 @@ const ChangeItemQuantity = z.object({
 
 const changeItemVariantValidation = z.object({
   id: z.string(),
- variantId:z.number(),
+  variantId: z.number(),
 });
 const CartItemValidations = {
   CreateCartItemValidation,
   ChangeItemQuantity,
-  changeItemVariantValidation
+  changeItemVariantValidation,
 };
 
 export default CartItemValidations;

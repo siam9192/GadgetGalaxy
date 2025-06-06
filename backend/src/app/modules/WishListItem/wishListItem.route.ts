@@ -13,9 +13,17 @@ router.post(
   validateRequest(WishListItemValidations.CreateWishListItemValidation),
   WishListItemControllers.createWishListItem,
 );
-router.delete("/:productId",auth([UserRole.CUSTOMER]), WishListItemControllers.deleteWishListItem);
+router.delete(
+  "/:productId",
+  auth([UserRole.CUSTOMER]),
+  WishListItemControllers.deleteWishListItem,
+);
 
-router.get("/my",auth([UserRole.CUSTOMER]), WishListItemControllers.getMyWishListItems);
+router.get(
+  "/my",
+  auth([UserRole.CUSTOMER]),
+  WishListItemControllers.getMyWishListItems,
+);
 
 const WishListItemRouter = router;
 export default WishListItemRouter;

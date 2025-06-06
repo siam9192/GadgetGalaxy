@@ -1,15 +1,14 @@
 import ShowSearchProducts from "@/components/sections/search/ShowSearchProducts";
 import ProductsPagination from "@/components/ui/ProductsPagination";
 import React from "react";
-import { PageProps } from "../../../../../.next/types/app/layout";
 import Container from "@/components/container/Container";
 import SubCategories from "@/components/sections/product-category/SubCategories";
 import ProductCategoryPageHeader from "@/components/sections/product-category/ProductCategoryPageHeader";
 import ProductCategoryPageFilterBox from "@/components/ui/ProductCategoryPageFilterBox";
 import { getCategoryProducts } from "@/services/product.service";
-import { IParam } from "@/types/util.type";
+import { IPageProps, IParam } from "@/types/util.type";
 
-const page = async ({ searchParams, params }: PageProps) => {
+const page = async ({ searchParams, params }: IPageProps) => {
   const slug = (await params).slug;
   const paramsC = Object.entries(await searchParams).map(([name, value]) => ({
     name,
@@ -23,7 +22,9 @@ const page = async ({ searchParams, params }: PageProps) => {
     <div>
       <Container className="mt-3">
         <SubCategories />
-        <ProductCategoryPageHeader />
+       {
+        meta &&    <ProductCategoryPageHeader meta={meta} />
+       }
         <div className="lg:grid grid-cols-7 gap-5 min-h-screen ">
           <div className="col-span-2 lg:block hidden">
             <ProductCategoryPageFilterBox />

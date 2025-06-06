@@ -1,3 +1,5 @@
+import { TVariantAttribute } from "./product.type";
+
 export interface IMyOrder {
   id: number;
   shippingInfo:IShippingInfo
@@ -30,16 +32,17 @@ export interface IOrderItem {
   id: string;
   orderId: number;
   productId: number;
-  variantId: any;
+  variantId: string;
   productName: string;
   imageUrl: string;
-  colorName: any;
-  colorCode: any;
-  attributes: any;
+  colorName: string;
+  colorCode: string;
+  attributes:TVariantAttribute[] ;
   quantity: number;
   price: number;
   totalAmount: number;
   isReviewed: boolean;
+  
 }
 
 export interface IExceptedDeliveryDate {

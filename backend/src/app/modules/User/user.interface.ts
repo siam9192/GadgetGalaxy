@@ -1,6 +1,5 @@
 import { AuthProvider, UserGender, UserRole, UserStatus } from "@prisma/client";
 
-
 export interface ICustomerFilterQuery {
   searchTerm?: string;
   status?: `${UserStatus}`;

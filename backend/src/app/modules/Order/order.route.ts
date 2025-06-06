@@ -53,7 +53,11 @@ router.patch(
   OrderControllers.updateOrderStatus,
 );
 
-router.get("/recent",  auth([UserRole.SUPER_ADMIN, UserRole.ADMIN,UserRole.CUSTOMER]),OrderControllers.getRecentOrders)
+router.get(
+  "/recent",
+  auth([UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.CUSTOMER]),
+  OrderControllers.getRecentOrders,
+);
 const OrderRouter = router;
 
 export default OrderRouter;

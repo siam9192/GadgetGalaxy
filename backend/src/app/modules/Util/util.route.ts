@@ -8,6 +8,10 @@ const router = Router();
 router.get("/search-keyword/:keyword", UtilControllers.getSearchKeywordResults);
 const UtilRouter = router;
 
-router.get("/my-count",auth(Object.values(UserRole)),UtilControllers.getUtilCounts);
+router.get(
+  "/my-count",
+  auth(Object.values(UserRole)),
+  UtilControllers.getUtilCounts,
+);
 
 export default UtilRouter;

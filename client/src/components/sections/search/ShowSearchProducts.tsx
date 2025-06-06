@@ -3,9 +3,10 @@ import ProductCard from "@/components/cards/ProductCard";
 import ProductTestCard from "@/components/cards/ProductTestCard";
 import { TCardProduct } from "@/types/product.type";
 import { ECardViewType, TCardViewType } from "@/types/util.type";
+import { SearchParams } from "next/dist/server/request/search-params";
 import React from "react";
 interface IProps {
-  searchParams: Record<string, string>;
+  searchParams: SearchParams;
   products: TCardProduct[];
 }
 const ShowSearchProducts = ({ searchParams, products }: IProps) => {

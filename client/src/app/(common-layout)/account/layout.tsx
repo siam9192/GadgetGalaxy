@@ -1,5 +1,5 @@
 import React from "react";
-import { LayoutProps } from "../../../../.next/types/app/layout";
+
 import AccountSidebar from "@/components/ui/AccountSidebar";
 import Container from "@/components/container/Container";
 import ResponsiveAccountSidebar from "@/components/ui/ResponsiveAccountSidebar";
@@ -9,8 +9,11 @@ export const metadata: Metadata = {
   title: "Account",
   description: "Gadget galaxy checkout page!",
 };
+interface IProps {
+  children:React.ReactNode
+}
 
-const layout = ({ children }: LayoutProps) => {
+const layout = ({ children }: IProps) => {
   return (
     <Container>
       <div className="lg:grid grid-cols-7 gap-5 min-h-[90vh] py-5">

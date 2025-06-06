@@ -5,22 +5,15 @@ import { orderInit, placeOrder } from "@/services/order.service";
 import { TCheckoutData } from "@/types/util.type";
 import { getFormValues } from "@/utils/helpers";
 import { useRouter } from "next/navigation";
-import React, { createContext, useState } from "react";
+import React, { useState } from "react";
 import { toast } from "react-toastify";
-
-export type TCheckoutContextValue = {
-  isValid: boolean;
-  values: Record<string, string>;
-  errors: Record<string, string>;
-};
-
-export const checkoutContext = createContext<TCheckoutContextValue | null>(null);
+import {checkoutContext} from "@/context"
 
 const page = () => {
   const [isValid, setIsValid] = useState(false);
   const [values, setValues] = useState<Record<string, string>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const value: TCheckoutContextValue = {
+  const value = {
     isValid,
     values,
     errors,

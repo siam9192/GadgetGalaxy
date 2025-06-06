@@ -126,7 +126,7 @@ const getNotificationsFromDB = async (
   };
 };
 
-const  getMyNotificationsFromDB = async (
+const getMyNotificationsFromDB = async (
   authUser: IAuthUser,
   paginationOptions: IPaginationOptions,
 ) => {

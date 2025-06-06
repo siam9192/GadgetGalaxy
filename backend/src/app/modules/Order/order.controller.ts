@@ -27,7 +27,7 @@ const placeOrder = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getMyOrders = catchAsync(async (req: Request, res: Response) => {
-  const paginationOptions = Pick(req.query, paginationOptionKeys)
+  const paginationOptions = Pick(req.query, paginationOptionKeys);
   const filter = Pick(req.query, ["status", "startDate", "endDate"]);
 
   const result = await OrderServices.getMyOrdersFromDB(
@@ -140,10 +140,8 @@ const cancelOrderIntoDB = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-
 const getRecentOrders = catchAsync(async (req: Request, res: Response) => {
-  const result = await OrderServices.getRecentOrdersFromDB(
-  );
+  const result = await OrderServices.getRecentOrdersFromDB();
   sendSuccessResponse(res, {
     statusCode: httpStatus.CREATED,
     message: "Recent orders retrieved  successfully",
@@ -162,7 +160,7 @@ const OrderControllers = {
   getNotReviewedOrderItems,
   updateOrderStatus,
   cancelOrderIntoDB,
-  getRecentOrders
+  getRecentOrders,
 };
 
 export default OrderControllers;

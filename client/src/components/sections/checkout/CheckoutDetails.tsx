@@ -1,12 +1,9 @@
 "use client";
-import { checkoutContext } from "@/app/(common-layout)/checkout/page";
-import { orderInit } from "@/services/order.service";
+import { checkoutContext } from "@/context";
 import { getShippingCharges } from "@/services/shippingCharge.service";
-import { setCheckoutData } from "@/services/util.service";
 import { IShippingCharge } from "@/types/shippingCharge.type";
 import { TCheckoutData } from "@/types/util.type";
 import { getCartItemPrice } from "@/utils/helpers";
-import { useRouter } from "next/navigation";
 import React, { useContext, useEffect, useState } from "react";
 import { FaBangladeshiTakaSign } from "react-icons/fa6";
 

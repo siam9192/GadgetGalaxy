@@ -12,7 +12,7 @@ const CategoryCard = ({ category }: TProps) => {
     <Link href={`/product-category/${category.slug}`} className="h-full">
       <div className="md:p-5 p-2 bg-blue-50 rounded-md border-2 border-blue-700/15">
         <div>
-          <img src={category.imageUrl || defaultImagesUrl.category} alt="" />
+          <img src={defaultImagesUrl.category} alt="" />
         </div>
         <h6 className="uppercase text-[0.7rem] text-center mt-3 font-medium  opacity-60">
           {category.name}

@@ -71,6 +71,7 @@ function auth(
     if (requiredRoles && !requiredRoles.includes(role)) {
       throw new AppError(httpStatus.UNAUTHORIZED, "You are not authorized  !");
     }
+    
 
     req.user = decoded as IAuthUser;
     next();

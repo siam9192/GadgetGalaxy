@@ -21,7 +21,12 @@ router.patch(
   CartItemControllers.changeItemQuantity,
 );
 
-router.patch("/change-variant",auth([UserRole.CUSTOMER]),validateRequest(CartItemValidations.changeItemVariantValidation),CartItemControllers.changeItemVariant)
+router.patch(
+  "/change-variant",
+  auth([UserRole.CUSTOMER]),
+  validateRequest(CartItemValidations.changeItemVariantValidation),
+  CartItemControllers.changeItemVariant,
+);
 
 router.get("/", auth([UserRole.CUSTOMER]), CartItemControllers.getMyCartItems);
 

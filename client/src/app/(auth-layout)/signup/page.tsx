@@ -1,7 +1,7 @@
 import SignupForm from "@/components/forms/SignupForm";
 import AuthNavigationButtons from "@/components/ui/AuthNavigationButtons";
 import Link from "next/link";
-import React from "react";
+import React, { Suspense } from "react";
 import { GoHome } from "react-icons/go";
 import { MdArrowBack } from "react-icons/md";
 
@@ -28,7 +28,9 @@ const page = () => {
       </div>
       <div className="bg-white  h-full flex flex-col justify-center items-center  relative  ">
         <div className=" md:w-[70%] w-full   p-5">
-          <SignupForm />
+         <Suspense>
+           <SignupForm />
+         </Suspense>
         </div>
         <AuthNavigationButtons />
       </div>

@@ -5,11 +5,13 @@ import React from "react";
 import { BsCart2 } from "react-icons/bs";
 import { GoHeart } from "react-icons/go";
 import NotificationBar from "./NotificationBar";
+import { useCurrentUser } from "@/provider/CurrentUserProvider";
 
 const HeaderUtils = () => {
+  const {user} =  useCurrentUser()
   const { data } = useGetMyCountQuery(undefined);
-  const count = data?.data;
-
+  const count =  data?.data;
+  
   return (
     <>
       <Link href="/wishlist">
@@ -32,7 +34,11 @@ const HeaderUtils = () => {
           ) : null}
         </button>
       </Link>
-      <NotificationBar />
+   {
+    user ?    <NotificationBar />
+    :
+    null
+   }
     </>
   );
 };

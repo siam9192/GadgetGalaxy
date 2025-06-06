@@ -19,7 +19,6 @@ const ProductCategoryPageFilterBox = () => {
   const [selectedBrand, setSelectedBrand] = useState<number | null>(null);
   const brands = brandData?.data || [];
   const router = useRouter();
-  const pathname = usePathname();
   const searchParams = useSearchParams();
   const handelFilter = () => {
     const params = [
@@ -41,7 +40,7 @@ const ProductCategoryPageFilterBox = () => {
   };
 
   return (
-    <div className="lg:h-fit h-full  w-full bg-blue-100 p-5">
+     <div className="h-fit  w-full bg-blue-100 p-5">
       <div className="mt-5 space-y-4">
         <div className="bg-white p-4">
           <h6 className="uppercase">Filter By Price</h6>
@@ -54,25 +53,31 @@ const ProductCategoryPageFilterBox = () => {
           <p className="text-end text-primary font-medium">
             {brands.find((b) => b.id === selectedBrand)?.name}
           </p>
-          <div className="mt-5 max-h-[400px] overflow-y-auto">
-            {brands.map((_, index) => (
-              <div
-                onClick={() => setSelectedBrand(_.id === selectedBrand ? null : _.id)}
-                key={index}
-                className={`py-2 flex items-center gap-2 ${selectedBrand === _.id ? "bg-blue-50" : ""} hover:cursor-pointer`}
-              >
-                <img
-                  src={
-                    _.logoUrl || "https://gadgetz.com.bd/wp-content/uploads/2022/01/Havit-logo.png"
-                  }
-                  alt=""
-                  className="w-1/5"
-                />
-                <p className="text-lg text-gray-800 opacity-60">{_.name}</p>
-              </div>
-            ))}
+          <div className="mt-5 max-h-[400px] overflow-y-auto min-h-60">
+            {brands.length ? (
+              brands.map((_, index) => (
+                <div
+                  onClick={() => setSelectedBrand(_.id === selectedBrand ? null : _.id)}
+                  key={index}
+                  className={`py-2 flex items-center gap-2 ${selectedBrand === _.id ? "bg-blue-50" : ""} hover:cursor-pointer`}
+                >
+                  <img
+                    src={
+                      _.logoUrl ||
+                      "https://gadgetz.com.bd/wp-content/uploads/2022/01/Havit-logo.png"
+                    }
+                    alt={_.name}
+                    className="w-1/5"
+                  />
+                  <p className="text-lg text-gray-800 opacity-60">{_.name}</p>
+                </div>
+              ))
+            ) : (
+              <p>No related brands</p>
+            )}
           </div>
         </div>
+   
       </div>
       <div className="mt-5">
         <button onClick={handelFilter} className="w-full py-3 bg-primary text-white ">

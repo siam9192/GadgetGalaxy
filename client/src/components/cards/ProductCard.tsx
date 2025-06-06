@@ -11,7 +11,7 @@ interface IProps {
 }
 const ProductCard = ({ index }: IProps) => {
   return (
-    <ProductCardContainer>
+  
       <div
         className={`md:p-3 p-2 bg-white shadow-xl relative  overflow-hidden hover:cursor-pointer product-card ${index !== undefined && (index + 1) % 2 === 0 ? " md:mt-0 " : ""}`}
       >
@@ -72,10 +72,10 @@ const ProductCard = ({ index }: IProps) => {
           <button className="text-xl bg-info p-2 rounded-full  text-white">
             <LuHeart />
           </button>
-          <ProductQuickView />
+         
         </div>
       </div>
-    </ProductCardContainer>
+   
   );
 };
 

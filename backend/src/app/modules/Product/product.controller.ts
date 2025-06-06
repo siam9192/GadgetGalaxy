@@ -95,7 +95,6 @@ const getCategoryProducts = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-
 const getBrandProducts = catchAsync(async (req: Request, res: Response) => {
   const filterQuery = Pick(req.query, ["category", "minPrice", "maxPrice"]);
   const paginationOptions = Pick(req.query, paginationOptionKeys);
@@ -194,16 +193,17 @@ const getRecommendedProducts = catchAsync(
   },
 );
 
-const getTopBrandsProducts = catchAsync(
-  async (req: Request, res: Response) => {
-    const result = await ProductServices.getTopBrandProductsFromDB(req.user,req.params.id);
-    sendSuccessResponse(res, {
-      statusCode: httpStatus.OK,
-      message: "Top brand products retrieved successfully",
-      data: result,
-    });
-  },
-);
+const getTopBrandsProducts = catchAsync(async (req: Request, res: Response) => {
+  const result = await ProductServices.getTopBrandProductsFromDB(
+    req.user,
+    req.params.id,
+  );
+  sendSuccessResponse(res, {
+    statusCode: httpStatus.OK,
+    message: "Top brand products retrieved successfully",
+    data: result,
+  });
+});
 
 const getProductsForManage = catchAsync(async (req: Request, res: Response) => {
   const filterData = Pick(req.query, [
@@ -237,21 +237,22 @@ const getStockOutProducts = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const createMany =  catchAsync(async (req: Request, res: Response) => {
+const createMany = catchAsync(async (req: Request, res: Response) => {
   sendSuccessResponse(res, {
     statusCode: httpStatus.OK,
     message: "successfully",
-    data:await Promise.all(req.body.map((b:any)=> ProductServices.createProductIntoDB(b)))
+    data: await Promise.all(
+      req.body.map((b: any) => ProductServices.createProductIntoDB(b)),
+    ),
   });
-}); 
+});
 
 const getProductVariants = catchAsync(async (req: Request, res: Response) => {
-  const result =
-    await ProductServices.getProductVariantsFromDB(req.params.id);
+  const result = await ProductServices.getProductVariantsFromDB(req.params.id);
   sendSuccessResponse(res, {
     statusCode: httpStatus.OK,
     message: " retrieved successfully",
-    data:result
+    data: result,
   });
 });
 const ProductControllers = {
@@ -273,7 +274,7 @@ const ProductControllers = {
   getProductsForManage,
   getStockOutProducts,
   createMany,
-  getProductVariants
+  getProductVariants,
 };
 
 export default ProductControllers;

@@ -352,6 +352,8 @@ const googleCallback = async ({
   };
 };
 
+const facebookCallback = async () => {};
+
 const login = async (res: Response, data: ILoginData) => {
   const user = await prisma.user.findFirst({
     where: {
@@ -470,23 +472,22 @@ const getAccessTokenUsingRefreshToken = async (req: Request, res: Response) => {
       id: decode.id,
       role: decode.role,
     };
-  
+
     // Insert profile id base on user role
     if (decode.role === UserRole.CUSTOMER) {
       tokenPayload.customerId = decode.customerId;
     } else {
-      tokenPayload.administratorId =decode.administratorId;
+      tokenPayload.administratorId = decode.administratorId;
     }
-  
 
     // Generating access token
-  const accessToken = jwtHelpers.generateToken(
-    tokenPayload,
-    config.jwt.access_token_secret as string,
-    config.jwt.access_token_expire_time as string,
-  );
+    const accessToken = jwtHelpers.generateToken(
+      tokenPayload,
+      config.jwt.access_token_secret as string,
+      config.jwt.access_token_expire_time as string,
+    );
     return {
-     accessToken,
+      accessToken,
     };
   } catch (error) {
     throw new AppError(httpStatus.BAD_REQUEST, "BAD😒 request!");
@@ -676,14 +677,14 @@ const getMeFromDB = async (authUser: IAuthUser) => {
       fullName: customer?.fullName,
       profilePhoto: customer.profilePhoto,
       phoneNumber: customer.phoneNumber,
-      dateOfBirth:customer.dateOfBirth,
+      dateOfBirth: customer.dateOfBirth,
       gender: customer.gender,
       addresses: customer.addresses,
-      role:user.role,
+      role: user.role,
       status: user.status,
-      passwordLastChangedAt:user.passwordLastChangedAt,
-      createdAt:user.createdAt,
-      updatedAt:user.updatedAt,
+      passwordLastChangedAt: user.passwordLastChangedAt,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
     };
   } else {
     const administrator = user.administrator!;

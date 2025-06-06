@@ -17,7 +17,7 @@ export const productSelect = {
   slug: true,
   price: true,
   offerPrice: true,
-  discountPercentage:true,
+  discountPercentage: true,
   rating: true,
   availableQuantity: true,
   variants: {

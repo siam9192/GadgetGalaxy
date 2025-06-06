@@ -1,101 +1,66 @@
 "use strict";
-var __awaiter =
-  (this && this.__awaiter) ||
-  function (thisArg, _arguments, P, generator) {
-    function adopt(value) {
-      return value instanceof P
-        ? value
-        : new P(function (resolve) {
-            resolve(value);
-          });
-    }
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
-      function fulfilled(value) {
-        try {
-          step(generator.next(value));
-        } catch (e) {
-          reject(e);
-        }
-      }
-      function rejected(value) {
-        try {
-          step(generator["throw"](value));
-        } catch (e) {
-          reject(e);
-        }
-      }
-      function step(result) {
-        result.done
-          ? resolve(result.value)
-          : adopt(result.value).then(fulfilled, rejected);
-      }
-      step((generator = generator.apply(thisArg, _arguments || [])).next());
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
-  };
-var __importDefault =
-  (this && this.__importDefault) ||
-  function (mod) {
-    return mod && mod.__esModule ? mod : { default: mod };
-  };
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const catchAsync_1 = __importDefault(require("../../shared/catchAsync"));
 const response_1 = require("../../shared/response");
 const http_status_1 = __importDefault(require("../../shared/http-status"));
 const cart_item_service_1 = __importDefault(require("./cart-item.service"));
-const createCartItem = (0, catchAsync_1.default)((req, res) =>
-  __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield cart_item_service_1.default.createCartItemIntoDB(
-      req.user,
-      req.body,
-    );
+const createCartItem = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield cart_item_service_1.default.createCartItemIntoDB(req.user, req.body);
     (0, response_1.sendSuccessResponse)(res, {
-      statusCode: http_status_1.default.OK,
-      message: "Item inserted into cart successfully",
-      data: result,
+        statusCode: http_status_1.default.OK,
+        message: "Item inserted into cart successfully",
+        data: result,
     });
-  }),
-);
-const getMyCartItems = (0, catchAsync_1.default)((req, res) =>
-  __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield cart_item_service_1.default.getMyCartItemsFromDB(
-      req.user,
-    );
+}));
+const getMyCartItems = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield cart_item_service_1.default.getMyCartItemsFromDB(req.user);
     (0, response_1.sendSuccessResponse)(res, {
-      statusCode: http_status_1.default.OK,
-      message: "Cart items retrieved successfully",
-      data: result,
+        statusCode: http_status_1.default.OK,
+        message: "Cart items retrieved successfully",
+        data: result,
     });
-  }),
-);
-const changeItemQuantity = (0, catchAsync_1.default)((req, res) =>
-  __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield cart_item_service_1.default.changeItemQuantity(
-      req.body,
-    );
+}));
+const changeItemQuantity = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield cart_item_service_1.default.changeItemQuantity(req.body);
     (0, response_1.sendSuccessResponse)(res, {
-      statusCode: http_status_1.default.OK,
-      message: "Item quantity changed successfully",
-      data: result,
+        statusCode: http_status_1.default.OK,
+        message: "Item quantity changed successfully",
+        data: result,
     });
-  }),
-);
-const deleteCartItemFromDB = (0, catchAsync_1.default)((req, res) =>
-  __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield cart_item_service_1.default.deleteCartItemFromDB(
-      req.user,
-      req.params.id,
-    );
+}));
+const changeItemVariant = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield cart_item_service_1.default.changeItemVariantIntoDB(req.user, req.body);
     (0, response_1.sendSuccessResponse)(res, {
-      statusCode: http_status_1.default.OK,
-      message: "Cart items deleted successfully",
-      data: result,
+        statusCode: http_status_1.default.OK,
+        message: "Item quantity changed successfully",
+        data: result,
     });
-  }),
-);
+}));
+const deleteCartItemFromDB = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield cart_item_service_1.default.deleteCartItemFromDB(req.user, req.params.id);
+    (0, response_1.sendSuccessResponse)(res, {
+        statusCode: http_status_1.default.OK,
+        message: "Cart items deleted successfully",
+        data: result,
+    });
+}));
 const CartItemControllers = {
-  createCartItem,
-  getMyCartItems,
-  deleteCartItemFromDB,
-  changeItemQuantity,
+    createCartItem,
+    getMyCartItems,
+    deleteCartItemFromDB,
+    changeItemQuantity,
+    changeItemVariant,
 };
 exports.default = CartItemControllers;

@@ -613,7 +613,8 @@ const applyDiscount = async (
   }
 
   if (
-    discount.customers && discount.customers.length && 
+    discount.customers &&
+    discount.customers.length &&
     !discount.customers
       .map((ele) => ele.customerId)
       .includes(authUser.customerId!)
@@ -640,7 +641,7 @@ const applyDiscount = async (
     const notAvailableCategoriesId: number[] = [];
     categoriesId.forEach((ele) => {
       // If product category not  found in applicable categories then push it notAvailableCategoriesId
-      if ( !applicableCategoriesId.includes(ele)) {
+      if (!applicableCategoriesId.includes(ele)) {
         notAvailableCategoriesId.push(ele);
       }
     });

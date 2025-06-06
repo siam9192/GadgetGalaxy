@@ -1,7 +1,7 @@
-import Link from "next/link";
+
 import React from "react";
 import { GoCheck } from "react-icons/go";
-import { IoIosStar, IoIosStarHalf } from "react-icons/io";
+
 
 import ProductCardContainer from "../container/ProductCardContainer";
 import { TCardProduct } from "@/types/product.type";

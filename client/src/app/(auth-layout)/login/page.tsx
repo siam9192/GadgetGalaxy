@@ -1,6 +1,6 @@
 import LoginForm from "@/components/forms/LoginForm";
 import AuthNavigationButtons from "@/components/ui/AuthNavigationButtons";
-import React from "react";
+import React, { Suspense } from "react";
 
 const page = () => {
   return (
@@ -25,7 +25,9 @@ const page = () => {
       </div>
       <div className="bg-white  h-full flex flex-col justify-center items-center  relative  ">
         <div className=" md:w-[70%] w-full p-5">
-          <LoginForm />
+        <Suspense>
+            <LoginForm />
+        </Suspense>
         </div>
         <AuthNavigationButtons />
       </div>

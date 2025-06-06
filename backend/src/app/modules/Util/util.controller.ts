@@ -17,16 +17,14 @@ const getSearchKeywordResults = catchAsync(
   },
 );
 
-const getUtilCounts = catchAsync(
-  async (req: Request, res: Response) => {
-    const result = await UtilServices.getMyUtilCountsFromDB(req.user);
-    sendSuccessResponse(res, {
-      statusCode: httpStatus.OK,
-      message: "Retrieved successfully",
-      data: result,
-    });
-  },
-);
+const getUtilCounts = catchAsync(async (req: Request, res: Response) => {
+  const result = await UtilServices.getMyUtilCountsFromDB(req.user);
+  sendSuccessResponse(res, {
+    statusCode: httpStatus.OK,
+    message: "Retrieved successfully",
+    data: result,
+  });
+});
 
 const UtilControllers = {
   getSearchKeywordResults,

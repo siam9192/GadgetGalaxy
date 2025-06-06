@@ -3,11 +3,8 @@ import prisma from "../../shared/prisma";
 import { productSelect } from "../../utils/constant";
 import { IAuthUser } from "../Auth/auth.interface";
 
-
-
 const getSearchKeywordResultsFromDB = async (keyword: string) => {
-
-  if(!keyword) return []
+  if (!keyword) return [];
   const categories = await prisma.category.findMany({
     where: {
       name: {
@@ -35,8 +32,6 @@ const getSearchKeywordResultsFromDB = async (keyword: string) => {
     select: productSelect,
   });
 
-  
-
   const productsData = products.map((product) => {
     const variant = product.variants[0];
     return {
@@ -45,24 +40,20 @@ const getSearchKeywordResultsFromDB = async (keyword: string) => {
       imageUrl: product.images[0].url,
       price: variant?.price || product.price,
       offerPrice: variant?.offerPrice || product.offerPrice,
+      rating: product.rating,
     };
   });
 
-  
-  
-const data: any[] = [];
-const tempData = [...productsData, ...categoriesData];
+  const data: any[] = [];
+  const tempData = [...productsData, ...categoriesData];
 
-for (const item of tempData) {
-  const randomIndex = Math.floor(Math.random() * (data.length + 1));
-  data.splice(randomIndex, 0, item); // insert at random position
-}
-  
-  return data
+  for (const item of tempData) {
+    const randomIndex = Math.floor(Math.random() * (data.length + 1));
+    data.splice(randomIndex, 0, item); // insert at random position
+  }
 
+  return data;
 };
-
-
 
 const getMyUtilCountsFromDB = async (authUser: IAuthUser) => {
   const data: Record<string, number> = {};
@@ -90,18 +81,18 @@ const getMyUtilCountsFromDB = async (authUser: IAuthUser) => {
   const totalNewNotifications = await prisma.notification.count({
     where: {
       userId: authUser.id,
-      isRead:false
+      isRead: false,
     },
   });
   return {
     ...data,
-   newNotification:totalNewNotifications,
+    newNotification: totalNewNotifications,
   };
 };
 
 const UtilServices = {
   getSearchKeywordResultsFromDB,
-  getMyUtilCountsFromDB
+  getMyUtilCountsFromDB,
 };
 
 export default UtilServices;

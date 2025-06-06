@@ -39,7 +39,7 @@ const getMyNotReviewedProducts = catchAsync(
     sendSuccessResponse(res, {
       statusCode: httpStatus.OK,
       message: "Product review response created successfully",
-      ...result
+      ...result,
     });
   },
 );

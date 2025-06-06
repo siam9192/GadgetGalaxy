@@ -9,7 +9,11 @@ router.get("/all", OverviewControllers.getAllOverviewData);
 
 router.get("/order", OverviewControllers.getOrdersOverviewData);
 
-router.get("/my",auth([UserRole.CUSTOMER]),OverviewControllers.getMyOverviewData)
+router.get(
+  "/my",
+  auth([UserRole.CUSTOMER]),
+  OverviewControllers.getMyOverviewData,
+);
 const OverviewRouter = router;
 
 export default OverviewRouter;

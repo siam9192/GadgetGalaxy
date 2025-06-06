@@ -1,14 +1,13 @@
 import ShowSearchProducts from "@/components/sections/search/ShowSearchProducts";
 import ProductsPagination from "@/components/ui/ProductsPagination";
 import React from "react";
-import { PageProps } from "../../../../../.next/types/app/layout";
 import Container from "@/components/container/Container";
 import { getBrandProducts, getCategoryProducts } from "@/services/product.service";
-import { IParam } from "@/types/util.type";
+import { IPageProps, IParam } from "@/types/util.type";
 import SearchPageHeader from "@/components/sections/search/SearchPageHeader";
 import ProductBrandPageFilterBox from "@/components/ui/ProductBrandPageFilterBox";
 
-const page = async ({ searchParams, params }: PageProps) => {
+const page = async ({ searchParams, params }: IPageProps) => {
   const name = (await params).name;
   const paramsC = Object.entries(await searchParams).map(([name, value]) => ({
     name,

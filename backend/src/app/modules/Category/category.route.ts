@@ -18,7 +18,10 @@ router.get("/:slug/subcategories", CategoryControllers.getChildCategories);
 router.get("/popular", CategoryControllers.getPopularCategories);
 router.get("/featured", CategoryControllers.getFeaturedCategories);
 router.get("/search-related", CategoryControllers.getSearchRelatedCategories);
-router.get("/brand-related/:brandId", CategoryControllers.getBrandRelatedCategories);
+router.get(
+  "/brand-related/:brandId",
+  CategoryControllers.getBrandRelatedCategories,
+);
 router.put(
   "/:id",
   validateRequest(CategoryValidations.UpdateCategoryValidationSchema),

@@ -31,9 +31,10 @@ const getCategories = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-
 const getChildCategories = catchAsync(async (req: Request, res: Response) => {
-  const result = await CategoryServices.getChildCategoriesBySlugFromDB(req.params.slug);
+  const result = await CategoryServices.getChildCategoriesBySlugFromDB(
+    req.params.slug,
+  );
 
   sendSuccessResponse(res, {
     statusCode: httpStatus.CREATED,
@@ -67,9 +68,9 @@ const getSearchRelatedCategories = catchAsync(
 
 const getBrandRelatedCategories = catchAsync(
   async (req: Request, res: Response) => {
-
-    const result =
-      await CategoryServices.getBrandRelatedCategoriesFormDB(req.params.brandName);
+    const result = await CategoryServices.getBrandRelatedCategoriesFormDB(
+      req.params.brandName,
+    );
     sendSuccessResponse(res, {
       statusCode: httpStatus.OK,
       message: "Related Categories retrieved successfully",

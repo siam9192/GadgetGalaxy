@@ -15,38 +15,51 @@ const UpdatedAddressSchema = z.object({
 export const UpdateCustomerProfileValidation = z.object({
   id: z.string().optional(),
   fullName: z
-  .string()
-  .min(1, { message: "Full name is required" })
-  .max(100, { message: "Full name must be less than 100 characters" }).optional(),
+    .string()
+    .min(1, { message: "Full name is required" })
+    .max(100, { message: "Full name must be less than 100 characters" })
+    .optional(),
 
-profilePhoto: z
-  .string()
-  .url({ message: "Profile photo must be a valid URL" }).optional(),
+  profilePhoto: z
+    .string()
+    .url({ message: "Profile photo must be a valid URL" })
+    .optional(),
 
-phoneNumber: z
-  .string()
-  .min(10, { message: "Phone number must be at least 10 digits" })
-  .max(15, { message: "Phone number must not exceed 15 digits" }).optional(),
+  phoneNumber: z
+    .string()
+    .min(10, { message: "Phone number must be at least 10 digits" })
+    .max(15, { message: "Phone number must not exceed 15 digits" })
+    .optional(),
 
-gender: z.nativeEnum(UserGender, {
-  required_error: "Gender is required",
-  invalid_type_error: "Invalid gender selected",
-}).optional(),
+  gender: z
+    .nativeEnum(UserGender, {
+      required_error: "Gender is required",
+      invalid_type_error: "Invalid gender selected",
+    })
+    .optional(),
 
-dateOfBirth: z
-  .string()
-  .refine(
-    (val) => !isNaN(Date.parse(val)),
-    { message: "Date of birth must be a valid date" }
-  )
-  .refine((val) => {
-    const dob = new Date(val);
-    const today = new Date();
-    const minDate = new Date(today.getFullYear() - 7, today.getMonth(), today.getDate());
-    return dob <= minDate;
-  }, {
-    message: "You must be at least 7 years old",
-  }).optional()
+  dateOfBirth: z
+    .string()
+    .refine((val) => !isNaN(Date.parse(val)), {
+      message: "Date of birth must be a valid date",
+    })
+    .refine(
+      (val) => {
+        const dob = new Date(val);
+        const today = new Date();
+        const minDate = new Date(
+          today.getFullYear() - 7,
+          today.getMonth(),
+          today.getDate(),
+        );
+        return dob <= minDate;
+      },
+      {
+        message: "You must be at least 7 years old",
+      },
+    )
+    .optional(),
+  addresses: z.array(UpdatedAddressSchema).optional(),
 });
 
 // Zod schema for IUpdateStaffProfilePayload

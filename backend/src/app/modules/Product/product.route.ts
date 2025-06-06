@@ -13,7 +13,7 @@ router.post(
   validateRequest(ProductValidations.CreateProductValidation),
   ProductControllers.createProduct,
 );
-router.post("/many",ProductControllers.createMany)
+router.post("/many", ProductControllers.createMany);
 router.put(
   "/:id",
   validateRequest(ProductValidations.UpdateProductValidation),
@@ -44,8 +44,11 @@ router.get(
   auth([UserRole.CUSTOMER], { providerMode: true }),
   ProductControllers.getProductBySlugForCustomerView,
 );
-router.get("/related/:slug", auth([UserRole.CUSTOMER], { providerMode: true }),
-ProductControllers.getRelatedProductsByProductSlug)
+router.get(
+  "/related/:slug",
+  auth([UserRole.CUSTOMER], { providerMode: true }),
+  ProductControllers.getRelatedProductsByProductSlug,
+);
 router.get(
   "/category/:slug",
   auth([UserRole.CUSTOMER], { providerMode: true }),
@@ -57,7 +60,6 @@ router.get(
   auth([UserRole.CUSTOMER], { providerMode: true }),
   ProductControllers.getBrandProducts,
 );
-
 
 router.get(
   "/new-arrival",
@@ -106,8 +108,7 @@ router.get(
   ProductControllers.getProductsForManage,
 );
 
-
-router.get("/:id/variants",ProductControllers.getProductVariants)
+router.get("/:id/variants", ProductControllers.getProductVariants);
 
 const ProductRouter = router;
 

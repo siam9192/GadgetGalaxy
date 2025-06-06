@@ -13,7 +13,6 @@ const initPayment = async (payload: IInitSSLPaymentPayload) => {
     "12h",
   );
 
- 
   const data = {
     store_id: config.ssl.store_id,
     store_passwd: config.ssl.store_password,

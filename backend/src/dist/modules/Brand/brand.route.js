@@ -1,49 +1,24 @@
 "use strict";
-var __importDefault =
-  (this && this.__importDefault) ||
-  function (mod) {
-    return mod && mod.__esModule ? mod : { default: mod };
-  };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const auth_1 = __importDefault(require("../../middlewares/auth"));
-const validateRequest_1 = __importDefault(
-  require("../../middlewares/validateRequest"),
-);
+const validateRequest_1 = __importDefault(require("../../middlewares/validateRequest"));
 const brand_validation_1 = __importDefault(require("./brand.validation"));
 const brand_controller_1 = __importDefault(require("./brand.controller"));
+const client_1 = require("@prisma/client");
 const router = (0, express_1.Router)();
-router.post(
-  "/",
-  (0, validateRequest_1.default)(
-    brand_validation_1.default.CreateBrandValidation,
-  ),
-  brand_controller_1.default.createBrand,
-);
-router.put(
-  "/",
-  (0, auth_1.default)(
-    (0, validateRequest_1.default)(
-      brand_validation_1.default.UpdateBrandValidation,
-    ),
-  ),
-  brand_controller_1.default.updateBrand,
-);
+router.post("/", (0, auth_1.default)([client_1.UserRole.SUPER_ADMIN, client_1.UserRole.ADMIN, client_1.UserRole.MODERATOR]), (0, validateRequest_1.default)(brand_validation_1.default.CreateBrandValidation), brand_controller_1.default.createBrand);
+router.put("/", (0, auth_1.default)([client_1.UserRole.SUPER_ADMIN, client_1.UserRole.ADMIN, client_1.UserRole.MODERATOR]), (0, validateRequest_1.default)(brand_validation_1.default.UpdateBrandValidation), brand_controller_1.default.updateBrand);
 router.get("/", brand_controller_1.default.getBrands);
-router.get("/manage", brand_controller_1.default.getBrandsForManage);
+router.get("/manage", (0, auth_1.default)([client_1.UserRole.SUPER_ADMIN, client_1.UserRole.ADMIN, client_1.UserRole.MODERATOR]), brand_controller_1.default.getBrandsForManage);
 router.get("/popular", brand_controller_1.default.getPopularBrands);
 router.get("/featured", brand_controller_1.default.getFeaturedBrands);
-router.get(
-  "/search-related",
-  brand_controller_1.default.getSearchRelatedBrands,
-);
-router.get(
-  "/category-related/:slug",
-  brand_controller_1.default.getSearchRelatedBrands,
-);
-router.get(
-  "/search/:keyword",
-  brand_controller_1.default.getSearchRelatedBrands,
-);
+router.get("/search-related", brand_controller_1.default.getSearchRelatedBrands);
+router.get("/top", brand_controller_1.default.getTopBrands);
+router.get("/category-related/:slug", brand_controller_1.default.getCategoryRelatedBrands);
+router.get("/search/:keyword", brand_controller_1.default.getSearchRelatedBrands);
 const BrandRouter = router;
 exports.default = BrandRouter;

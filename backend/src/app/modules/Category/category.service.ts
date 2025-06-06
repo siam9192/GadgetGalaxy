@@ -74,6 +74,7 @@ const createCategoryIntoDB = async (payload: ICreateCategoryPayload) => {
           ...item,
           parentId: createdParentCategory.id,
           slug,
+
         };
         childCategoriesData.push(data);
       }
@@ -173,7 +174,9 @@ const getCategoriesFromDB = async (
     othersFilterData.parentId = Number(othersFilterData.parentId);
   }
 
-  const andConditions: Prisma.CategoryWhereInput[] = [];
+  const andConditions: Prisma.CategoryWhereInput[] = [
+
+  ];
 
   if (searchTerm) {
     const blogSearchableFields = ["name"];
@@ -210,7 +213,8 @@ const getCategoriesFromDB = async (
     select: {
       id: true,
       name: true,
-      slug:true,
+      imageUrl:true,
+      slug: true,
       parentId: true,
       _count: true,
     },
@@ -292,7 +296,7 @@ const getAllVisibleCategoriesFromDB = async () => {
   const categories = await prisma.category.findMany({
     where: {
       parentId: null, // Fetch only root categories
-      isVisible:true
+      isVisible: true,
     },
     include: {
       children: {
@@ -350,26 +354,26 @@ const getChildCategoriesByIdFromDB = async (id: string) => {
   return categories;
 };
 
-const getBrandRelatedCategoriesFormDB =  async (name:string)=>{
-  const groupCategories =  await prisma.productCategory.groupBy({
-    where:{
-      product:{
-        brand:{
-          name
-        }
-      }
+const getBrandRelatedCategoriesFormDB = async (name: string) => {
+  const groupCategories = await prisma.productCategory.groupBy({
+    where: {
+      product: {
+        brand: {
+          name,
+        },
+      },
     },
-   by:'categoryId'
-  })
+    by: "categoryId",
+  });
   const data = prisma.category.findMany({
-    where:{
-    id:{
-      in:groupCategories.map(_=>_.categoryId)
-    }
-    }
-  })
-  return data
-}
+    where: {
+      id: {
+        in: groupCategories.map((_) => _.categoryId),
+      },
+    },
+  });
+  return data;
+};
 
 const CategoryServices = {
   createCategoryIntoDB,

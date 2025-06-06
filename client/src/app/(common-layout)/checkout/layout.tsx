@@ -1,9 +1,9 @@
 "use client";
 import React from "react";
-import { LayoutProps } from "../../../../.next/types/app/layout";
 import Container from "@/components/container/Container";
+import { ILayoutProps } from "@/types/util.type";
 
-const layout = ({ children }: LayoutProps) => {
+const layout = ({ children }: ILayoutProps) => {
   return (
     <>
       <Container>{children}</Container>

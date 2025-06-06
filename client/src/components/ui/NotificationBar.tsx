@@ -111,7 +111,7 @@ const NotificationBar = () => {
         <PiBell />
         {newNotificationsTotal !== 0 && (
           <div className="size-5 flex justify-center items-center bg-red-500 rounded-full absolute  -top-1  right-0 text-[0.6rem] text-white">
-            {newNotificationsTotal}
+            {newNotificationsTotal||0}
           </div>
         )}
       </button>

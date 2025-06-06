@@ -4,7 +4,7 @@ import { BsSearch } from "react-icons/bs";
 import { LuShoppingBag, LuUserRound } from "react-icons/lu";
 import { IoMenu } from "react-icons/io5";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+
 
 const navLinks = [
   {

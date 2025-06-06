@@ -1,8 +1,11 @@
 import SettingSidebar from "@/components/sections/account/setting/SettingSidebar";
 import React from "react";
-import { LayoutProps } from "../../../../../.next/types/app/layout";
 
-const layout = ({ children }: LayoutProps) => {
+interface IProps {
+  children:React.ReactNode
+}
+
+const layout = ({ children }: IProps) => {
   return (
     <div>
       <h1 className="text-2xl font-medium">Account Settings</h1>

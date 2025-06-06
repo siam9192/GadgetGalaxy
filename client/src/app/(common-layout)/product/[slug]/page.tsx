@@ -4,14 +4,14 @@ import ProductImageGallery from "@/components/sections/product/ProductImageGalle
 import RecentlyViewedProducts from "@/components/sections/product/RecentlyViewedProducts";
 import RelatedProducts from "@/components/sections/product/RelatedProducts";
 import React from "react";
-import { LuMoveLeft } from "react-icons/lu";
-import { PageProps } from "../../../../../.next/types/app/layout";
+
 import { getProductDetails } from "@/services/product.service";
 import AddAsRecentView from "@/components/sections/product/AddAsRecentView";
 import NavigateTab from "@/components/ui/NavigateTab";
+import { IPageProps } from "@/types/util.type";
 
-const page = async ({ params }: PageProps) => {
-  const { slug } = await params;
+const page = async ({ params }: IPageProps) => {
+  const { slug } =  await params;
   const data = await getProductDetails(slug);
 
   const product = data?.data;

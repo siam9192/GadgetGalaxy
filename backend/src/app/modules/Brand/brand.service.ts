@@ -366,7 +366,7 @@ const getCategoryRelatedBrandsFromDB = async (slug: string) => {
       },
     },
   });
-  
+
   return brands;
 };
 

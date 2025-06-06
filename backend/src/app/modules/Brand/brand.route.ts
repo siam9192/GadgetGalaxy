@@ -28,9 +28,12 @@ router.get(
 );
 router.get("/popular", BrandControllers.getPopularBrands);
 router.get("/featured", BrandControllers.getFeaturedBrands);
-router.get("/search-related",BrandControllers.getSearchRelatedBrands);
+router.get("/search-related", BrandControllers.getSearchRelatedBrands);
 router.get("/top", BrandControllers.getTopBrands);
-router.get("/category-related/:slug", BrandControllers.getCategoryRelatedBrands);
+router.get(
+  "/category-related/:slug",
+  BrandControllers.getCategoryRelatedBrands,
+);
 router.get("/search/:keyword", BrandControllers.getSearchRelatedBrands);
 
 const BrandRouter = router;

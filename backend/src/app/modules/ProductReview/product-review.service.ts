@@ -101,9 +101,8 @@ const getMyNotReviewedProductsFromDB = async (
     order: {
       customer: {
         userId: authUser.id,
-
       },
-      status:OrderStatus.DELIVERED
+      status: OrderStatus.DELIVERED,
     },
     isReviewed: false,
   };
@@ -145,7 +144,7 @@ const getProductReviewsFromDB = async (
 
   const whereConditions: Prisma.ProductReviewWhereInput = {
     id: productId,
-    status:ProductReviewStatus.VISIBLE
+    status: ProductReviewStatus.VISIBLE,
   };
 
   const reviews = await prisma.productReview.findMany({
@@ -155,14 +154,14 @@ const getProductReviewsFromDB = async (
     orderBy: {
       [orderBy]: sortOrder,
     },
-    include:{
-      customer:{
-        select:{
-          fullName:true,
-           profilePhoto:true
-        }
-      }
-    }
+    include: {
+      customer: {
+        select: {
+          fullName: true,
+          profilePhoto: true,
+        },
+      },
+    },
   });
 
   const totalResult = await prisma.productReview.count({
@@ -170,27 +169,26 @@ const getProductReviewsFromDB = async (
   });
 
   const total = await prisma.productReview.count({
-    where:{
+    where: {
       productId,
-      status:ProductReviewStatus.VISIBLE
+      status: ProductReviewStatus.VISIBLE,
     },
   });
- 
 
-  const data = reviews.map((review)=>{
+  const data = reviews.map((review) => {
     return {
-      id:review.id,
-    comment:review.comment,
-    imagesUrl:review.imagesUrl,
-    reviewer:{
-      name:review.customer.fullName,
-      profilePhoto:review.customer.profilePhoto
-    },
-    rating: review.rating,
-    createdAt: review.createdAt,
-    updatedAt: review.updatedAt,
-    }
-  })
+      id: review.id,
+      comment: review.comment,
+      imagesUrl: review.imagesUrl,
+      reviewer: {
+        name: review.customer.fullName,
+        profilePhoto: review.customer.profilePhoto,
+      },
+      rating: review.rating,
+      createdAt: review.createdAt,
+      updatedAt: review.updatedAt,
+    };
+  });
   return {
     data,
     meta: {
@@ -227,9 +225,8 @@ const getMyReviewsFromDB = async (
             },
           },
         },
-        
       },
-      orderItem:true
+      orderItem: true,
     },
     take: limit,
     skip,
@@ -243,17 +240,16 @@ const getMyReviewsFromDB = async (
   });
 
   const filteredData = data.map((item) => {
-
     return {
       id: item.id,
       comment: item.comment,
-      imagesUrl:item.imagesUrl,
+      imagesUrl: item.imagesUrl,
       rating: item.rating,
       response: item.response,
-      item:item.orderItem,
+      item: item.orderItem,
       createdAt: item.createdAt,
       updatedAt: item.updatedAt,
-    }
+    };
   });
 
   return {
