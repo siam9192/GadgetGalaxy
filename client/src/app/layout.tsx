@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Provider from "@/provider";
+import envConfig from "@/config/envConfig";
 
 export const metadata: Metadata = {
   title: "GadgetGalaxy",

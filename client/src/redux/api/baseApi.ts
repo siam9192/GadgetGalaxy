@@ -1,14 +1,14 @@
+import envConfig from "@/config/envConfig";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import Cookies from "js-cookie";
 
 export const baseApi = createApi({
   reducerPath: "baseApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: process.env.NEXT_PUBLIC_BASE_API,
+    baseUrl:envConfig.base_api,
     // credentials:"include",
     prepareHeaders: (headers) => {
       const token = Cookies.get("accessToken");
-
       if (token) {
         headers.set("authorization", `Bearer ${token}`);
       }

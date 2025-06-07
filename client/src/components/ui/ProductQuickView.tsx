@@ -33,7 +33,7 @@ export const ProductQuickView = ({ slug, closeFn }: IProps) => {
     }
   };
 
-  const bouncedLoading = useLoadingBounce({ isLoading });
+  const bouncedLoading = useLoadingBounce({ isLoading,delay:400 });
   if (bouncedLoading)
     return (
       <div className="h-60 flex justify-center items-center flex-col bg-white">

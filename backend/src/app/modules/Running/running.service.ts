@@ -4,7 +4,7 @@ import prisma from "../../shared/prisma";
 const Running = () => {
   // Run the handler function every 10 minutes
   setInterval(handler, 1000 * 60 * 10);
-
+  
   async function handler() {
     // Set the expiration time to 24 hours ago
     const paymentExpiredAt = new Date();

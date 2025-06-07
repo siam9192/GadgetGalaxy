@@ -495,6 +495,7 @@ const getSearchProductsFromDB = async (
   paginationOptions: IPaginationOptions,
   authUser?: IAuthUser,
 ) => {
+  console.log(filterQuery)
   const { page, limit, skip, orderBy, sortOrder } =
     calculatePagination(paginationOptions);
   const andConditions: Prisma.ProductWhereInput[] = [
@@ -1132,7 +1133,6 @@ const getProductBySlugForCustomerViewFromDB = async (
     },
   });
 
-  console.dir(product, { depth: null });
   return { ...product, isWishListed };
 };
 

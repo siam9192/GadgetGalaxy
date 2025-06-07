@@ -355,11 +355,56 @@ const createAdministratorIntoDB = (authUser, payload) => __awaiter(void 0, void 
     }));
     return result;
 });
+const createSupperAdmin = () => __awaiter(void 0, void 0, void 0, function* () {
+    const payload = {
+        fullName: "MR.Super admin",
+        email: "superadmin@gmail.com",
+        password: "123456",
+        profilePhoto: "https://images.unsplash.com/photo-1529665253569-6d01c0eaf7b6?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8cHJvZmlsZXxlbnwwfHwwfHx8MA%3D%3D",
+        phoneNumber: "876872357635",
+        gender: client_1.UserGender.MALE,
+        role: client_1.UserRole.SUPER_ADMIN
+    };
+    const user = yield prisma_1.default.user.findFirst({
+        where: {
+            email: payload.email,
+        },
+    });
+    // Checking user existence
+    if (user) {
+        throw new AppError_1.default(http_status_1.default.NOT_FOUND, "User is already exist using this email");
+    }
+    const result = yield prisma_1.default.$transaction((txClient) => __awaiter(void 0, void 0, void 0, function* () {
+        const hashedPassword = yield (0, bycrypt_1.bcryptHash)(payload.password);
+        // Create user
+        const createdUser = yield txClient.user.create({
+            data: {
+                email: payload.email,
+                role: payload.role,
+                password: hashedPassword,
+                authProvider: client_1.AuthProvider.EMAIL_PASSWORD,
+            },
+        });
+        // Create staff
+        const createAdministrator = yield txClient.administrator.create({
+            data: {
+                userId: createdUser.id,
+                fullName: payload.fullName,
+                profilePhoto: payload.profilePhoto,
+                gender: payload.gender || null,
+                phoneNumber: payload.phoneNumber || null,
+            },
+        });
+        return createAdministrator;
+    }));
+    return result;
+});
 const UserServices = {
     ChangeUserStatusIntoDB,
     getCustomersFromDB,
     getAdministratorsFromDB,
     softDeleteUserByIdIntoDB,
     createAdministratorIntoDB,
+    createSupperAdmin
 };
 exports.default = UserServices;

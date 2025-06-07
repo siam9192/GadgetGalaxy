@@ -178,6 +178,7 @@ const getCategoriesFromDB = (filterRequest, options) => __awaiter(void 0, void 0
         select: {
             id: true,
             name: true,
+            imageUrl: true,
             slug: true,
             parentId: true,
             _count: true,

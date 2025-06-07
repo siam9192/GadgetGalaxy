@@ -1,5 +1,6 @@
 import Banner from "@/components/sections/home/Banner";
 import BestDeals from "@/components/sections/home/BestDeals";
+import Faq from "@/components/sections/home/Faq";
 import FeaturedCategories from "@/components/sections/home/FeaturedCategories";
 import FeaturedProducts from "@/components/sections/home/FeaturedProducts";
 import Hero from "@/components/sections/home/Hero";
@@ -25,6 +26,7 @@ export default function Home() {
       <TopBrandProducts />
       <ShopByBrands />
       <BestDeals />
+      <Faq/>
     </div>
   );
 }

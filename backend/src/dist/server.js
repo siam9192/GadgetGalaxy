@@ -13,12 +13,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const app_1 = __importDefault(require("./app"));
-const config_1 = __importDefault(require("./config"));
 const running_service_1 = __importDefault(require("./modules/Running/running.service"));
 const port = 5000;
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
-        console.log(config_1.default);
+        //  await UserServices.createSupperAdmin()
         try {
             app_1.default.listen(port, () => {
                 console.log("GadgetGalaxy Server is Running on Port:", port);

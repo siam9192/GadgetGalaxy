@@ -22,14 +22,14 @@ router.get(
   "/brand-related/:brandId",
   CategoryControllers.getBrandRelatedCategories,
 );
+
+router.get("/visible", CategoryControllers.getAllVisibleCategories);
+
+router.get("/search/:keyword", CategoryControllers.getSearchKeywordCategories);
 router.put(
   "/:id",
   validateRequest(CategoryValidations.UpdateCategoryValidationSchema),
   CategoryControllers.updateCategory,
 );
-
-router.get("/visible", CategoryControllers.getAllVisibleCategories);
-
-router.get("/search/:keyword", CategoryControllers.getSearchKeywordCategories);
 const CategoryRouter = router;
 export default CategoryRouter;

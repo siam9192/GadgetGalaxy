@@ -264,6 +264,7 @@ const getSearchRelatedCategoriesFromDB = async (filterQuery: {
 }) => {
   const { searchTerm } = filterQuery;
 
+
   // Group categories
   const groupResult = await prisma.category.groupBy({
     where: {
@@ -290,6 +291,7 @@ const getSearchRelatedCategoriesFromDB = async (filterQuery: {
       },
     },
   });
+  
   return data;
 };
 const getAllVisibleCategoriesFromDB = async () => {

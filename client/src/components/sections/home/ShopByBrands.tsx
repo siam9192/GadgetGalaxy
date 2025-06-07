@@ -6,23 +6,7 @@ import React from "react";
 import { FaChevronRight } from "react-icons/fa";
 
 const ShopByBrands = async () => {
-  // const brands = [
-  //   {
-  //     logoUrl: "https://adminapi.applegadgetsbd.com/storage/media/thumb/Apple-6176.png",
-  //   },
-  //   {
-  //     logoUrl: "https://adminapi.applegadgetsbd.com/storage/media/thumb/Samsung-4680.png",
-  //   },
-  //   {
-  //     logoUrl: "https://adminapi.applegadgetsbd.com/storage/media/thumb/Oneplus-9091.png",
-  //   },
-  //   {
-  //     logoUrl: "https://adminapi.applegadgetsbd.com/storage/media/thumb/Xiaomi-1934.png",
-  //   },
-  //   {
-  //     logoUrl: "https://adminapi.applegadgetsbd.com/storage/media/thumb/Google-4283.png",
-  //   },
-  // ];
+ 
   const brands = await getFeaturedBrands();
   return (
     <section className="md:py-10 py-6">
@@ -41,9 +25,10 @@ const ShopByBrands = async () => {
         <div className="p-5 bg-white lg:grid-cols-none grid grid-cols-1    lg:flex items-center flex-wrap md:justify-center lg:gap-7 md:gap-5 gap-3">
           {brands.map((brand, index) => (
             <Link key={index} href={`product-brand/${brand.name}`}>
-              <div className="p-5 border-2 border-blue-100 rounded-md lg:size-52 ">
+              <div className="p-5 border-2 border-blue-100 rounded-md lg:size-52 flex flex-col justify-between items-center ">
                 <img
-                  src={"https://adminapi.applegadgetsbd.com/storage/media/thumb/Oneplus-9091.png"}
+                  src={brand.logoUrl}
+                  className=" w-32"
                 />
                 <h1 className="text-center text-xl  font-primary">{brand.name}</h1>
               </div>

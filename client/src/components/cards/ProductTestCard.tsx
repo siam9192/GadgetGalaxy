@@ -25,18 +25,20 @@ const ProductTestCard = ({ product, index }: IProps) => {
       <div
         className={`md:p-3 p-2 bg-white shadow-xl relative  overflow-hidden hover:cursor-pointer product-card flex flex-col  ${index !== undefined && (index + 1) % 2 === 0 ? " md:mt-0 " : ""} h-full`}
       >
-        <div className="relative">
-          <img src={product.images[0].url} alt="" className="w-full" />
+        <div className="relative h-52">
+          <img src={product.images[0].url} alt="" className="w-full  max-h-52" />
           {product.discountPercentage >= 5 && (
             <div className="absolute left-1 top-1 bg-info text-white md:px-4 px-3 py-1 rounded-full md:text-sm text-[0.7rem] font-unique">
               {product.discountPercentage}%
             </div>
           )}
         </div>
-        <div className="mt-2 space-y-2  grow ">
-          <div className="">
+         <div className="mt-2 grow">
             <h2 className="font-secondary md:text-lg text-[0.9rem]">{product.name}</h2>
           </div>
+
+        <div className="mt-2 space-y-2">
+         
           <div className="space-y-1">
             <ProductRating rating={product.rating} />
             {pricing.offerPrice ? (

@@ -39,7 +39,7 @@ const createProductIntoDB = (payload) => __awaiter(void 0, void 0, void 0, funct
     // Validate variant pricing
     if (variants && variants.length) {
         variants.forEach((variant) => {
-            if (variant.offerPrice && variant.offerPrice >= payload.price) {
+            if (variant.offerPrice && (variant.offerPrice >= variant.price)) {
                 throw new AppError_1.default(http_status_1.default.NOT_ACCEPTABLE, "Variant Offer price can not be getter than or equal price");
             }
         });

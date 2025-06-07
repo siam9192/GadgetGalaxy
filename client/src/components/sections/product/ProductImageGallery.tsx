@@ -24,11 +24,11 @@ const ProductImageGallery = ({ images }: TProps) => {
         {imagesUrl.map((imgUrl, index) => {
           if (activeIndex !== index) return null;
           return (
-            <div key={index}>
+            <div key={index} className=" size-[400px]  mx-auto  pt-20">
               <img
                 src={imgUrl}
                 alt=""
-                className={`md:max-w-[60%] mx-auto ${prevActiveIndex < index ? "previewImageAnimate1" : "previewImageAnimate2"} `}
+                className={`  mx-auto h-[200px]  md:h-[300px] ${prevActiveIndex < index ? "previewImageAnimate1" : "previewImageAnimate2"} `}
               />
             </div>
           );
@@ -39,9 +39,9 @@ const ProductImageGallery = ({ images }: TProps) => {
           <div
             key={index}
             onClick={() => handelChangeActiveIndex(index)}
-            className={` p-2 border-2 border-gray-900/10 hover:border-info hover:cursor-pointer  rounded-md ${activeIndex === index ? "border-info border-2" : ""}`}
+            className={` p-2  border-2 border-gray-900/10 hover:border-info hover:cursor-pointer  rounded-md ${activeIndex === index ? "border-info border-2" : ""}`}
           >
-            <img src={image} alt="" />
+            <img src={image} alt="" className=" object-cover" />
           </div>
         ))}
         <ImageGalleryPopup images={images} />
