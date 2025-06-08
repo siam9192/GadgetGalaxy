@@ -22,11 +22,12 @@ export interface IParam {
 export type TSearchKeywordData = {
   type: "product" | "category";
   name: string;
+  slug: string;
   imageUrl: string;
   price?: number;
-  offerPrice?:number
+  offerPrice?: number;
   stock?: number;
-  rating?:number
+  rating?: number;
   hierarchySte?: string;
 };
 
@@ -44,13 +45,11 @@ export type TCheckoutData = {
   discountCode: string | null;
 };
 
-
-
 export interface ILayoutProps {
-  children:React.ReactNode
+  children: React.ReactNode;
 }
 
 export interface IPageProps {
-  searchParams:Promise<SearchParams>,
-  params:Promise<Record<string,string>>
+  searchParams: Promise<SearchParams>;
+  params: Promise<Record<string, string>>;
 }

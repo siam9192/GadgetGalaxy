@@ -11,7 +11,7 @@ import NavigateTab from "@/components/ui/NavigateTab";
 import { IPageProps } from "@/types/util.type";
 
 const page = async ({ params }: IPageProps) => {
-  const { slug } =  await params;
+  const { slug } = await params;
   const data = await getProductDetails(slug);
 
   const product = data?.data;

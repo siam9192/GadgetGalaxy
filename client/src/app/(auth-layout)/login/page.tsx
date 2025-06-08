@@ -25,9 +25,9 @@ const page = () => {
       </div>
       <div className="bg-white  h-full flex flex-col justify-center items-center  relative  ">
         <div className=" md:w-[70%] w-full p-5">
-        <Suspense>
+          <Suspense>
             <LoginForm />
-        </Suspense>
+          </Suspense>
         </div>
         <AuthNavigationButtons />
       </div>

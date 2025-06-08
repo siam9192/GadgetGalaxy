@@ -38,7 +38,7 @@ const navLinks = [
 ];
 const ResponsiveNavbar = () => {
   return (
-    <div className="mt-5">
+    <div className="mt-5 font-secondary">
       {navLinks.map((item) => (
         <Link href={item.href} key={item.href}>
           <button key={item.href} className=" flex items-center gap-2 py-3 px-2 ">

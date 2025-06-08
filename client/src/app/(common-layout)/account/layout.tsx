@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   description: "Gadget galaxy checkout page!",
 };
 interface IProps {
-  children:React.ReactNode
+  children: React.ReactNode;
 }
 
 const layout = ({ children }: IProps) => {

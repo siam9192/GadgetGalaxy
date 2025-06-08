@@ -5,6 +5,7 @@ import { TbCurrencyTaka } from "react-icons/tb";
 import { useGetSearchKeywordResultsQuery } from "@/redux/features/utils/utils.api";
 import { useRouter } from "next/navigation";
 import { defaultImagesUrl } from "@/utils/constant";
+import Link from "next/link";
 
 const SearchBox = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -70,51 +71,54 @@ const SearchBox = () => {
               results.map((item, index) => {
                 if (item.type === "product") {
                   return (
-                    <div key={index} className="p-2 hover:bg-gray-100">
-                      <p className="text-primary font-medium text-sm mb-1">Product</p>
-                      <div className="flex items-center gap-2">
-                        <img src={item.imageUrl} alt="" className="size-12" />
-                        <div>
-                          <h5 className=" text-lg ">{item.name}</h5>
-                          <ProductRating rating={item.rating||0} />
-                          <div className="text-primary font-semibold flex items-center gap-2 ">
-                       <div className="flex items-center">
-                                 <span className="text-xl">
-                              <TbCurrencyTaka /> 
-                             </span>
-                             <span>{item.offerPrice||item.price}</span>
-                       </div >
-                        {
-                          item.offerPrice ?
-                           <div className="flex items-center text-gray-800">
-                             <span> <TbCurrencyTaka /></span>    <del >  {item.price}</del>
-                           
-                         </div>
-                         :
-                         null
-                        }
-                          
+                    <Link key={index} href={`/products/${item.slug}`}>
+                      <div className="p-2 hover:bg-gray-100">
+                        <p className="text-primary font-medium text-sm mb-1">Product</p>
+                        <div className="flex items-center gap-2">
+                          <img src={item.imageUrl} alt="" className="size-12" />
+                          <div>
+                            <h5 className=" text-lg ">{item.name}</h5>
+                            <ProductRating rating={item.rating || 0} />
+                            <div className="text-primary font-semibold flex items-center gap-2 ">
+                              <div className="flex items-center">
+                                <span className="text-xl">
+                                  <TbCurrencyTaka />
+                                </span>
+                                <span>{item.offerPrice || item.price}</span>
+                              </div>
+                              {item.offerPrice ? (
+                                <div className="flex items-center text-gray-800">
+                                  <span>
+                                    {" "}
+                                    <TbCurrencyTaka />
+                                  </span>{" "}
+                                  <del> {item.price}</del>
+                                </div>
+                              ) : null}
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
+                    </Link>
                   );
                 } else {
                   return (
-                    <div key={index} className="p-3 hover:bg-gray-100">
-                      <p className="text-info font-medium text-sm mb-1">Category</p>
-                      <div className=" flex gap-2 ">
-                        <img
-                          src={item.imageUrl || defaultImagesUrl.category}
-                          alt=""
-                          className="size-12"
-                        />
-                        <div>
-                          <h5 className="text-lg">{item.name}</h5>
-                          <h6 className="text-gray-800 text-sm">{item.hierarchySte}</h6>
+                    <Link key={index} href={`/product-category/${item.slug}`}>
+                      <div className="p-3 hover:bg-gray-100">
+                        <p className="text-info font-medium text-sm mb-1">Category</p>
+                        <div className=" flex gap-2 ">
+                          <img
+                            src={item.imageUrl || defaultImagesUrl.category}
+                            alt=""
+                            className="size-12"
+                          />
+                          <div>
+                            <h5 className="text-lg">{item.name}</h5>
+                            <h6 className="text-gray-800 text-sm">{item.hierarchySte}</h6>
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    </Link>
                   );
                 }
               })

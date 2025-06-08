@@ -4,7 +4,7 @@ import Header1 from "@/components/shared/Header1";
 import React from "react";
 
 interface IProps {
-  children:React.ReactNode
+  children: React.ReactNode;
 }
 const layout = ({ children }: IProps) => {
   return (

@@ -42,10 +42,11 @@ const routes = [
 const AccountSidebar = () => {
   const pathname = usePathname();
   const router = useRouter();
-  const { refetch } = useCurrentUser();
+  const { refetch,setUser} = useCurrentUser();
   const handelLogout = async () => {
     const st = await logout();
     if (st) {
+      setUser(null)
       refetch();
       router.replace("/");
     }

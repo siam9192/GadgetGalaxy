@@ -3,9 +3,11 @@ import "@/styles/rangeSlider.css";
 
 interface IProps {
   onChange: (range: { min: number; max: number }) => void | any;
+  min?: number;
+  max?: number;
 }
 
-const RangeSlider: React.FC<IProps> = ({ onChange }) => {
+const RangeSlider: React.FC<IProps> = ({ onChange, min, max }) => {
   const sliderContainerRef = useRef<HTMLDivElement | null>(null);
   const thumbMinRef = useRef<HTMLDivElement | null>(null);
   const thumbMaxRef = useRef<HTMLDivElement | null>(null);
@@ -13,8 +15,10 @@ const RangeSlider: React.FC<IProps> = ({ onChange }) => {
   const minValueDisplayRef = useRef<HTMLSpanElement | null>(null);
   const maxValueDisplayRef = useRef<HTMLSpanElement | null>(null);
 
-  const minPrice = 0;
-  const maxPrice = 10000;
+  if (min === undefined) min = 0;
+  if (max === undefined) max = 1000000;
+  const minPrice = min;
+  const maxPrice = max;
   const [currentMin, setCurrentMin] = useState(minPrice);
   const [currentMax, setCurrentMax] = useState(maxPrice);
 

@@ -56,15 +56,14 @@ const Header1 = () => {
               <img
                 src="https://gadgetz.com.bd/wp-content/uploads/2023/11/gadgetz.png"
                 alt=""
-                className=" lg:w-full  w-[70%]"
+                className=" lg:w-full  w-40 md:w-52 "
               />
             </div>
-            <div className=" col-span-6   w-full  lg:block hidden">
+            <div className=" col-span-5 xl:col-span-6   w-full  lg:block hidden">
               <SearchBox />
             </div>
-            <div className="col-span-2 bg-white px-2 py-3 flex items-center justify-end lg:gap-4 gap-3 font-primary">
+            <div className=" col-span-3 xl:col-span-2 bg-white px-2 py-3 flex items-center justify-end lg:gap-4 gap-3 font-primary">
               <HeaderAuthNavigation />
-              <ResponsiveSearchBox />
               <HeaderUtils />
               <ResponsiveSidebar />
             </div>
@@ -74,28 +73,23 @@ const Header1 = () => {
       <div className="py-2 border-b border-gray-600/10 lg:block hidden bg-white">
         <Container>
           <div className="grid grid-cols-10  items-center gap-14 font-primary ">
-            <div className=" col-span-2   ">
+            <div className=" lg:col-span-3 xl:col-span-2   ">
               <BrowseCategories />
             </div>
-            <div className="col-span-6 ">
-              <div className="flex items-center gap-4">
+            <div className=" lg:col-span-7 xl:col-span-6 ">
+              <div className="flex items-center gap-2 xl:gap-4">
                 {navLinks.map((link) => (
                   <Link
                     href={link.href}
                     key={link.name}
-                    className={` uppercase font-secondary text-black font-medium tracking-[0.1rem] hover:text-primary  hover:scale-95`}
+                    className={` uppercase font-secondary text-black font-medium tracking-[0.1rem] text-sm xl:text-[1rem] hover:text-primary  hover:scale-95`}
                   >
                     {link.name}
                   </Link>
                 ))}
               </div>
             </div>
-            <div className=" col-span-2 px-2 py-3   font-medium flex items-center gap-2 ">
-              <span className="text-2xl text-white">
-                <LuUserRound />
-              </span>
-              <span className="text-white text-sm">Login/Register</span>
-            </div>
+          
           </div>
         </Container>
       </div>

@@ -77,7 +77,7 @@ const HeroCarousel = () => {
       customLeftArrow={<CustomLeftArrow />}
     >
       {sliderImages.map((img, index) => (
-        <img src={img} key={index} className=" lg:h-full h-60 " />
+        <img src={img} key={index} className=" w-full lg:h-full h-60 md:h-96 " />
       ))}
     </Carousel>
   );

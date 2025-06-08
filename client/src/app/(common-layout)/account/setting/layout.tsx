@@ -2,7 +2,7 @@ import SettingSidebar from "@/components/sections/account/setting/SettingSidebar
 import React from "react";
 
 interface IProps {
-  children:React.ReactNode
+  children: React.ReactNode;
 }
 
 const layout = ({ children }: IProps) => {

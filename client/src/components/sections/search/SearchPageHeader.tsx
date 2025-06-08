@@ -71,7 +71,7 @@ const SearchPageHeader = ({ meta }: IProps) => {
 
   return (
     <div>
-      <div className="md:p-5 p-2 md:block hidden bg-white md:flex justify-between items-center">
+      <div className="md:p-5 p-2 lg:block hidden bg-white lg:flex justify-between items-center">
         <h1 className="text-3xl md:block hidden text-primary font-medium">Filter Products</h1>
         <div>
           <p className="font-medium ">
@@ -94,7 +94,7 @@ const SearchPageHeader = ({ meta }: IProps) => {
           </select>
         </div>
       </div>
-      <div className="p-2 md:hidden block bg-white flex flex-col  gap-2">
+      <div className="p-2 lg:hidden block bg-white flex flex-col  gap-2">
         <div>
           <p className="font-medium">
             Showing {startFrom}-{endAt} of {meta.totalResult} products

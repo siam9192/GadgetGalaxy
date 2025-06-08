@@ -5,7 +5,6 @@ import { LuShoppingBag, LuUserRound } from "react-icons/lu";
 import { IoMenu } from "react-icons/io5";
 import Link from "next/link";
 
-
 const navLinks = [
   {
     name: "Home",

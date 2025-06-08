@@ -15,15 +15,13 @@ const SearchPageFilterBox = () => {
   const searchParams = useSearchParams();
   const searchTerm = searchParams.get("searchTerm") || "";
 
-  const { data: catData,error } = useGetSearchRelatedCategoriesQuery([
+  const { data: catData, error } = useGetSearchRelatedCategoriesQuery([
     { name: "searchTerm", value: searchTerm },
   ]);
-  console.log(error)
 
   const { data: brandData } = useGetSearchRelatedBrandsQuery([
     { name: "searchTerm", value: searchTerm },
   ]);
-
 
   const categories = catData?.data || [];
   const brands = brandData?.data || [];
@@ -51,6 +49,10 @@ const SearchPageFilterBox = () => {
         name: "maxPrice",
         value: priceRange.max,
       },
+      {
+        name:'page',
+        value:1
+      }
     ];
 
     router.push(pathname + urlSearch(searchParams, params));

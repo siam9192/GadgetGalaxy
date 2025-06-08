@@ -22,9 +22,7 @@ const page = async ({ searchParams, params }: IPageProps) => {
     <div>
       <Container className="mt-3">
         <SubCategories />
-       {
-        meta &&    <ProductCategoryPageHeader meta={meta} />
-       }
+        {meta && <ProductCategoryPageHeader meta={meta} />}
         <div className="lg:grid grid-cols-7 gap-5 min-h-screen ">
           <div className="col-span-2 lg:block hidden">
             <ProductCategoryPageFilterBox />

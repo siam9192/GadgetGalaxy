@@ -6,7 +6,6 @@ import React from "react";
 import { FaChevronRight } from "react-icons/fa";
 
 const ShopByBrands = async () => {
- 
   const brands = await getFeaturedBrands();
   return (
     <section className="md:py-10 py-6">
@@ -22,14 +21,11 @@ const ShopByBrands = async () => {
             </button>
           </Link>
         </div>
-        <div className="p-5 bg-white lg:grid-cols-none grid grid-cols-1    lg:flex items-center flex-wrap md:justify-center lg:gap-7 md:gap-5 gap-3">
+        <div className="p-5 bg-white lg:grid-cols-none grid grid-cols-1 md:grid-cols-2yarn dev    lg:flex items-center flex-wrap md:justify-center lg:gap-7 md:gap-5 gap-3">
           {brands.map((brand, index) => (
             <Link key={index} href={`product-brand/${brand.name}`}>
               <div className="p-5 border-2 border-blue-100 rounded-md lg:size-52 flex flex-col justify-between items-center ">
-                <img
-                  src={brand.logoUrl}
-                  className=" w-32"
-                />
+                <img src={brand.logoUrl} className=" w-32" />
                 <h1 className="text-center text-xl  font-primary">{brand.name}</h1>
               </div>
             </Link>

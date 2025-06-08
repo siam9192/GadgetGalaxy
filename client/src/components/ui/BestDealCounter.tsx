@@ -14,7 +14,7 @@ const BestDealCounter = () => {
     return () => clearTimeout(timeout);
   }, []);
 
-  const date = new Date("2025-04-24");
+  const date = new Date("2026-04-24");
 
   date.setDate(date.getDate() + 10);
 

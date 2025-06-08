@@ -70,36 +70,32 @@ const ChangeCartItemVariant = ({ item, onChange }: IProps) => {
             ))}
           </div>
         </div>
-   {
-    variants.length ?
-         <div className="mt-2">
-          <p className="font-medium">Attributes:</p>
-          <div className="mt-3 space-y-2">
-            {items.map((i) => {
-
-              return (
-                <div
-                  key={i.id}
-                  onClick={() => setSelectedVariantId(i.id)}
-                  className={`md:p-4 p-3  flex md:flex-row flex-col md:items-center gap-2   text-sm rounded-md ${selectedVariantId === i.id ? "bg-secondary text-black" : " bg-gray-50 border-2 border-blue-100 "} hover:cursor-pointer `}
-                >
-                  <input
-                    type="radio"
-                    id={i.id.toString()}
-                    name="att"
-                    className="md:size-6 size-5 accent-primary   hidden"
-                  />
-                  <label htmlFor={i.id.toString()} className="hover:cursor-pointer">
-                    {i.attributesString}
-                  </label>
-                </div>
-              );
-            })}
+        {variants.length ? (
+          <div className="mt-2">
+            <p className="font-medium">Attributes:</p>
+            <div className="mt-3 space-y-2">
+              {items.map((i) => {
+                return (
+                  <div
+                    key={i.id}
+                    onClick={() => setSelectedVariantId(i.id)}
+                    className={`md:p-4 p-3  flex md:flex-row flex-col md:items-center gap-2   text-sm rounded-md ${selectedVariantId === i.id ? "bg-secondary text-black" : " bg-gray-50 border-2 border-blue-100 "} hover:cursor-pointer `}
+                  >
+                    <input
+                      type="radio"
+                      id={i.id.toString()}
+                      name="att"
+                      className="md:size-6 size-5 accent-primary   hidden"
+                    />
+                    <label htmlFor={i.id.toString()} className="hover:cursor-pointer">
+                      {i.attributesString}
+                    </label>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        </div>
-        :
-        null
-   }
+        ) : null}
       </div>
       <div className="mt-8 text-end">
         <button

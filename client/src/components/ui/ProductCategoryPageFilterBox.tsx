@@ -40,7 +40,7 @@ const ProductCategoryPageFilterBox = () => {
   };
 
   return (
-     <div className="h-fit  w-full bg-blue-100 p-5">
+    <div className="h-fit  w-full bg-blue-100 p-5">
       <div className="mt-5 space-y-4">
         <div className="bg-white p-4">
           <h6 className="uppercase">Filter By Price</h6>
@@ -77,7 +77,6 @@ const ProductCategoryPageFilterBox = () => {
             )}
           </div>
         </div>
-   
       </div>
       <div className="mt-5">
         <button onClick={handelFilter} className="w-full py-3 bg-primary text-white ">

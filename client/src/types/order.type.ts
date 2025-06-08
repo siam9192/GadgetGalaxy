@@ -2,7 +2,7 @@ import { TVariantAttribute } from "./product.type";
 
 export interface IMyOrder {
   id: number;
-  shippingInfo:IShippingInfo
+  shippingInfo: IShippingInfo;
   items: IOrderItem[];
   totalAmount: number;
   discountAmount: number;
@@ -15,17 +15,15 @@ export interface IMyOrder {
   paymentStatus: TOrderPaymentStatus;
   createdAt: string;
   payment: IPayment;
-
 }
-
 
 interface IShippingInfo {
   fullName: string;
   phoneNumber: string;
   emailAddress: string;
-    district: string;
-    zone: string;
-    line: string;
+  district: string;
+  zone: string;
+  line: string;
 }
 
 export interface IOrderItem {
@@ -37,12 +35,11 @@ export interface IOrderItem {
   imageUrl: string;
   colorName: string;
   colorCode: string;
-  attributes:TVariantAttribute[] ;
+  attributes: TVariantAttribute[];
   quantity: number;
   price: number;
   totalAmount: number;
   isReviewed: boolean;
-  
 }
 
 export interface IExceptedDeliveryDate {

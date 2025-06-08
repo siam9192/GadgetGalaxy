@@ -22,7 +22,7 @@ const ShowSearchProducts = ({ searchParams, products }: IProps) => {
           ))}
         </div>
       ) : (
-        <div className="grid lg:grid-cols-4 md:grid-cols-3 grid-cols-2 md:gap-3 gap-2">
+        <div className="grid xl:grid-cols-4 lg:grid-cols-3 grid-cols-2 md:gap-3 gap-2">
           {products.map((product, index) => (
             <ProductTestCard product={product} key={index} />
           ))}

@@ -16,6 +16,7 @@ const page = async ({ searchParams }: IPageProps) => {
   const data = await getSearchProducts(params as IParam[]);
   const products = data?.data || [];
   const meta = data?.meta;
+
   return (
     <Container className="mt-3">
       {data?.meta && <SearchPageHeader meta={data?.meta} />}

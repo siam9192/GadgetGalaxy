@@ -19,7 +19,7 @@ const HeaderAuthNavigation = () => {
     <Link href={"/account"} className="lg:block hidden">
       <img
         className="size-10 outline-2 outline-primary  outline-offset-4 rounded-full"
-        src={defaultImagesUrl.profileMain}
+        src={user.profilePhoto||defaultImagesUrl.profileMain}
         alt=""
       />
     </Link>

@@ -5,7 +5,7 @@ import Cookies from "js-cookie";
 export const baseApi = createApi({
   reducerPath: "baseApi",
   baseQuery: fetchBaseQuery({
-    baseUrl:envConfig.base_api,
+    baseUrl: envConfig.base_api,
     // credentials:"include",
     prepareHeaders: (headers) => {
       const token = Cookies.get("accessToken");
@@ -18,6 +18,7 @@ export const baseApi = createApi({
 
   endpoints: (builder) => ({}),
   tagTypes: [
+    "search-products",
     "cart-items",
     "wishlist-items",
     "utils-count",

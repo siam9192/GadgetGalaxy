@@ -1,7 +1,5 @@
-
 import React from "react";
 import { GoCheck } from "react-icons/go";
-
 
 import ProductCardContainer from "../container/ProductCardContainer";
 import { TCardProduct } from "@/types/product.type";
@@ -33,12 +31,11 @@ const ProductTestCard = ({ product, index }: IProps) => {
             </div>
           )}
         </div>
-         <div className="mt-2 grow">
-            <h2 className="font-secondary md:text-lg text-[0.9rem]">{product.name}</h2>
-          </div>
+        <div className="mt-2 grow">
+          <h2 className="font-secondary md:text-lg text-[0.9rem]">{product.name}</h2>
+        </div>
 
         <div className="mt-2 space-y-2">
-         
           <div className="space-y-1">
             <ProductRating rating={product.rating} />
             {pricing.offerPrice ? (

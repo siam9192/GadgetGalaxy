@@ -1,12 +1,15 @@
 import Container from "@/components/container/Container";
 import React from "react";
 
-
 interface IProps {
-  children:React.ReactNode
+  children: React.ReactNode;
 }
 const layout = ({ children }: IProps) => {
-  return <Container>{children}</Container>;
+  return (
+    <div className="min-h-screen">
+      <Container>{children}</Container>
+    </div>
+  );
 };
 
 export default layout;

@@ -25,7 +25,7 @@ export interface IProductReview {
     name: string;
     profilePhoto: string;
   };
-  item:IOrderItem
+  item: IOrderItem;
   rating: number;
   createdAt: string;
   updatedAt: string;

@@ -9,7 +9,7 @@ const BestDealProductCard = () => {
     <div className="md:p-5 p-2 border-2 rounded-lg border-primary  grid   md:grid-cols-5 grid-cols-1  gap-5  bg-white ">
       <div className="md:col-span-2">
         <img
-          src="https://www.pngall.com/wp-content/uploads/2016/05/Photo-Camera-Download-PNG.png"
+          src="https://i5.walmartimages.com/seo/Restored-Apple-iPhone-X-Refurbished-Smartphone-256GB-Fully-Unlocked-Silver-Color-Refurbished_79e69493-85db-4c38-8406-60da206bba5b.7658f71f88486ebe02ff324f56f0bbbe.jpeg"
           alt=""
         />
       </div>

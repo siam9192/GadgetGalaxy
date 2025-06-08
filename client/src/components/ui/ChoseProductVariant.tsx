@@ -135,9 +135,7 @@ const ChoseProductVariant = () => {
           ))}
         </div>
       </div>
-      <div className="mt-3">
-        {/* <AddToCart /> */}
-      </div>
+      <div className="mt-3">{/* <AddToCart /> */}</div>
     </>
   );
 };

@@ -13,7 +13,7 @@ interface ICategory {
   subCategories: ICategory[];
 }
 const ResponsiveBrowseCategory = ({}: IProps) => {
-  return <div>ResponsiveBrowseCategory</div>;
+  return <div></div>;
 };
 
 export default ResponsiveBrowseCategory;

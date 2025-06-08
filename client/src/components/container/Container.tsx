@@ -5,7 +5,11 @@ interface IProps {
   className?: string;
 }
 const Container = ({ children, className }: IProps) => {
-  return <div className={`max-w-[1400px] mx-auto lg:px-0 px-2 ${className || ""}`}>{children}</div>;
+  return (
+    <div className={`max-w-[1400px] mx-auto lg:px-0 md:px-20 p-2 ${className || ""}`}>
+      {children}
+    </div>
+  );
 };
 
 export default Container;

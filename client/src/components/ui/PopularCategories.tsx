@@ -50,49 +50,46 @@ const PopularCategories = () => {
   const total = categories.length;
 
   const handleChangeCurrent = (type: "p" | "n") => {
-  const maxCurrent = Math.max(total - showLength, 0); // prevent negative scroll
+    const maxCurrent = Math.max(total - showLength, 0); // prevent negative scroll
 
-  if (type === "n") {
-    setCurrent((prev) => Math.min(prev + 1, maxCurrent));
-  } else {
-    setCurrent((prev) => Math.max(prev - 1, 0));
-  }
-};
+    if (type === "n") {
+      setCurrent((prev) => Math.min(prev + 1, maxCurrent));
+    } else {
+      setCurrent((prev) => Math.max(prev - 1, 0));
+    }
+  };
 
   const router = useRouter();
-  const cardWidthPercentage =  100 / showLength
-  
+  const cardWidthPercentage = 100 / showLength;
+
   return (
     <Container className="bg-white mt-5 p-5 md:p-10 shadow relative">
       <div
         ref={containerRef}
         className="relative w-full h-[150px] md:h-[200px] flex items-center justify-center overflow-hidden"
       >
-       
-          {categories.map((category, index) => (
-            <div
-              key={index}
-              className="flex flex-col items-center p-3 rounded-md flex-shrink-0 hover:border-primary hover:border-2 hover:cursor-pointer transition-transform duration-200 absolute top-0  h-full "
-              
-               style={{
-            transform: `translateX(-${current * 100}%)`,
-             width: `${cardWidthPercentage}%` ,
-             left:`${index * cardWidthPercentage}%`
-          }}
-              onClick={() => router.push(`/product-category/${category.slug}`)}
-            >
-              <img
-                src={category.imageUrl || defaultImagesUrl.category}
-                alt={category.name}
-                className="w-24 h-24 md:w-32 md:h-32 object-cover rounded-md"
-              />
-              <h5 className="text-black font-medium mt-2 text-sm text-center md:text-base">
-                {category.name}
-              </h5>
-            </div>
-          ))}
-        </div>
-      
+        {categories.map((category, index) => (
+          <div
+            key={index}
+            className="flex flex-col items-center p-3 rounded-md flex-shrink-0 hover:border-primary hover:border-2 hover:cursor-pointer transition-transform duration-200 absolute top-0  h-full "
+            style={{
+              transform: `translateX(-${current * 100}%)`,
+              width: `${cardWidthPercentage}%`,
+              left: `${index * cardWidthPercentage}%`,
+            }}
+            onClick={() => router.push(`/product-category/${category.slug}`)}
+          >
+            <img
+              src={category.imageUrl || defaultImagesUrl.category}
+              alt={category.name}
+              className="w-24 h-24 md:w-32 md:h-32 object-cover rounded-md"
+            />
+            <h5 className="text-black font-medium mt-2 text-sm text-center md:text-base">
+              {category.name}
+            </h5>
+          </div>
+        ))}
+      </div>
 
       {/* Navigation Buttons */}
       {total > showLength && (

@@ -6,13 +6,9 @@ interface IProps {
 const BrandCard = ({ brand }: IProps) => {
   return (
     <Link href={`/product-brand/${brand.name}`}>
-      <div className="p-5 bg-white hover:scale-95 duration-75">
+      <div className="p-5 bg-white hover:scale-95 duration-75 h-full">
         <h1 className="text-xl font-medium text-primary">{brand.name}</h1>
-        <img
-          src="https://adminapi.applegadgetsbd.com/storage/media/thumb/Xiaomi-1934.png"
-          alt=""
-          className="mx-auto "
-        />
+        <img src={brand.logoUrl} alt="" className="mx-auto w-52 " />
       </div>
     </Link>
   );

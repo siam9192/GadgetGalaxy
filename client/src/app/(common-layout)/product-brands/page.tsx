@@ -5,9 +5,7 @@ import { getBrands } from "@/services/brand.service";
 import React from "react";
 import { IPageProps, IParam } from "@/types/util.type";
 
-
-
-const page = async ({ searchParams }:IPageProps) => {
+const page = async ({ searchParams }: IPageProps) => {
   const params = Object.entries(searchParams).map(([name, value]) => ({
     name,
     value,

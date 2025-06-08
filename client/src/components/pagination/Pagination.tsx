@@ -1,4 +1,5 @@
 import { TMeta } from "@/types/response.type";
+import { useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { FcNext, FcPrevious } from "react-icons/fc";
 
@@ -6,11 +7,10 @@ type TProps = TMeta & { delta?: number; onPageChange: (page: number) => void | a
 
 function Pagination({ totalResult: total, limit, page, delta = 2, onPageChange }: TProps) {
   const [pages, setPages] = useState<(number | string)[]>([]);
-
   const [currentPage, setCurrentPage] = useState<number>(page || 1);
 
   const totalPages = Math.ceil(total / limit);
-
+  const searchParams = useSearchParams()
   useEffect(() => {
     const range = [];
     let left = Math.max(2, currentPage - delta);

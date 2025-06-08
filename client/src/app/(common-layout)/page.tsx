@@ -26,7 +26,7 @@ export default function Home() {
       <TopBrandProducts />
       <ShopByBrands />
       <BestDeals />
-      <Faq/>
+      <Faq />
     </div>
   );
 }
