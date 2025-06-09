@@ -5,7 +5,7 @@ import UserServices from "./modules/User/user.service";
 
 const port = 5000;
 async function main() {
-//  await UserServices.createSupperAdmin()
+  //  await UserServices.createSupperAdmin()
   try {
     app.listen(port, () => {
       console.log("GadgetGalaxy Server is Running on Port:", port);

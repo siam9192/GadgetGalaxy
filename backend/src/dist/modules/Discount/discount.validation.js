@@ -13,8 +13,8 @@ exports.CreateDiscountValidation = zod_1.z.object({
     maxDiscount: zod_1.z.number().positive().optional(),
     usageLimit: zod_1.z.number().positive().min(1).optional(),
     usageCount: zod_1.z.number().nonnegative().optional(),
-    validFrom: zod_1.z.string().date(),
-    validUntil: zod_1.z.string().date(),
+    validFrom: zod_1.z.string().datetime(),
+    validUntil: zod_1.z.string().datetime(),
     customersId: zod_1.z
         .array(zod_1.z.string())
         .nonempty("Customers ID array cannot be empty.")

@@ -48,6 +48,7 @@ const getSearchKeywordResultsFromDB = (keyword) => __awaiter(void 0, void 0, voi
         return {
             type: "product",
             name: product.name,
+            slug: product.slug,
             imageUrl: product.images[0].url,
             price: (variant === null || variant === void 0 ? void 0 : variant.price) || product.price,
             offerPrice: (variant === null || variant === void 0 ? void 0 : variant.offerPrice) || product.offerPrice,

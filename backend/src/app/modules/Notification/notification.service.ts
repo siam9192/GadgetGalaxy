@@ -144,6 +144,7 @@ const getMyNotificationsFromDB = async (
     },
   });
 
+  
   const totalResult = await prisma.notification.count({
     where: {
       userId: authUser.id,

@@ -4,6 +4,6 @@ export interface IName {
 }
 
 export enum EEnvironment {
-  PRODUCTION = 'PROD',
-  DEVELOPMENT = 'DEB'
-} 
+  PRODUCTION = "PROD",
+  DEVELOPMENT = "DEB",
+}

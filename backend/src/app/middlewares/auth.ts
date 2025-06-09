@@ -32,6 +32,7 @@ function auth(
         config.jwt.access_token_secret as string,
       ) as JwtPayload;
     } catch (error) {
+      if(authConfig?.providerMode) return next ()
       throw new AppError(httpStatus.UNAUTHORIZED, "Unauthorized");
     }
 
@@ -71,7 +72,6 @@ function auth(
     if (requiredRoles && !requiredRoles.includes(role)) {
       throw new AppError(httpStatus.UNAUTHORIZED, "You are not authorized  !");
     }
-    
 
     req.user = decoded as IAuthUser;
     next();

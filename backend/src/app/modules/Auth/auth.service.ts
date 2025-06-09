@@ -1,4 +1,10 @@
-import { AuthProvider, UserRole, UserStatus } from "@prisma/client";
+import {
+  AuthProvider,
+  NotificationCategory,
+  NotificationType,
+  UserRole,
+  UserStatus,
+} from "@prisma/client";
 import AppError from "../../Errors/AppError";
 import httpStatus from "../../shared/http-status";
 import prisma from "../../shared/prisma";
@@ -162,6 +168,16 @@ const verifyRegistrationUsingOTP = async (data: IVerifyAccountData) => {
         userId: createdUser.id,
       },
     });
+    prisma.notification.create({
+      data: {
+        userId: createdUser.id,
+        type: NotificationType.INFO,
+        category: NotificationCategory.SYSTEM,
+        title: "Thanks for your registration 😊😊",
+        message:
+          "Your account has been successfully created. We’re excited to have you with us—explore and enjoy all the features!",
+      },
+    });
     return null;
   });
 
@@ -287,7 +303,7 @@ const googleCallback = async ({
       throw new AppError(httpStatus.NOT_ACCEPTABLE, "Account is Blocked");
     const updateData = {
       fullName: data.name,
-      profilePhotoUrl: data.picture,
+      profilePhoto: data.picture,
     };
 
     await prisma.customer.update({
@@ -337,13 +353,13 @@ const googleCallback = async ({
   const accessToken = jwtHelpers.generateToken(
     tokenPayload,
     config.jwt.access_token_secret as string,
-    "7d",
+    config.jwt.access_token_expire_time as string,
   );
   // Generating refresh token
   const refreshToken = jwtHelpers.generateToken(
     tokenPayload,
     config.jwt.access_token_secret as string,
-    config.jwt.refresh_token_secret as string,
+    config.jwt.refresh_token_expire_time as string,
   );
 
   return {
@@ -534,7 +550,16 @@ const changePassword = async (
       password: hashedNewPassword,
     },
   });
-
+  prisma.notification.create({
+    data: {
+      userId: authUser.id,
+      type: NotificationType.INFO,
+      category: NotificationCategory.SYSTEM,
+      title: "Password Changed Successfully 🔐",
+      message:
+        "Your password has been changed. If you did not perform this action, please contact support immediately to secure your account.",
+    },
+  });
   return null;
 };
 
@@ -597,6 +622,7 @@ const forgetPassword = async (email: string) => {
 const resetPassword = async (payload: IResetPasswordPayload) => {
   // Verify token
   let decode;
+  
   try {
     decode = (await jwtHelpers.verifyToken(
       payload.token,
@@ -621,6 +647,7 @@ const resetPassword = async (payload: IResetPasswordPayload) => {
 
     if (!session) throw new Error();
   } catch (error) {
+    
     throw new AppError(
       httpStatus.BAD_REQUEST,
       "Sorry maybe reset link expired,used or something wrong",
@@ -646,6 +673,17 @@ const resetPassword = async (payload: IResetPasswordPayload) => {
       },
       data: {
         isUsed: true,
+      },
+    });
+
+    prisma.notification.create({
+      data: {
+        userId: decode.userId,
+        type: NotificationType.INFO,
+        category: NotificationCategory.SYSTEM,
+        title: "Password Reset Successful 🔒",
+        message:
+          "Your password has been updated successfully. You can now log in with your new password. Keep it safe and secure!",
       },
     });
   });

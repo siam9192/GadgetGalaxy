@@ -56,51 +56,51 @@ const convertExceptedDeliveryDate = (rangeHours) => {
     };
 };
 exports.convertExceptedDeliveryDate = convertExceptedDeliveryDate;
-function getOrderStatusMessage(status) {
+function getOrderStatusMessage(status, orderId) {
     switch (status) {
         case client_1.OrderStatus.PENDING:
             return {
-                title: "Your order is pending",
-                message: "We have received your order and it is currently pending. We will notify you once it is processed.",
+                title: `Your order "#${orderId}" is pending`,
+                message: "We have received your order and it is currently pending because we have to verify it for we will contact you shortly. We will notify you once it is processed.",
             };
         case client_1.OrderStatus.PLACED:
             return {
-                title: "Your order has been placed",
+                title: `Your order "#${orderId}" has been placed`,
                 message: "Your order has been successfully placed. We will start processing it soon.",
             };
         case client_1.OrderStatus.PROCESSING:
             return {
-                title: "Your order is being processed",
+                title: `Your order "#${orderId}" is being processed`,
                 message: "Your order is currently being prepared. We will update you once it is shipped.",
             };
         case client_1.OrderStatus.IN_TRANSIT:
             return {
-                title: "Your order is on the way",
+                title: `Your order "#${orderId}" is on the way`,
                 message: "Good news! Your order has been shipped and is on its way to your address.",
             };
         case client_1.OrderStatus.DELIVERED:
             return {
-                title: "Your order has been delivered",
+                title: `Your order "#${orderId}" has been delivered`,
                 message: "Your order has been successfully delivered. We hope you enjoy your purchase!",
             };
         case client_1.OrderStatus.RETURNED:
             return {
-                title: "Your order has been returned",
+                title: `Your order "#${orderId}" has been returned`,
                 message: "We have received your returned order. If you have any questions, please contact our support team.",
             };
         case client_1.OrderStatus.CANCELED:
             return {
-                title: "Your order has been canceled",
+                title: `Your order "#${orderId}" has been canceled`,
                 message: "Your order has been canceled. If this was a mistake or you need further assistance, please reach out to support.",
             };
         case client_1.OrderStatus.FAILED:
             return {
-                title: "Your order failed",
+                title: `Your order "#${orderId}" has been failed`,
                 message: "Unfortunately, your order could not be processed. Please try again or contact support for assistance.",
             };
         default:
             return {
-                title: "Order update",
+                title: `There is an update about your order "#${orderId}" is on the way`,
                 message: "There is an update regarding your order. Please check your order details.",
             };
     }

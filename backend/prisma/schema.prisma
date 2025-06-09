@@ -457,14 +457,16 @@ model AdministratorActivityLog {
 model Notification {
 id String @id @default(cuid())
 userId Int
-type NotificationType
+type NotificationType 
+category NotificationCategory @default(SYSTEM)
 title String
 message String
 imageUrl String?
 isRead Boolean @default(false)
 createdAt DateTime @default(now())
 updatedAt DateTime @updatedAt
-link      String?
+href String?
+metaData Json?
 user      User     @relation(fields: [userId], references: [id])
 @@index([userId])
 @@map("notifications")
@@ -482,12 +484,6 @@ model PasswordResetRequest {
 }
 
 
-enum NotificationType {
-  ORDER_STATUS
-  PROMOTION
-  SYSTEM
-  ALERT
-}
 
 enum UserRole {
     SUPER_ADMIN
@@ -629,4 +625,22 @@ enum PaymentRefundStatus {
   COMPLETED
   REJECTED
   EXPIRED
+}
+
+enum NotificationType {
+  WARNING
+  INFO
+}
+
+
+
+enum NotificationCategory {
+  SYSTEM
+  ORDER
+  WISHLIST
+  CARTITEM
+  PRODUCT
+  CATEGORY
+  PROMOTION
+  COUPON
 }

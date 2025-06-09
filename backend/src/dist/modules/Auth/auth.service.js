@@ -132,6 +132,15 @@ const verifyRegistrationUsingOTP = (data) => __awaiter(void 0, void 0, void 0, f
                 userId: createdUser.id,
             },
         });
+        prisma_1.default.notification.create({
+            data: {
+                userId: createdUser.id,
+                type: client_1.NotificationType.INFO,
+                category: client_1.NotificationCategory.SYSTEM,
+                title: "Thanks for your registration 😊😊",
+                message: "Your account has been successfully created. We’re excited to have you with us—explore and enjoy all the features!",
+            },
+        });
         return null;
     }));
     return result;
@@ -223,7 +232,7 @@ const googleCallback = (_a) => __awaiter(void 0, [_a], void 0, function* ({ acce
             throw new AppError_1.default(http_status_1.default.NOT_ACCEPTABLE, "Account is Blocked");
         const updateData = {
             fullName: data.name,
-            profilePhotoUrl: data.picture,
+            profilePhoto: data.picture,
         };
         yield prisma_1.default.customer.update({
             where: {
@@ -263,9 +272,9 @@ const googleCallback = (_a) => __awaiter(void 0, [_a], void 0, function* ({ acce
         }));
     }
     // Generating access token
-    const accessToken = jwtHelpers_1.default.generateToken(tokenPayload, config_1.default.jwt.access_token_secret, "7d");
+    const accessToken = jwtHelpers_1.default.generateToken(tokenPayload, config_1.default.jwt.access_token_secret, config_1.default.jwt.access_token_expire_time);
     // Generating refresh token
-    const refreshToken = jwtHelpers_1.default.generateToken(tokenPayload, config_1.default.jwt.access_token_secret, config_1.default.jwt.refresh_token_secret);
+    const refreshToken = jwtHelpers_1.default.generateToken(tokenPayload, config_1.default.jwt.access_token_secret, config_1.default.jwt.refresh_token_expire_time);
     return {
         accessToken,
         refreshToken,
@@ -407,6 +416,15 @@ const changePassword = (authUser, payload) => __awaiter(void 0, void 0, void 0, 
             password: hashedNewPassword,
         },
     });
+    prisma_1.default.notification.create({
+        data: {
+            userId: authUser.id,
+            type: client_1.NotificationType.INFO,
+            category: client_1.NotificationCategory.SYSTEM,
+            title: "Password Changed Successfully 🔐",
+            message: "Your password has been changed. If you did not perform this action, please contact support immediately to secure your account.",
+        },
+    });
     return null;
 });
 const forgetPassword = (email) => __awaiter(void 0, void 0, void 0, function* () {
@@ -492,6 +510,15 @@ const resetPassword = (payload) => __awaiter(void 0, void 0, void 0, function* (
             },
             data: {
                 isUsed: true,
+            },
+        });
+        prisma_1.default.notification.create({
+            data: {
+                userId: decode.userId,
+                type: client_1.NotificationType.INFO,
+                category: client_1.NotificationCategory.SYSTEM,
+                title: "Password Reset Successful 🔒",
+                message: "Your password has been updated successfully. You can now log in with your new password. Keep it safe and secure!",
             },
         });
     }));

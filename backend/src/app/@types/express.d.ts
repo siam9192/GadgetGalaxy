@@ -1,5 +1,3 @@
-
-
 import express from "express";
 import { TRole } from "../modules/user/user.interface";
 import { JwtPayload } from "jsonwebtoken";

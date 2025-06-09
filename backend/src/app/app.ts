@@ -6,7 +6,12 @@ import cookieParser from "cookie-parser";
 import { sendErrorResponse } from "./shared/response";
 const app = express();
 
-app.use(cors({ origin: ["http://localhost:3000","https://gadget-galaxy-phi.vercel.app/"], credentials: true }));
+app.use(
+  cors({
+    origin: ["http://localhost:3000", "https://gadget-galaxy-phi.vercel.app/"],
+    credentials: true,
+  }),
+);
 app.use(express.json());
 app.use(cookieParser());
 app.use;

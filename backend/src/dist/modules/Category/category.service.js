@@ -173,6 +173,16 @@ const getCategoriesFromDB = (filterRequest, options) => __awaiter(void 0, void 0
         isVisible: true,
         // parentId:null
     };
+    let childInclude = {};
+    let current = childInclude;
+    for (let i = 0; i < 10; i++) {
+        current.include = {
+            _count: true,
+            children: {}
+        };
+        current = current.include.children;
+    }
+    console.log(childInclude);
     const categories = yield prisma_1.default.category.findMany({
         where: whereConditions,
         select: {
@@ -182,6 +192,7 @@ const getCategoriesFromDB = (filterRequest, options) => __awaiter(void 0, void 0
             slug: true,
             parentId: true,
             _count: true,
+            children: childInclude,
         },
         skip,
         take: limit,
@@ -195,6 +206,10 @@ const getCategoriesFromDB = (filterRequest, options) => __awaiter(void 0, void 0
         limit,
         totalResult,
     };
+    for (const category of categories) {
+        if (category.children) {
+        }
+    }
     return {
         meta,
         data,

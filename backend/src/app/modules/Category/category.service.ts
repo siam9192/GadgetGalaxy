@@ -1,4 +1,4 @@
-import { Category, Prisma } from "@prisma/client";
+import { Category, Prisma, ProductStatus } from "@prisma/client";
 import { IPaginationOptions } from "../../interfaces/pagination";
 import prisma from "../../shared/prisma";
 import {
@@ -74,7 +74,6 @@ const createCategoryIntoDB = async (payload: ICreateCategoryPayload) => {
           ...item,
           parentId: createdParentCategory.id,
           slug,
-
         };
         childCategoriesData.push(data);
       }
@@ -175,7 +174,7 @@ const getCategoriesFromDB = async (
   }
 
   const andConditions: Prisma.CategoryWhereInput[] = [
-
+  
   ];
 
   if (searchTerm) {
@@ -207,17 +206,32 @@ const getCategoriesFromDB = async (
     isVisible: true,
     // parentId:null
   };
+ let childInclude: any = {};
+let current = childInclude;
+
+for (let i = 0; i < 10; i++) {
+  current.include = {
+    _count:true,
+    children:{}
+  };
+  current = current.include.children;
+}
+console.log(childInclude)
 
   const categories = await prisma.category.findMany({
     where: whereConditions,
     select: {
       id: true,
       name: true,
-      imageUrl:true,
+      imageUrl: true,
       slug: true,
       parentId: true,
       _count: true,
+      children:childInclude
+      ,
+      
     },
+   
     skip,
     take: limit,
   });
@@ -232,6 +246,13 @@ const getCategoriesFromDB = async (
     limit,
     totalResult,
   };
+
+  for (const category of categories){
+   
+    if(category.children){
+
+    }
+  }
 
   return {
     meta,
@@ -264,7 +285,6 @@ const getSearchRelatedCategoriesFromDB = async (filterQuery: {
 }) => {
   const { searchTerm } = filterQuery;
 
-
   // Group categories
   const groupResult = await prisma.category.groupBy({
     where: {
@@ -291,7 +311,7 @@ const getSearchRelatedCategoriesFromDB = async (filterQuery: {
       },
     },
   });
-  
+
   return data;
 };
 const getAllVisibleCategoriesFromDB = async () => {

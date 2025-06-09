@@ -11,7 +11,7 @@ const CreateCategoryValidationSchema = z.object({
       z.object({
         name: z.string(),
         isFeatured: z.boolean(),
-        imageUrl:z.string().optional()
+        imageUrl: z.string().optional(),
       }),
     )
     .optional(),

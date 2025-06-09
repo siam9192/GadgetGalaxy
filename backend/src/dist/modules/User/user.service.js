@@ -363,7 +363,7 @@ const createSupperAdmin = () => __awaiter(void 0, void 0, void 0, function* () {
         profilePhoto: "https://images.unsplash.com/photo-1529665253569-6d01c0eaf7b6?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8cHJvZmlsZXxlbnwwfHwwfHx8MA%3D%3D",
         phoneNumber: "876872357635",
         gender: client_1.UserGender.MALE,
-        role: client_1.UserRole.SUPER_ADMIN
+        role: client_1.UserRole.SUPER_ADMIN,
     };
     const user = yield prisma_1.default.user.findFirst({
         where: {
@@ -405,6 +405,6 @@ const UserServices = {
     getAdministratorsFromDB,
     softDeleteUserByIdIntoDB,
     createAdministratorIntoDB,
-    createSupperAdmin
+    createSupperAdmin,
 };
 exports.default = UserServices;

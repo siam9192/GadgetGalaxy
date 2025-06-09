@@ -10,6 +10,8 @@ import {
 import {
   DiscountType,
   ItemReserveStatus,
+  NotificationCategory,
+  NotificationType,
   OrderPaymentStatus,
   OrderStatus,
   PaymentMethod,
@@ -489,6 +491,18 @@ const PlaceOrderIntoDB = async (
       }
     }
 
+    await prisma.notification.create({
+      data:{
+        userId:authUser.id,
+        type:NotificationType.INFO,
+        category:NotificationCategory.ORDER,
+       ...getOrderStatusMessage(OrderStatus.PENDING,createdOrder.id),
+       metaData:{
+        orderId:createdOrder.id
+       }
+      }
+    })
+
     const deletableCartItemsId = createdOrder.deletableCartItemsId;
     // If deletable cart items exist then delete cart items from db
     if (deletableCartItemsId) {
@@ -509,7 +523,7 @@ const placeOrderAfterSuccessfulPaymentIntoDB = async (
   paymentId: string,
   tx: Prisma.TransactionClient,
 ) => {
-  await tx.payment.update({
+const payment =   await tx.payment.update({
     where: {
       id: paymentId,
     },
@@ -525,6 +539,9 @@ const placeOrderAfterSuccessfulPaymentIntoDB = async (
       status: OrderStatus.PLACED,
       paymentStatus: OrderPaymentStatus.PAID,
     },
+    include:{
+      customer:true
+    }
   });
 
   const deletableCartItemsId = updatedOrderData.deletableCartItemsId;
@@ -539,6 +556,17 @@ const placeOrderAfterSuccessfulPaymentIntoDB = async (
       },
     });
   }
+    await prisma.notification.create({
+      data:{
+        userId:updatedOrderData.customer.userId,
+        type:NotificationType.INFO,
+        category:NotificationCategory.ORDER,
+       ...getOrderStatusMessage(OrderStatus.PENDING,updatedOrderData.id),
+       metaData:{
+        orderId:updatedOrderData.customer.userId
+       }
+      }
+    })
 };
 
 const manageUnsuccessfulOrdersIntoDB = async (
@@ -729,12 +757,19 @@ const updateOrderStatusIntoDB = async (
       },
     });
   });
-  await NotificationServices.createNotificationIntoDB({
-    usersId: [order.customer.userId],
-    ...getOrderStatusMessage(payload.status),
-    type: "ALERT",
-  });
+ 
 
+    prisma.notification.create({
+      data:{
+        userId:authUser.id,
+        type:NotificationType.INFO,
+        category:NotificationCategory.ORDER,
+       ...getOrderStatusMessage(payload.status,order.id),
+       metaData:{
+        orderId:order.id
+       }
+      }
+    })
   return result;
 };
 
@@ -764,13 +799,14 @@ const cancelMyOrderIntoDB = async (
 
   await prisma.$transaction(async (tx) => {
     await manageUnsuccessfulOrdersIntoDB("CANCELED", id, tx);
-    await tx.notification.create({
+     tx.notification.create({
       data: {
         userId: authUser.id!,
-        title: `You have canceled your order ID:${id}`,
+        title: `You have canceled your order "#${order.id}"`,
         message:
           "Your order has been successfully canceled. If this was a mistake or you need assistance, please contact our support team.",
-        type: "ORDER_STATUS",
+        type: NotificationType.INFO,
+        category:NotificationCategory.ORDER
       },
     });
   });

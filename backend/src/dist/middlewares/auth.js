@@ -36,6 +36,8 @@ function auth(requiredRoles, authConfig) {
             decoded = jwtHelpers_1.default.verifyToken(token, config_1.default.jwt.access_token_secret);
         }
         catch (error) {
+            if (authConfig === null || authConfig === void 0 ? void 0 : authConfig.providerMode)
+                return next();
             throw new AppError_1.default(http_status_1.default.UNAUTHORIZED, "Unauthorized");
         }
         const { role, id, iat } = decoded;

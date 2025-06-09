@@ -30,7 +30,6 @@ const client_1 = require("@prisma/client");
 const paginationHelper_1 = require("../../helpers/paginationHelper");
 const payment_service_1 = __importDefault(require("../Payment/payment.service"));
 const function_1 = require("../../utils/function");
-const notification_service_1 = __importDefault(require("../Notification/notification.service"));
 const initOrderIntoDB = (authUser, payload) => __awaiter(void 0, void 0, void 0, function* () {
     const cartItems = yield prisma_1.default.cartItem.findMany({
         where: {
@@ -396,6 +395,11 @@ const PlaceOrderIntoDB = (authUser, payload) => __awaiter(void 0, void 0, void 0
                 });
             }
         }
+        yield prisma_1.default.notification.create({
+            data: Object.assign(Object.assign({ userId: authUser.id, type: client_1.NotificationType.INFO, category: client_1.NotificationCategory.ORDER }, (0, function_1.getOrderStatusMessage)(client_1.OrderStatus.PENDING, createdOrder.id)), { metaData: {
+                    orderId: createdOrder.id
+                } })
+        });
         const deletableCartItemsId = createdOrder.deletableCartItemsId;
         // If deletable cart items exist then delete cart items from db
         if (deletableCartItemsId) {
@@ -411,7 +415,7 @@ const PlaceOrderIntoDB = (authUser, payload) => __awaiter(void 0, void 0, void 0
     }));
 });
 const placeOrderAfterSuccessfulPaymentIntoDB = (paymentId, tx) => __awaiter(void 0, void 0, void 0, function* () {
-    yield tx.payment.update({
+    const payment = yield tx.payment.update({
         where: {
             id: paymentId,
         },
@@ -427,6 +431,9 @@ const placeOrderAfterSuccessfulPaymentIntoDB = (paymentId, tx) => __awaiter(void
             status: client_1.OrderStatus.PLACED,
             paymentStatus: client_1.OrderPaymentStatus.PAID,
         },
+        include: {
+            customer: true
+        }
     });
     const deletableCartItemsId = updatedOrderData.deletableCartItemsId;
     // If deletable cart items exist then delete cart items from db
@@ -439,6 +446,11 @@ const placeOrderAfterSuccessfulPaymentIntoDB = (paymentId, tx) => __awaiter(void
             },
         });
     }
+    yield prisma_1.default.notification.create({
+        data: Object.assign(Object.assign({ userId: updatedOrderData.customer.userId, type: client_1.NotificationType.INFO, category: client_1.NotificationCategory.ORDER }, (0, function_1.getOrderStatusMessage)(client_1.OrderStatus.PENDING, updatedOrderData.id)), { metaData: {
+                orderId: updatedOrderData.customer.userId
+            } })
+    });
 });
 const manageUnsuccessfulOrdersIntoDB = (status, id, tx) => __awaiter(void 0, void 0, void 0, function* () {
     yield tx.order.update({
@@ -593,7 +605,11 @@ const updateOrderStatusIntoDB = (authUser, payload) => __awaiter(void 0, void 0,
             },
         });
     }));
-    yield notification_service_1.default.createNotificationIntoDB(Object.assign(Object.assign({ usersId: [order.customer.userId] }, (0, function_1.getOrderStatusMessage)(payload.status)), { type: "ALERT" }));
+    prisma_1.default.notification.create({
+        data: Object.assign(Object.assign({ userId: authUser.id, type: client_1.NotificationType.INFO, category: client_1.NotificationCategory.ORDER }, (0, function_1.getOrderStatusMessage)(payload.status, order.id)), { metaData: {
+                orderId: order.id
+            } })
+    });
     return result;
 });
 const cancelMyOrderIntoDB = (authUser, id) => __awaiter(void 0, void 0, void 0, function* () {
@@ -616,12 +632,13 @@ const cancelMyOrderIntoDB = (authUser, id) => __awaiter(void 0, void 0, void 0, 
     }
     yield prisma_1.default.$transaction((tx) => __awaiter(void 0, void 0, void 0, function* () {
         yield manageUnsuccessfulOrdersIntoDB("CANCELED", id, tx);
-        yield tx.notification.create({
+        tx.notification.create({
             data: {
                 userId: authUser.id,
-                title: `You have canceled your order ID:${id}`,
+                title: `You have canceled your order "#${order.id}"`,
                 message: "Your order has been successfully canceled. If this was a mistake or you need assistance, please contact our support team.",
-                type: "ORDER_STATUS",
+                type: client_1.NotificationType.INFO,
+                category: client_1.NotificationCategory.ORDER
             },
         });
     }));

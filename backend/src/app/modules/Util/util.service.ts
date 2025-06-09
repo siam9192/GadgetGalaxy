@@ -37,6 +37,7 @@ const getSearchKeywordResultsFromDB = async (keyword: string) => {
     return {
       type: "product",
       name: product.name,
+      slug:product.slug,
       imageUrl: product.images[0].url,
       price: variant?.price || product.price,
       offerPrice: variant?.offerPrice || product.offerPrice,

@@ -39,7 +39,7 @@ const createProductIntoDB = (payload) => __awaiter(void 0, void 0, void 0, funct
     // Validate variant pricing
     if (variants && variants.length) {
         variants.forEach((variant) => {
-            if (variant.offerPrice && (variant.offerPrice >= variant.price)) {
+            if (variant.offerPrice && variant.offerPrice >= variant.price) {
                 throw new AppError_1.default(http_status_1.default.NOT_ACCEPTABLE, "Variant Offer price can not be getter than or equal price");
             }
         });
@@ -950,7 +950,6 @@ const getProductBySlugForCustomerViewFromDB = (authUser, slug) => __awaiter(void
             },
         },
     });
-    console.dir(product, { depth: null });
     return Object.assign(Object.assign({}, product), { isWishListed });
 });
 const getFeaturedProductsFromDB = (paginationOptions, authUser) => __awaiter(void 0, void 0, void 0, function* () {

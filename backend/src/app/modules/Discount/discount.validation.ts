@@ -11,8 +11,8 @@ export const CreateDiscountValidation = z.object({
   maxDiscount: z.number().positive().optional(),
   usageLimit: z.number().positive().min(1).optional(),
   usageCount: z.number().nonnegative().optional(),
-  validFrom: z.string().date(),
-  validUntil: z.string().date(),
+  validFrom: z.string().datetime(),
+  validUntil: z.string().datetime(),
   customersId: z
     .array(z.string())
     .nonempty("Customers ID array cannot be empty.")

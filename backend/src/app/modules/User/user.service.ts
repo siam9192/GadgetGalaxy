@@ -406,17 +406,18 @@ const createAdministratorIntoDB = async (
   return result;
 };
 
-const createSupperAdmin = async ()=>{
+const createSupperAdmin = async () => {
   const payload = {
-     fullName:"MR.Super admin",
-      email: "superadmin@gmail.com",
-      password: "123456",
-      profilePhoto: "https://images.unsplash.com/photo-1529665253569-6d01c0eaf7b6?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8cHJvZmlsZXxlbnwwfHwwfHx8MA%3D%3D",
-      phoneNumber: "876872357635",
-      gender: UserGender.MALE,
-      role: UserRole.SUPER_ADMIN
-  }
-const user = await prisma.user.findFirst({
+    fullName: "MR.Super admin",
+    email: "superadmin@gmail.com",
+    password: "123456",
+    profilePhoto:
+      "https://images.unsplash.com/photo-1529665253569-6d01c0eaf7b6?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8cHJvZmlsZXxlbnwwfHwwfHx8MA%3D%3D",
+    phoneNumber: "876872357635",
+    gender: UserGender.MALE,
+    role: UserRole.SUPER_ADMIN,
+  };
+  const user = await prisma.user.findFirst({
     where: {
       email: payload.email,
     },
@@ -453,12 +454,10 @@ const user = await prisma.user.findFirst({
       },
     });
 
-  
-
     return createAdministrator;
   });
   return result;
-}
+};
 
 const UserServices = {
   ChangeUserStatusIntoDB,
@@ -466,7 +465,7 @@ const UserServices = {
   getAdministratorsFromDB,
   softDeleteUserByIdIntoDB,
   createAdministratorIntoDB,
-  createSupperAdmin
+  createSupperAdmin,
 };
 
 export default UserServices;

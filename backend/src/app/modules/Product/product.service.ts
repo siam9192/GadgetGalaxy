@@ -35,9 +35,7 @@ const createProductIntoDB = async (payload: ICreateProductPayload) => {
   // Validate variant pricing
   if (variants && variants.length) {
     variants.forEach((variant) => {
-   
-      if (variant.offerPrice && (variant.offerPrice >= variant.price)) {
-        
+      if (variant.offerPrice && variant.offerPrice >= variant.price) {
         throw new AppError(
           httpStatus.NOT_ACCEPTABLE,
           "Variant Offer price can not be getter than or equal price",
@@ -495,7 +493,6 @@ const getSearchProductsFromDB = async (
   paginationOptions: IPaginationOptions,
   authUser?: IAuthUser,
 ) => {
-  console.log(filterQuery)
   const { page, limit, skip, orderBy, sortOrder } =
     calculatePagination(paginationOptions);
   const andConditions: Prisma.ProductWhereInput[] = [
